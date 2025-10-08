@@ -1283,23 +1283,32 @@
     // Setup manual edit buttons based on presentation type
     function setupManualEditButtons(data) {
       const container = document.getElementById('manualEditButtons');
+      const infoBox = container.previousElementSibling;
       
-      if (data.presentationType === 'google_slides' && data.slides_url) {
+      // Update info box text based on provider
+      if (data.provider === 'google_slides') {
+        infoBox.innerHTML = 'Select to edit your <strong>Google Slides</strong> to make manual changes, and once you are done you may select "Resubmit Changes" at the bottom along with any other changes you made. This version will be published in the next Video.';
+      } else if (data.provider === 'powerpoint') {
+        infoBox.innerHTML = 'Select to edit your <strong>PowerPoint</strong> to make manual changes, and once you are done you may select "Resubmit Changes" at the bottom along with any other changes you made. This version will be published in the next Video.';
+      }
+      
+      // Create button based on provider
+      if (data.provider === 'google_slides' && data.original_url) {
         container.innerHTML = `
-          <button class="btn btn-primary" onclick="window.open('${data.slides_url}', '_blank')">
-            📊 Open in Google Slides
+          <button class="btn btn-primary" onclick="window.open('${data.original_url}', '_blank')">
+            📊 View Google Slides Version
           </button>
         `;
-      } else if (data.presentationType === 'powerpoint' && data.pptx_url) {
+      } else if (data.provider === 'powerpoint' && data.original_url) {
         container.innerHTML = `
-          <a href="${data.pptx_url}" download class="btn btn-primary">
-            📥 Download PowerPoint
-          </a>
+          <button class="btn btn-primary" onclick="window.open('${data.original_url}', '_blank')">
+            📄 View PowerPoint Version
+          </button>
         `;
       } else {
         container.innerHTML = `
           <div style="color: #999; font-style: italic;">
-            Presentation files not available for this job.
+            Presentation link not available for this job.
           </div>
         `;
       }
