@@ -546,6 +546,13 @@
         const data = await response.json();
         console.log('[API] Response:', data);
         
+        // Auto-redirect to finalized page if job is already finalized
+        if (data.isFinalized && !isFinalized) {
+          console.log('[REDIRECT] Job is finalized, redirecting...');
+          window.location.replace(`${window.location.origin}${window.location.pathname}?job=${jobId}&finalized=true`);
+          return;
+        }
+        
         displayVideo(data);
       } catch (error) {
         console.error('[API ERROR]', error);
