@@ -395,6 +395,26 @@
       min-width: 0;
     }
 
+    .song-position {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+
+    .song-item:hover .song-position {
+      transform: scale(1.1);
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    }
+
     .song-name {
       font-weight: 600;
       overflow: hidden;
@@ -982,10 +1002,12 @@
         const audioId = `audio-${song.id}`;
         const newBadge = song.isNew ? '<span class="song-badge">NEW</span>' : '';
         const itemClass = song.isNew ? 'song-item new-upload' : 'song-item';
+        const position = index + 1; // 1-indexed position
         
         html += `
           <div class="${itemClass}">
             <div class="song-info">
+              <div class="song-position">${position}</div>
               <span class="song-name">🎵 ${song.displayName}</span>
               ${newBadge}
             </div>
