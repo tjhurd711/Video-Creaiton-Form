@@ -874,6 +874,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     const jobId = urlParams.get('job');
     const isFinalized = urlParams.get('finalized') === 'true';
+    const isSharedView = urlParams.get('share') === 'true'; // NEW: Check if this is a shared view
     
     // Track changes made by user
     let pendingChanges = {};
@@ -1295,13 +1296,13 @@
       // Create button based on provider
       if (data.provider === 'google_slides' && data.original_url) {
         container.innerHTML = `
-          <button class="btn btn-primary" onclick="window.open('${data.original_url}', '_blank')">
+          <button class="btn btn-primary" onclick="handleManualEditClick('${data.original_url}')">
             📊 View Google Slides Version
           </button>
         `;
       } else if (data.provider === 'powerpoint' && data.original_url) {
         container.innerHTML = `
-          <button class="btn btn-primary" onclick="window.open('${data.original_url}', '_blank')">
+          <button class="btn btn-primary" onclick="handleManualEditClick('${data.original_url}')">
             📄 View PowerPoint Version
           </button>
         `;
@@ -1312,6 +1313,18 @@
           </div>
         `;
       }
+    }
+    
+    // Handle manual edit button click
+    function handleManualEditClick(url) {
+      // Open the presentation
+      window.open(url, '_blank');
+      
+      // Track that manual edits were accessed
+      trackChange('manualEditsRequested', true);
+      
+      // Show a toast to inform user
+      showToast('Presentation opened! Make your changes, then click "Resubmit Changes" when done.', 'success');
     }
     
     // Display video and controls
@@ -1336,6 +1349,22 @@
         document.getElementById('actionButtons').style.display = 'none';
         document.getElementById('finalizedMessage').style.display = 'block';
         document.getElementById('finalDownloadBtn').href = data.downloadUrl || data.videoUrl;
+        return;
+      }
+      
+      // Check if this is a shared view (hide all action buttons)
+      if (isSharedView) {
+        container.innerHTML = `
+          <div class="video-wrapper">
+            <video controls preload="auto" crossorigin="anonymous">
+              <source src="${data.videoUrl}" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        `;
+        
+        // Hide all action buttons and edit sections
+        document.getElementById('actionButtons').style.display = 'none';
         return;
       }
       
@@ -1456,9 +1485,9 @@
     // Share button handler
     document.getElementById('shareBtn').addEventListener('click', async () => {
       try {
-        const shareUrl = `${window.location.origin}${window.location.pathname}?job=${jobId}`;
+        const shareUrl = `${window.location.origin}${window.location.pathname}?job=${jobId}&share=true`;
         await navigator.clipboard.writeText(shareUrl);
-        showToast('Share link copied to clipboard!');
+        showToast('Share link copied to clipboard! Recipients will only see the video.', 'success');
       } catch (error) {
         showToast('Failed to copy link: ' + error.message, 'error');
       }
