@@ -374,15 +374,85 @@
       border: 2px solid #e0e0e0;
       border-radius: 8px;
       margin-bottom: 10px;
+      transition: all 0.2s;
+    }
+
+    .song-item:hover {
+      border-color: #667eea;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+    }
+
+    .song-item.new-upload {
+      border-color: #4CAF50;
+      background: #f1f8f4;
+    }
+
+    .song-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
     }
 
     .song-name {
       font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .song-badge {
+      background: #4CAF50;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .song-controls {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
     }
 
     .btn-small {
       padding: 6px 12px;
       font-size: 13px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 600;
+    }
+
+    .btn-play {
+      background: #2196F3;
+      color: white;
+    }
+
+    .btn-play:hover {
+      background: #0b7dda;
+    }
+
+    .btn-play.playing {
+      background: #FF9800;
+    }
+
+    .btn-move {
+      background: #f5f5f5;
+      color: #666;
+      border: 1px solid #ddd;
+    }
+
+    .btn-move:hover {
+      background: #e0e0e0;
+    }
+
+    .btn-move:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
     }
 
     .btn-danger {
@@ -394,20 +464,39 @@
       background: #d32f2f;
     }
 
-    .upload-progress {
-      margin-top: 10px;
-      height: 8px;
-      background: #e0e0e0;
-      border-radius: 4px;
-      overflow: hidden;
-      display: none;
+    .upload-section {
+      margin-top: 15px;
+      padding: 15px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      border: 2px dashed #ccc;
     }
 
-    .upload-progress-bar {
-      height: 100%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      transition: width 0.3s;
-      width: 0%;
+    .upload-section.max-reached {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .upload-label {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #667eea;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .upload-label:hover {
+      background: #5568d3;
+      transform: translateY(-1px);
+    }
+
+    .upload-label.disabled {
+      background: #ccc;
+      cursor: not-allowed;
     }
 
     /* Song Range Sliders */
@@ -531,6 +620,7 @@
       .btn { width: 100%; justify-content: center; }
       .toast { right: 20px; left: 20px; max-width: none; }
       .slide-inputs { grid-template-columns: 1fr; }
+      .song-controls { flex-wrap: wrap; }
     }
   </style>
 </head>
@@ -591,20 +681,20 @@
             <span class="chevron">▼</span>
           </div>
           <div class="edit-option-content">
-            <div class="info-box">
-              ⚠️ This feature requires backend API support (coming soon). You'll be able to upload new MP3 files or remove existing songs.
-            </div>
             <div class="form-group">
-              <label>Current Songs</label>
+              <label>Your Songs (drag to reorder, max 6 total)</label>
               <div id="songList" class="song-list">
                 <!-- Will be populated dynamically -->
               </div>
             </div>
-            <div class="form-group">
-              <label for="newSongUpload">Upload New Songs (MP3 only)</label>
-              <input type="file" id="newSongUpload" accept=".mp3,audio/mpeg" multiple disabled>
-              <div class="upload-progress" id="uploadProgress">
-                <div class="upload-progress-bar" id="uploadProgressBar"></div>
+            
+            <div class="upload-section" id="uploadSection">
+              <label class="upload-label" id="uploadLabel">
+                📤 Upload New Songs (MP3)
+                <input type="file" id="newSongUpload" accept=".mp3,audio/mpeg" multiple style="display: none;">
+              </label>
+              <div style="margin-top: 8px; font-size: 13px; color: #666;">
+                <span id="songCountDisplay">0 of 6 songs</span>
               </div>
             </div>
           </div>
@@ -758,6 +848,7 @@
   <script>
     // Configuration
     const API_BASE = 'https://4hyy6kr2id.execute-api.us-east-2.amazonaws.com/prod';
+    const MAX_SONGS = 6;
     
     // Parse job ID from URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -767,7 +858,8 @@
     // Track changes made by user
     let pendingChanges = {};
     let currentSettings = {};
-    let currentSongCount = 0;
+    let currentSongs = []; // Array of {id, name, url, isNew, file}
+    let currentlyPlayingAudio = null;
     
     // Prevent going back if finalized
     if (isFinalized) {
@@ -801,8 +893,19 @@
         // Store current settings
         if (data.settings) {
           currentSettings = data.settings;
-          currentSongCount = data.settings.audioCount || 0;
           populateFormDefaults(data.settings);
+        }
+        
+        // Initialize songs from API response
+        if (data.songs && data.songs.length > 0) {
+          currentSongs = data.songs.map(song => ({
+            id: song.name,
+            name: song.name,
+            displayName: song.displayName || song.name,
+            url: song.url,
+            isNew: false,
+            file: null
+          }));
         }
         
         // Auto-redirect to finalized page if job is already finalized
@@ -814,8 +917,8 @@
         
         displayVideo(data);
         setupManualEditButtons(data);
-        setupSongList(data);
-        setupSongRangeSliders(); // Initialize sliders based on song count
+        renderSongList();
+        updateSongCount();
       } catch (error) {
         console.error('[API ERROR]', error);
         showError('Failed to load video data: ' + error.message);
@@ -851,79 +954,202 @@
       }
     }
     
-    // Setup manual edit buttons based on presentation type
-    function setupManualEditButtons(data) {
-      const container = document.getElementById('manualEditButtons');
-      
-      if (data.presentationType === 'google_slides' && data.slides_url) {
-        container.innerHTML = `
-          <button class="btn btn-primary" onclick="window.open('${data.slides_url}', '_blank')">
-            📊 Open in Google Slides
-          </button>
-        `;
-      } else if (data.presentationType === 'powerpoint' && data.pptx_url) {
-        container.innerHTML = `
-          <a href="${data.pptx_url}" download class="btn btn-primary">
-            📥 Download PowerPoint
-          </a>
-        `;
-      } else {
-        container.innerHTML = `
-          <div style="color: #999; font-style: italic;">
-            Presentation files not available for this job.
-          </div>
-        `;
-      }
-    }
-    
-    // Setup song list
-    function setupSongList(data) {
+    // Render song list
+    function renderSongList() {
       const container = document.getElementById('songList');
-      const audioCount = data.settings?.audioCount || 0;
-      currentSongCount = audioCount;
       
-      if (audioCount === 0) {
-        container.innerHTML = '<div style="color: #999; font-style: italic;">No songs found</div>';
+      if (currentSongs.length === 0) {
+        container.innerHTML = '<div style="color: #999; font-style: italic;">No songs yet. Upload some MP3s below!</div>';
         return;
       }
       
       let html = '';
-      for (let i = 1; i <= audioCount; i++) {
+      currentSongs.forEach((song, index) => {
+        const audioId = `audio-${song.id}`;
+        const newBadge = song.isNew ? '<span class="song-badge">NEW</span>' : '';
+        const itemClass = song.isNew ? 'song-item new-upload' : 'song-item';
+        
         html += `
-          <div class="song-item">
-            <span class="song-name">🎵 Song ${i}.mp3</span>
-            <button class="btn btn-small btn-danger" onclick="alert('Delete functionality requires backend API')" disabled>
-              🗑️ Remove
-            </button>
+          <div class="${itemClass}">
+            <div class="song-info">
+              <span class="song-name">🎵 ${song.displayName}</span>
+              ${newBadge}
+            </div>
+            <div class="song-controls">
+              ${song.url ? `<button class="btn-small btn-play" onclick="togglePlay('${audioId}', this)">▶️</button>` : ''}
+              <button class="btn-small btn-move" onclick="moveSongUp(${index})" ${index === 0 ? 'disabled' : ''}>⬆️</button>
+              <button class="btn-small btn-move" onclick="moveSongDown(${index})" ${index === currentSongs.length - 1 ? 'disabled' : ''}>⬇️</button>
+              <button class="btn-small btn-danger" onclick="removeSong(${index})">🗑️</button>
+            </div>
+            ${song.url ? `<audio id="${audioId}" src="${song.url}" preload="none"></audio>` : ''}
           </div>
         `;
-      }
+      });
+      
       container.innerHTML = html;
+      updateSongTracking();
     }
     
-    // Setup song range sliders (called when musicDistribution changes or on load)
+    // Toggle audio play/pause
+    function togglePlay(audioId, button) {
+      const audio = document.getElementById(audioId);
+      
+      // Stop currently playing audio
+      if (currentlyPlayingAudio && currentlyPlayingAudio !== audio) {
+        currentlyPlayingAudio.pause();
+        currentlyPlayingAudio.currentTime = 0;
+        // Reset button of previously playing audio
+        document.querySelectorAll('.btn-play').forEach(btn => {
+          btn.textContent = '▶️';
+          btn.classList.remove('playing');
+        });
+      }
+      
+      if (audio.paused) {
+        audio.play();
+        button.textContent = '⏸️';
+        button.classList.add('playing');
+        currentlyPlayingAudio = audio;
+        
+        // Reset button when audio ends
+        audio.onended = () => {
+          button.textContent = '▶️';
+          button.classList.remove('playing');
+          currentlyPlayingAudio = null;
+        };
+      } else {
+        audio.pause();
+        audio.currentTime = 0;
+        button.textContent = '▶️';
+        button.classList.remove('playing');
+        currentlyPlayingAudio = null;
+      }
+    }
+    
+    // Move song up
+    function moveSongUp(index) {
+      if (index === 0) return;
+      const temp = currentSongs[index];
+      currentSongs[index] = currentSongs[index - 1];
+      currentSongs[index - 1] = temp;
+      renderSongList();
+      updateSongRangeSliders();
+    }
+    
+    // Move song down
+    function moveSongDown(index) {
+      if (index === currentSongs.length - 1) return;
+      const temp = currentSongs[index];
+      currentSongs[index] = currentSongs[index + 1];
+      currentSongs[index + 1] = temp;
+      renderSongList();
+      updateSongRangeSliders();
+    }
+    
+    // Remove song
+    function removeSong(index) {
+      if (!confirm(`Remove "${currentSongs[index].displayName}"?`)) return;
+      currentSongs.splice(index, 1);
+      renderSongList();
+      updateSongCount();
+      updateSongRangeSliders();
+    }
+    
+    // Update song count display
+    function updateSongCount() {
+      const display = document.getElementById('songCountDisplay');
+      const uploadSection = document.getElementById('uploadSection');
+      const uploadLabel = document.getElementById('uploadLabel');
+      
+      display.textContent = `${currentSongs.length} of ${MAX_SONGS} songs`;
+      
+      if (currentSongs.length >= MAX_SONGS) {
+        uploadSection.classList.add('max-reached');
+        uploadLabel.classList.add('disabled');
+      } else {
+        uploadSection.classList.remove('max-reached');
+        uploadLabel.classList.remove('disabled');
+      }
+    }
+    
+    // Handle new song uploads
+    document.getElementById('newSongUpload').addEventListener('change', (e) => {
+      const files = Array.from(e.target.files);
+      
+      files.forEach(file => {
+        if (currentSongs.length >= MAX_SONGS) {
+          showToast(`Maximum ${MAX_SONGS} songs reached`, 'error');
+          return;
+        }
+        
+        if (!file.type.includes('audio/mpeg') && !file.name.endsWith('.mp3')) {
+          showToast(`${file.name} is not an MP3 file`, 'error');
+          return;
+        }
+        
+        // Add to current songs
+        currentSongs.push({
+          id: `new-${Date.now()}-${Math.random()}`,
+          name: file.name,
+          displayName: file.name,
+          url: null, // No URL yet (will be uploaded on resubmit)
+          isNew: true,
+          file: file
+        });
+      });
+      
+      renderSongList();
+      updateSongCount();
+      updateSongRangeSliders();
+      
+      // Reset file input
+      e.target.value = '';
+    });
+    
+    // Track song changes for resubmit
+    function updateSongTracking() {
+      // Build songOrder array for backend
+      const songOrder = currentSongs.map(song => song.name);
+      const newSongs = currentSongs.filter(s => s.isNew).map(s => ({
+        originalName: s.name,
+        file: s.file
+      }));
+      
+      // Only track if there are changes
+      const hasChanges = currentSongs.some(s => s.isNew) || 
+                        JSON.stringify(songOrder) !== JSON.stringify(currentSongs.map(s => s.name));
+      
+      if (hasChanges || newSongs.length > 0) {
+        trackChange('songOrder', songOrder);
+        if (newSongs.length > 0) {
+          trackChange('newSongs', newSongs);
+        }
+      }
+    }
+    
+    // Setup song range sliders (called when musicDistribution changes or song count changes)
     function setupSongRangeSliders() {
       const container = document.getElementById('songRangesList');
       
-      if (currentSongCount === 0) {
+      if (currentSongs.length === 0) {
         container.innerHTML = '<div style="color: #999; font-style: italic;">No songs available. Add songs first.</div>';
         return;
       }
       
       let html = '';
-      for (let i = 1; i <= currentSongCount; i++) {
+      currentSongs.forEach((song, index) => {
         html += `
           <div class="song-range-item">
             <div class="song-range-header">
-              🎵 Song ${i}
+              🎵 ${song.displayName}
             </div>
             <div class="slide-inputs">
               <div class="slide-input-group">
                 <label>Start Slide</label>
                 <input type="number" 
-                       id="song${i}Start" 
+                       id="songRange${index}Start" 
                        class="song-range-input"
-                       data-song="${i}"
+                       data-song-index="${index}"
                        data-type="start"
                        min="1" 
                        max="250" 
@@ -932,9 +1158,9 @@
               <div class="slide-input-group">
                 <label>End Slide</label>
                 <input type="number" 
-                       id="song${i}End" 
+                       id="songRange${index}End" 
                        class="song-range-input"
-                       data-song="${i}"
+                       data-song-index="${index}"
                        data-type="end"
                        min="1" 
                        max="250" 
@@ -943,7 +1169,7 @@
             </div>
           </div>
         `;
-      }
+      });
       
       container.innerHTML = html;
       
@@ -953,25 +1179,36 @@
       });
     }
     
+    // Update song range sliders when song count changes
+    function updateSongRangeSliders() {
+      const musicDist = document.getElementById('musicDistribution').value;
+      if (musicDist === 'specifyPlacement') {
+        setupSongRangeSliders();
+      }
+    }
+    
     // Handle song range input changes
     function handleSongRangeChange() {
       const songRanges = [];
       
-      for (let i = 1; i <= currentSongCount; i++) {
-        const startInput = document.getElementById(`song${i}Start`);
-        const endInput = document.getElementById(`song${i}End`);
-        const startVal = parseInt(startInput.value);
-        const endVal = parseInt(endInput.value);
+      currentSongs.forEach((song, index) => {
+        const startInput = document.getElementById(`songRange${index}Start`);
+        const endInput = document.getElementById(`songRange${index}End`);
         
-        // Only include if both values are provided
-        if (!isNaN(startVal) && !isNaN(endVal)) {
-          songRanges.push({
-            song: `song${i}.mp3`,
-            startSlide: startVal,
-            endSlide: endVal
-          });
+        if (startInput && endInput) {
+          const startVal = parseInt(startInput.value);
+          const endVal = parseInt(endInput.value);
+          
+          // Only include if both values are provided
+          if (!isNaN(startVal) && !isNaN(endVal)) {
+            songRanges.push({
+              song: song.name,
+              startSlide: startVal,
+              endSlide: endVal
+            });
+          }
         }
-      }
+      });
       
       // Track changes
       if (songRanges.length > 0) {
@@ -996,6 +1233,31 @@
         // Clear songRanges from pending changes if switching away
         delete pendingChanges.songRanges;
         updateResubmitButton();
+      }
+    }
+    
+    // Setup manual edit buttons based on presentation type
+    function setupManualEditButtons(data) {
+      const container = document.getElementById('manualEditButtons');
+      
+      if (data.presentationType === 'google_slides' && data.slides_url) {
+        container.innerHTML = `
+          <button class="btn btn-primary" onclick="window.open('${data.slides_url}', '_blank')">
+            📊 Open in Google Slides
+          </button>
+        `;
+      } else if (data.presentationType === 'powerpoint' && data.pptx_url) {
+        container.innerHTML = `
+          <a href="${data.pptx_url}" download class="btn btn-primary">
+            📥 Download PowerPoint
+          </a>
+        `;
+      } else {
+        container.innerHTML = `
+          <div style="color: #999; font-style: italic;">
+            Presentation files not available for this job.
+          </div>
+        `;
       }
     }
     
@@ -1259,16 +1521,27 @@
         
         console.log('[RESUBMIT] Sending changes:', pendingChanges);
         
+        // Note: newSongs with File objects can't be sent as JSON
+        // Backend will need to handle file uploads separately via presigned URLs
+        const submitData = {
+          originalJobId: jobId,
+          changes: {...pendingChanges}
+        };
+        
+        // Remove file objects from changes (backend will handle via presigned URLs)
+        if (submitData.changes.newSongs) {
+          submitData.changes.newSongs = submitData.changes.newSongs.map(s => ({
+            originalName: s.originalName
+          }));
+        }
+        
         // Call resubmit API
         const response = await fetch(`${API_BASE}/jobs/${jobId}/resubmit`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            originalJobId: jobId,
-            changes: pendingChanges
-          })
+          body: JSON.stringify(submitData)
         });
         
         if (!response.ok) {
