@@ -934,7 +934,7 @@
             currentSongs.push({
               id: `song${i}.mp3`,
               name: `song${i}.mp3`,
-              displayName: `Song ${i}.mp3`,
+              displayName: `song${i}.mp3`, // Just show the backend filename
               url: null, // No URL yet (backend needs to provide)
               isNew: false,
               file: null
@@ -1008,7 +1008,7 @@
           <div class="${itemClass}">
             <div class="song-info">
               <div class="song-position">${position}</div>
-              <span class="song-name">🎵 ${song.displayName}</span>
+              <span class="song-name">${song.displayName}</span>
               ${newBadge}
             </div>
             <div class="song-controls">
@@ -1123,12 +1123,15 @@
           return;
         }
         
+        // Create a local URL for preview
+        const localUrl = URL.createObjectURL(file);
+        
         // Add to current songs
         currentSongs.push({
           id: `new-${Date.now()}-${Math.random()}`,
           name: file.name,
           displayName: file.name,
-          url: null, // No URL yet (will be uploaded on resubmit)
+          url: localUrl, // Local preview URL
           isNew: true,
           file: file
         });
