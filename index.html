@@ -1177,10 +1177,15 @@
       
       let html = '';
       currentSongs.forEach((song, index) => {
+        const audioId = `audio-range-${song.id}`;
+        const playButton = song.url ? `<button class="btn-small btn-play" onclick="togglePlay('${audioId}', this)" style="margin-left: 8px;">▶️</button>` : '';
+        
         html += `
           <div class="song-range-item">
             <div class="song-range-header">
               🎵 ${song.displayName}
+              ${playButton}
+              ${song.url ? `<audio id="${audioId}" src="${song.url}" preload="none"></audio>` : ''}
             </div>
             <div class="slide-inputs">
               <div class="slide-input-group">
