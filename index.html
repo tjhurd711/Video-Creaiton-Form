@@ -500,7 +500,7 @@
   
   <script>
     // Configuration
-    const API_BASE = 'https://YOUR_API_GATEWAY_URL'; // Replace with your API Gateway URL
+    const API_BASE = 'https://4hyy6kr2id.execute-api.us-east-2.amazonaws.com/prod';
     
     // Parse job ID from URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -515,25 +515,19 @@
     // Load job data from API
     async function loadJobData(jobId) {
       try {
-        // TODO: Replace with actual API call
-        // const response = await fetch(`${API_BASE}/jobs/${jobId}`);
-        // const data = await response.json();
+        console.log('[API] Calling:', `${API_BASE}/jobs/${jobId}`);
+        const response = await fetch(`${API_BASE}/jobs/${jobId}`);
         
-        // MOCK DATA for demo
-        const data = {
-          jobId: jobId,
-          videoUrl: 'https://example.com/video.mp4', // This will be presigned S3 URL
-          settings: {
-            timingMode: 'perSlide',
-            visualPackage: 'simple-fade-wipe',
-            audioCount: 2,
-            slides_url: null,
-            pptx_url: null
-          }
-        };
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('[API] Response:', data);
         
         displayVideo(data);
       } catch (error) {
+        console.error('[API ERROR]', error);
         showError('Failed to load video data: ' + error.message);
       }
     }
@@ -567,14 +561,11 @@
         showError('Video failed to load. The file may be corrupted or the URL expired.');
       });
       
-      // Show action buttons - use streaming URL for video, download URL for button
+      // Show action buttons
       document.getElementById('downloadBtn').style.display = 'inline-flex';
       document.getElementById('downloadBtn').href = data.downloadUrl || data.videoUrl;
       document.getElementById('shareBtn').style.display = 'inline-flex';
       document.getElementById('emailBtn').style.display = 'inline-flex';
-      
-      // Show edit sections (currently placeholders)
-      // document.querySelector('.edit-sections').style.display = 'block';
     }
     
     // Show error message
@@ -597,8 +588,7 @@
     // Share button handler
     document.getElementById('shareBtn').addEventListener('click', async () => {
       try {
-        // TODO: Call share API
-        const shareUrl = `${window.location.origin}/share.html?v=${jobId}`;
+        const shareUrl = `${window.location.origin}/?job=${jobId}`;
         await navigator.clipboard.writeText(shareUrl);
         showToast('Share link copied to clipboard!');
       } catch (error) {
@@ -609,7 +599,6 @@
     // Email backup handler
     document.getElementById('emailBtn').addEventListener('click', async () => {
       try {
-        // TODO: Call email API
         showToast('Backup email sent!');
       } catch (error) {
         showToast('Failed to send email: ' + error.message, 'error');
@@ -628,7 +617,6 @@
     document.getElementById('resubmitBtn').addEventListener('click', async () => {
       if (confirm('Create a new video with your changes?')) {
         try {
-          // TODO: Collect changes and call resubmit API
           showToast('Video resubmitted! You\'ll receive an email in 5-15 minutes.');
         } catch (error) {
           showToast('Failed to resubmit: ' + error.message, 'error');
