@@ -500,7 +500,7 @@
   
   <script>
     // Configuration
-    const API_BASE = 'https://4hyy6kr2id.execute-api.us-east-2.amazonaws.com/prod';
+    const API_BASE = 'https://YOUR_API_GATEWAY_URL'; // Replace with your API Gateway URL
     
     // Parse job ID from URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -546,19 +546,30 @@
       // Update header
       jobInfo.textContent = `Order #${data.jobId}`;
       
-      // Create video element
+      // Create video element with better loading
       container.innerHTML = `
         <div class="video-wrapper">
-          <video controls preload="metadata">
+          <video controls preload="auto" crossorigin="anonymous">
             <source src="${data.videoUrl}" type="video/mp4">
             Your browser does not support the video tag.
           </video>
         </div>
       `;
       
-      // Show action buttons
+      // Add video event listeners for debugging
+      const video = container.querySelector('video');
+      video.addEventListener('loadstart', () => console.log('[VIDEO] Loading started'));
+      video.addEventListener('loadedmetadata', () => console.log('[VIDEO] Metadata loaded'));
+      video.addEventListener('canplay', () => console.log('[VIDEO] Can play'));
+      video.addEventListener('error', (e) => {
+        console.error('[VIDEO ERROR]', e);
+        console.error('[VIDEO ERROR] Details:', video.error);
+        showError('Video failed to load. The file may be corrupted or the URL expired.');
+      });
+      
+      // Show action buttons - use streaming URL for video, download URL for button
       document.getElementById('downloadBtn').style.display = 'inline-flex';
-      document.getElementById('downloadBtn').href = data.videoUrl;
+      document.getElementById('downloadBtn').href = data.downloadUrl || data.videoUrl;
       document.getElementById('shareBtn').style.display = 'inline-flex';
       document.getElementById('emailBtn').style.display = 'inline-flex';
       
