@@ -516,12 +516,15 @@
     const jobId = urlParams.get('job');
     const isFinalized = urlParams.get('finalized') === 'true';
     
-    // OPTION 2: Prevent going back if finalized
+    // OPTION 2: Prevent going back if finalized (more aggressive)
     if (isFinalized) {
+      // Push multiple states to make it harder to go back
       history.pushState(null, null, location.href);
-      window.onpopstate = function() {
-        history.go(1);
-      };
+      history.pushState(null, null, location.href);
+      
+      window.addEventListener('popstate', function(event) {
+        history.pushState(null, null, location.href);
+      });
     }
     
     if (!jobId) {
@@ -658,8 +661,14 @@
             throw new Error('Failed to finalize order');
           }
           
-          // OPTION 1: Replace history so they can't go back
-          window.location.replace(`${window.location.origin}${window.location.pathname}?job=${jobId}&finalized=true`);
+          // Nuclear option: Replace current URL in history, then navigate
+          const finalizedUrl = `${window.location.origin}${window.location.pathname}?job=${jobId}&finalized=true`;
+          
+          // Replace the current history entry
+          history.replaceState(null, '', finalizedUrl);
+          
+          // Force reload to new URL
+          location.reload();
           
         } catch (error) {
           console.error('[FINALIZE ERROR]', error);
