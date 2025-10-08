@@ -898,6 +898,7 @@
         
         // Initialize songs from API response
         if (data.songs && data.songs.length > 0) {
+          // Backend provides songs array with URLs
           currentSongs = data.songs.map(song => ({
             id: song.name,
             name: song.name,
@@ -906,6 +907,19 @@
             isNew: false,
             file: null
           }));
+        } else if (data.settings && data.settings.audioCount > 0) {
+          // Fallback: use audioCount to generate song list
+          const audioCount = data.settings.audioCount;
+          for (let i = 1; i <= audioCount; i++) {
+            currentSongs.push({
+              id: `song${i}.mp3`,
+              name: `song${i}.mp3`,
+              displayName: `Song ${i}.mp3`,
+              url: null, // No URL yet (backend needs to provide)
+              isNew: false,
+              file: null
+            });
+          }
         }
         
         // Auto-redirect to finalized page if job is already finalized
