@@ -516,6 +516,14 @@
     const jobId = urlParams.get('job');
     const isFinalized = urlParams.get('finalized') === 'true';
     
+    // OPTION 2: Prevent going back if finalized
+    if (isFinalized) {
+      history.pushState(null, null, location.href);
+      window.onpopstate = function() {
+        history.go(1);
+      };
+    }
+    
     if (!jobId) {
       showError('No job ID provided in URL. Please check your link.');
     } else {
@@ -650,8 +658,8 @@
             throw new Error('Failed to finalize order');
           }
           
-          // Redirect to finalized state
-          window.location.href = `${window.location.origin}${window.location.pathname}?job=${jobId}&finalized=true`;
+          // OPTION 1: Replace history so they can't go back
+          window.location.replace(`${window.location.origin}${window.location.pathname}?job=${jobId}&finalized=true`);
           
         } catch (error) {
           console.error('[FINALIZE ERROR]', error);
