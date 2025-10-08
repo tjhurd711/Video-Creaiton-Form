@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Memorial Video</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+    
+    .header p {
+      opacity: 0.9;
+      font-size: 14px;
+    }
+    
+    .content {
+      padding: 30px;
+    }
+    
+    /* Video Player Section */
+    .video-section {
+      margin-bottom: 30px;
+    }
+    
+    .video-wrapper {
+      position: relative;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    video {
+      width: 100%;
+      display: block;
+    }
+    
+    .loading {
+      padding: 100px 20px;
+      text-align: center;
+      color: #999;
+    }
+    
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .error {
+      padding: 30px;
+      background: #fee;
+      border-left: 4px solid #e33;
+      border-radius: 8px;
+      color: #c33;
+    }
+    
+    /* Action Buttons */
+    .actions {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      padding: 14px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-primary {
+      background: #4CAF50;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #45a049;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+    }
+    
+    .btn-secondary {
+      background: #2196F3;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #0b7dda;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+    }
+    
+    .btn-outline {
+      background: white;
+      color: #667eea;
+      border: 2px solid #667eea;
+    }
+    
+    .btn-outline:hover {
+      background: #667eea;
+      color: white;
+    }
+    
+    /* Edit Sections */
+    .edit-sections {
+      border-top: 2px solid #f0f0f0;
+      padding-top: 30px;
+      margin-top: 30px;
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+    
+    .section-header h2 {
+      font-size: 22px;
+      color: #333;
+    }
+    
+    .section-header .badge {
+      background: #667eea;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .edit-option {
+      background: #f9f9f9;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      transition: all 0.3s;
+    }
+    
+    .edit-option:hover {
+      border-color: #667eea;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+    }
+    
+    .edit-option-header {
+      padding: 20px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+    
+    .edit-option-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .edit-option-icon {
+      font-size: 24px;
+    }
+    
+    .chevron {
+      font-size: 20px;
+      transition: transform 0.3s;
+      color: #999;
+    }
+    
+    .edit-option.expanded .chevron {
+      transform: rotate(180deg);
+    }
+    
+    .edit-option-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      padding: 0 20px;
+    }
+    
+    .edit-option.expanded .edit-option-content {
+      max-height: 800px;
+      padding: 0 20px 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #555;
+    }
+    
+    .form-group select,
+    .form-group input[type="number"],
+    .form-group input[type="file"] {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: border-color 0.2s;
+    }
+    
+    .form-group select:focus,
+    .form-group input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .radio-option:hover {
+      border-color: #667eea;
+      background: #f8f9ff;
+    }
+    
+    .radio-option input[type="radio"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+    
+    .placeholder {
+      padding: 20px;
+      background: #fff9e6;
+      border: 2px dashed #ffd700;
+      border-radius: 8px;
+      text-align: center;
+      color: #886600;
+      font-style: italic;
+    }
+    
+    /* Resubmit Button */
+    .resubmit-section {
+      margin-top: 30px;
+      padding-top: 30px;
+      border-top: 2px solid #f0f0f0;
+      text-align: center;
+    }
+    
+    .btn-resubmit {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 18px 40px;
+      font-size: 18px;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-resubmit:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+    }
+    
+    .btn-resubmit:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    /* Notification Toast */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      padding: 16px 24px;
+      background: #333;
+      color: white;
+      border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s;
+      z-index: 1000;
+    }
+    
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .toast.success {
+      background: #4CAF50;
+    }
+    
+    .toast.error {
+      background: #f44336;
+    }
+    
+    @media (max-width: 768px) {
+      .header h1 { font-size: 24px; }
+      .actions { flex-direction: column; }
+      .btn { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>✨ Your Memorial Video</h1>
+      <p id="jobInfo">Loading...</p>
+    </div>
+    
+    <div class="content">
+      <!-- Video Player Section -->
+      <div class="video-section">
+        <div id="videoContainer" class="loading">
+          <div class="spinner"></div>
+          <p>Loading your video...</p>
+        </div>
+      </div>
+      
+      <!-- Primary Actions -->
+      <div class="actions">
+        <a id="downloadBtn" href="#" class="btn btn-primary" style="display:none;">
+          📥 Download Video
+        </a>
+        <button id="shareBtn" class="btn btn-secondary" style="display:none;">
+          🔗 Share Video
+        </button>
+        <button id="emailBtn" class="btn btn-outline" style="display:none;">
+          📧 Email Me a Backup
+        </button>
+      </div>
+      
+      <!-- Edit Sections -->
+      <div class="edit-sections" style="display:none;">
+        <div class="section-header">
+          <h2>Make Changes</h2>
+          <span class="badge">Coming Soon</span>
+        </div>
+        
+        <!-- Change Transitions -->
+        <div class="edit-option" data-section="transitions">
+          <div class="edit-option-header">
+            <div class="edit-option-title">
+              <span class="edit-option-icon">🎨</span>
+              <span>Change Transitions</span>
+            </div>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="edit-option-content">
+            <div class="placeholder">
+              Select from visual packages: simple-fade-wipe, pages-of-life, floating-frames, zoom-through, blinds-combs-bars
+            </div>
+          </div>
+        </div>
+        
+        <!-- Change Timing -->
+        <div class="edit-option" data-section="timing">
+          <div class="edit-option-header">
+            <div class="edit-option-title">
+              <span class="edit-option-icon">⏱️</span>
+              <span>Change Video Length</span>
+            </div>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="edit-option-content">
+            <div class="placeholder">
+              Choose timing mode: Per Slide Duration, Fixed Total Runtime, or Fit to Music Length
+            </div>
+          </div>
+        </div>
+        
+        <!-- Change Song Logic -->
+        <div class="edit-option" data-section="songlogic">
+          <div class="edit-option-header">
+            <div class="edit-option-title">
+              <span class="edit-option-icon">🎼</span>
+              <span>Change Song Logic</span>
+            </div>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="edit-option-content">
+            <div class="placeholder">
+              Adjust music distribution, crossfade settings, and volume levels
+            </div>
+          </div>
+        </div>
+        
+        <!-- Manual Changes -->
+        <div class="edit-option" data-section="manual">
+          <div class="edit-option-header">
+            <div class="edit-option-title">
+              <span class="edit-option-icon">✏️</span>
+              <span>Make Manual Changes</span>
+            </div>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="edit-option-content">
+            <div class="placeholder">
+              Open your presentation in cloud editor (Google Slides or OneDrive)
+            </div>
+          </div>
+        </div>
+        
+        <!-- Change Songs -->
+        <div class="edit-option" data-section="songs">
+          <div class="edit-option-header">
+            <div class="edit-option-title">
+              <span class="edit-option-icon">🎵</span>
+              <span>Change Songs</span>
+            </div>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="edit-option-content">
+            <div class="placeholder">
+              Upload new MP3 files or remove/replace existing songs
+            </div>
+          </div>
+        </div>
+        
+        <!-- Resubmit Section -->
+        <div class="resubmit-section">
+          <button id="resubmitBtn" class="btn-resubmit" disabled>
+            🚀 Resubmit Changes
+          </button>
+          <p style="margin-top:12px; color:#999; font-size:14px;">
+            Make changes above, then click to create a new video
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+  
+  <script>
+    // Configuration
+    const API_BASE = 'https://YOUR_API_GATEWAY_URL'; // Replace with your API Gateway URL
+    
+    // Parse job ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const jobId = urlParams.get('job');
+    
+    if (!jobId) {
+      showError('No job ID provided in URL. Please check your link.');
+    } else {
+      loadJobData(jobId);
+    }
+    
+    // Load job data from API
+    async function loadJobData(jobId) {
+      try {
+        // TODO: Replace with actual API call
+        // const response = await fetch(`${API_BASE}/jobs/${jobId}`);
+        // const data = await response.json();
+        
+        // MOCK DATA for demo
+        const data = {
+          jobId: jobId,
+          videoUrl: 'https://example.com/video.mp4', // This will be presigned S3 URL
+          settings: {
+            timingMode: 'perSlide',
+            visualPackage: 'simple-fade-wipe',
+            audioCount: 2,
+            slides_url: null,
+            pptx_url: null
+          }
+        };
+        
+        displayVideo(data);
+      } catch (error) {
+        showError('Failed to load video data: ' + error.message);
+      }
+    }
+    
+    // Display video and controls
+    function displayVideo(data) {
+      const container = document.getElementById('videoContainer');
+      const jobInfo = document.getElementById('jobInfo');
+      
+      // Update header
+      jobInfo.textContent = `Order #${data.jobId}`;
+      
+      // Create video element
+      container.innerHTML = `
+        <div class="video-wrapper">
+          <video controls preload="metadata">
+            <source src="${data.videoUrl}" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      `;
+      
+      // Show action buttons
+      document.getElementById('downloadBtn').style.display = 'inline-flex';
+      document.getElementById('downloadBtn').href = data.videoUrl;
+      document.getElementById('shareBtn').style.display = 'inline-flex';
+      document.getElementById('emailBtn').style.display = 'inline-flex';
+      
+      // Show edit sections (currently placeholders)
+      // document.querySelector('.edit-sections').style.display = 'block';
+    }
+    
+    // Show error message
+    function showError(message) {
+      const container = document.getElementById('videoContainer');
+      container.innerHTML = `<div class="error">${message}</div>`;
+    }
+    
+    // Toast notification
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast ${type} show`;
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+    
+    // Share button handler
+    document.getElementById('shareBtn').addEventListener('click', async () => {
+      try {
+        // TODO: Call share API
+        const shareUrl = `${window.location.origin}/share.html?v=${jobId}`;
+        await navigator.clipboard.writeText(shareUrl);
+        showToast('Share link copied to clipboard!');
+      } catch (error) {
+        showToast('Failed to copy link: ' + error.message, 'error');
+      }
+    });
+    
+    // Email backup handler
+    document.getElementById('emailBtn').addEventListener('click', async () => {
+      try {
+        // TODO: Call email API
+        showToast('Backup email sent!');
+      } catch (error) {
+        showToast('Failed to send email: ' + error.message, 'error');
+      }
+    });
+    
+    // Edit section expansion
+    document.querySelectorAll('.edit-option-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const option = header.closest('.edit-option');
+        option.classList.toggle('expanded');
+      });
+    });
+    
+    // Resubmit button
+    document.getElementById('resubmitBtn').addEventListener('click', async () => {
+      if (confirm('Create a new video with your changes?')) {
+        try {
+          // TODO: Collect changes and call resubmit API
+          showToast('Video resubmitted! You\'ll receive an email in 5-15 minutes.');
+        } catch (error) {
+          showToast('Failed to resubmit: ' + error.message, 'error');
+        }
+      }
+    });
+  </script>
+</body>
+</html>
