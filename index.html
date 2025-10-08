@@ -383,16 +383,25 @@
       </div>
       
       <!-- Primary Actions -->
-      <div class="actions">
-        <a id="downloadBtn" href="#" class="btn btn-primary" style="display:none;">
-          📥 Download Video
-        </a>
+      <div class="actions" id="actionButtons">
+        <button id="finalizeBtn" class="btn btn-primary" style="display:none;">
+          ✅ I'm Finished (Download Video)
+        </button>
         <button id="shareBtn" class="btn btn-secondary" style="display:none;">
           🔗 Share Video
         </button>
-        <button id="emailBtn" class="btn btn-outline" style="display:none;">
-          📧 Email Me a Backup
-        </button>
+      </div>
+      
+      <!-- Finalized State -->
+      <div id="finalizedMessage" style="display:none;">
+        <div style="background: #e8f5e9; border: 2px solid #4CAF50; border-radius: 12px; padding: 30px; text-align: center;">
+          <div style="font-size: 48px; margin-bottom: 15px;">✅</div>
+          <h2 style="color: #2e7d32; margin-bottom: 10px;">Order Complete!</h2>
+          <p style="color: #555; margin-bottom: 20px;">Your memorial video has been finalized. A backup copy has been sent to your email.</p>
+          <a id="finalDownloadBtn" href="#" class="btn btn-primary">
+            📥 Download Video Again
+          </a>
+        </div>
       </div>
       
       <!-- Edit Sections -->
@@ -505,6 +514,7 @@
     // Parse job ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const jobId = urlParams.get('job');
+    const isFinalized = urlParams.get('finalized') === 'true';
     
     if (!jobId) {
       showError('No job ID provided in URL. Please check your link.');
@@ -540,6 +550,24 @@
       // Update header
       jobInfo.textContent = `Order #${data.jobId}`;
       
+      // Check if finalized
+      if (isFinalized) {
+        // Show finalized message instead of video
+        container.innerHTML = `
+          <div class="video-wrapper">
+            <video controls preload="auto">
+              <source src="${data.videoUrl}" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        `;
+        
+        document.getElementById('actionButtons').style.display = 'none';
+        document.getElementById('finalizedMessage').style.display = 'block';
+        document.getElementById('finalDownloadBtn').href = data.downloadUrl || data.videoUrl;
+        return;
+      }
+      
       // Create video element with better loading
       container.innerHTML = `
         <div class="video-wrapper">
@@ -562,10 +590,14 @@
       });
       
       // Show action buttons
-      document.getElementById('downloadBtn').style.display = 'inline-flex';
-      document.getElementById('downloadBtn').href = data.downloadUrl || data.videoUrl;
+      document.getElementById('finalizeBtn').style.display = 'inline-flex';
       document.getElementById('shareBtn').style.display = 'inline-flex';
-      document.getElementById('emailBtn').style.display = 'inline-flex';
+      
+      // Store video data globally for finalize button
+      window.videoData = data;
+      
+      // Setup finalize button handler (after button is visible)
+      setupFinalizeButton();
     }
     
     // Show error message
@@ -585,6 +617,49 @@
       }, 3000);
     }
     
+    // Finalize button handler
+    function setupFinalizeButton() {
+      document.getElementById('finalizeBtn').addEventListener('click', async () => {
+        const confirmed = confirm(
+          "Are you sure? You won't be able to make anymore edits to the final video. " +
+          "You will also be emailed a final copy as a backup."
+        );
+        
+        if (!confirmed) return;
+        
+        try {
+          // Download the video
+          const downloadUrl = window.videoData.downloadUrl || window.videoData.videoUrl;
+          const link = document.createElement('a');
+          link.href = downloadUrl;
+          link.download = `memorial_video_${jobId}.mp4`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          // Call finalize API
+          showToast('Finalizing your order...', 'success');
+          const response = await fetch(`${API_BASE}/jobs/${jobId}/finalize`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (!response.ok) {
+            throw new Error('Failed to finalize order');
+          }
+          
+          // Redirect to finalized state
+          window.location.href = `${window.location.origin}${window.location.pathname}?job=${jobId}&finalized=true`;
+          
+        } catch (error) {
+          console.error('[FINALIZE ERROR]', error);
+          showToast('Download started, but email failed. Please contact support.', 'error');
+        }
+      });
+    }
+    
     // Share button handler
     document.getElementById('shareBtn').addEventListener('click', async () => {
       try {
@@ -593,15 +668,6 @@
         showToast('Share link copied to clipboard!');
       } catch (error) {
         showToast('Failed to copy link: ' + error.message, 'error');
-      }
-    });
-    
-    // Email backup handler
-    document.getElementById('emailBtn').addEventListener('click', async () => {
-      try {
-        showToast('Backup email sent!');
-      } catch (error) {
-        showToast('Failed to send email: ' + error.message, 'error');
       }
     });
     
