@@ -146,6 +146,17 @@
       background: #667eea;
       color: white;
     }
+
+    .btn-edit {
+      background: #FF9800;
+      color: white;
+    }
+
+    .btn-edit:hover {
+      background: #f57c00;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+    }
     
     /* Edit Sections */
     .edit-sections {
@@ -227,7 +238,7 @@
     }
     
     .edit-option.expanded .edit-option-content {
-      max-height: 800px;
+      max-height: 1000px;
       padding: 0 20px 20px;
     }
     
@@ -240,6 +251,14 @@
       font-weight: 600;
       margin-bottom: 8px;
       color: #555;
+      font-size: 14px;
+    }
+
+    .form-group .help-text {
+      font-size: 13px;
+      color: #777;
+      font-weight: 400;
+      margin-top: 4px;
     }
     
     .form-group select,
@@ -267,7 +286,7 @@
     
     .radio-option {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 10px;
       padding: 12px;
       border: 2px solid #e0e0e0;
@@ -280,11 +299,40 @@
       border-color: #667eea;
       background: #f8f9ff;
     }
+
+    .radio-option.selected {
+      border-color: #667eea;
+      background: #f8f9ff;
+    }
     
     .radio-option input[type="radio"] {
       width: 20px;
       height: 20px;
       cursor: pointer;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .radio-option-content {
+      flex: 1;
+    }
+
+    .radio-option-label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .radio-option-desc {
+      font-size: 13px;
+      color: #666;
+    }
+
+    .conditional-input {
+      margin-top: 12px;
+      padding: 12px;
+      background: white;
+      border-radius: 6px;
     }
     
     .placeholder {
@@ -295,6 +343,71 @@
       text-align: center;
       color: #886600;
       font-style: italic;
+    }
+
+    .info-box {
+      padding: 16px;
+      background: #e3f2fd;
+      border-left: 4px solid #2196F3;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #1565c0;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .song-list {
+      margin-bottom: 20px;
+    }
+
+    .song-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .song-name {
+      font-weight: 600;
+    }
+
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+
+    .btn-danger {
+      background: #f44336;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #d32f2f;
+    }
+
+    .upload-progress {
+      margin-top: 10px;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .upload-progress-bar {
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      transition: width 0.3s;
+      width: 0%;
     }
     
     /* Resubmit Button */
@@ -318,7 +431,7 @@
       box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
     }
     
-    .btn-resubmit:hover {
+    .btn-resubmit:hover:not(:disabled) {
       transform: translateY(-3px);
       box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
     }
@@ -344,6 +457,7 @@
       transform: translateY(20px);
       transition: all 0.3s;
       z-index: 1000;
+      max-width: 400px;
     }
     
     .toast.show {
@@ -363,6 +477,7 @@
       .header h1 { font-size: 24px; }
       .actions { flex-direction: column; }
       .btn { width: 100%; justify-content: center; }
+      .toast { right: 20px; left: 20px; max-width: none; }
     }
   </style>
 </head>
@@ -384,6 +499,9 @@
       
       <!-- Primary Actions -->
       <div class="actions" id="actionButtons">
+        <button id="editBtn" class="btn btn-edit" style="display:none;">
+          ✏️ Edit & Resubmit
+        </button>
         <button id="finalizeBtn" class="btn btn-primary" style="display:none;">
           ✅ I'm Finished (Download Video)
         </button>
@@ -405,10 +523,9 @@
       </div>
       
       <!-- Edit Sections -->
-      <div class="edit-sections" style="display:none;">
+      <div class="edit-sections" id="editSections" style="display:none;">
         <div class="section-header">
-          <h2>Make Changes</h2>
-          <span class="badge">Coming Soon</span>
+          <h2>✏️ Make Changes to Your Video</h2>
         </div>
         
         <!-- Change Transitions -->
@@ -421,8 +538,19 @@
             <span class="chevron">▼</span>
           </div>
           <div class="edit-option-content">
-            <div class="placeholder">
-              Select from visual packages: simple-fade-wipe, pages-of-life, floating-frames, zoom-through, blinds-combs-bars
+            <div class="form-group">
+              <label for="visualPackage">
+                Visual Package
+                <div class="help-text">Choose the style of transitions between slides</div>
+              </label>
+              <select id="visualPackage" name="visualPackage">
+                <option value="">-- Select a package --</option>
+                <option value="simple-fade-wipe">Simple Fade & Wipe</option>
+                <option value="pages-of-life">Pages of Life</option>
+                <option value="floating-frames">Floating Frames</option>
+                <option value="zoom-through">Zoom Through</option>
+                <option value="blinds-combs-bars">Blinds, Combs & Bars</option>
+              </select>
             </div>
           </div>
         </div>
@@ -437,8 +565,41 @@
             <span class="chevron">▼</span>
           </div>
           <div class="edit-option-content">
-            <div class="placeholder">
-              Choose timing mode: Per Slide Duration, Fixed Total Runtime, or Fit to Music Length
+            <div class="form-group">
+              <label>Timing Mode</label>
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="timingMode" value="perSlide">
+                  <div class="radio-option-content">
+                    <span class="radio-option-label">Per Slide Duration</span>
+                    <span class="radio-option-desc">Set how many seconds each slide should display</span>
+                    <div class="conditional-input" id="perSlideInput" style="display:none;">
+                      <label for="perSlideSec" style="font-size: 13px; margin-bottom: 6px;">Seconds per slide:</label>
+                      <input type="number" id="perSlideSec" name="perSlideSec" min="2" max="30" value="5" style="padding: 8px;">
+                    </div>
+                  </div>
+                </label>
+                
+                <label class="radio-option">
+                  <input type="radio" name="timingMode" value="fixedRuntime">
+                  <div class="radio-option-content">
+                    <span class="radio-option-label">Fixed Total Runtime</span>
+                    <span class="radio-option-desc">Set the total video length in seconds</span>
+                    <div class="conditional-input" id="fixedRuntimeInput" style="display:none;">
+                      <label for="fixedRuntimeSec" style="font-size: 13px; margin-bottom: 6px;">Total runtime (seconds):</label>
+                      <input type="number" id="fixedRuntimeSec" name="fixedRuntimeSec" min="30" max="1800" value="320" style="padding: 8px;">
+                    </div>
+                  </div>
+                </label>
+                
+                <label class="radio-option">
+                  <input type="radio" name="timingMode" value="fitToSongs">
+                  <div class="radio-option-content">
+                    <span class="radio-option-label">Fit to Music Length</span>
+                    <span class="radio-option-desc">Video duration matches your music (automatic)</span>
+                  </div>
+                </label>
+              </div>
             </div>
           </div>
         </div>
@@ -453,8 +614,52 @@
             <span class="chevron">▼</span>
           </div>
           <div class="edit-option-content">
-            <div class="placeholder">
-              Adjust music distribution, crossfade settings, and volume levels
+            <div class="form-group">
+              <label for="musicDistribution">
+                Music Distribution
+                <div class="help-text">How songs should be spread across the video</div>
+              </label>
+              <select id="musicDistribution" name="musicDistribution">
+                <option value="">-- Select distribution --</option>
+                <option value="evenlyDistributed">Evenly Distributed</option>
+                <option value="specifyPlacement">Specify Placement (Advanced)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="audioMatchPolicy">
+                Audio Match Policy
+                <div class="help-text">How to handle audio length vs video length</div>
+              </label>
+              <select id="audioMatchPolicy" name="audioMatchPolicy">
+                <option value="">-- Select policy --</option>
+                <option value="fitTo">Fit audio to video length</option>
+                <option value="leave">Leave audio as-is</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="targetLufs">
+                Target Volume (LUFS)
+                <div class="help-text">Audio normalization level (-20 to -10, recommended: -16)</div>
+              </label>
+              <input type="number" id="targetLufs" name="targetLufs" min="-20" max="-10" step="0.5" value="-16">
+            </div>
+
+            <div class="form-group">
+              <label for="fadeInSec">
+                Fade In Duration (seconds)
+                <div class="help-text">How long the music takes to fade in at the start</div>
+              </label>
+              <input type="number" id="fadeInSec" name="fadeInSec" min="0" max="10" step="0.5" value="2">
+            </div>
+
+            <div class="form-group">
+              <label for="fadeOutSec">
+                Fade Out Duration (seconds)
+                <div class="help-text">How long the music takes to fade out at the end</div>
+              </label>
+              <input type="number" id="fadeOutSec" name="fadeOutSec" min="0" max="10" step="0.5" value="2">
             </div>
           </div>
         </div>
@@ -469,8 +674,11 @@
             <span class="chevron">▼</span>
           </div>
           <div class="edit-option-content">
-            <div class="placeholder">
-              Open your presentation in cloud editor (Google Slides or OneDrive)
+            <div class="info-box">
+              Edit your presentation directly, then come back here and click "Resubmit Changes" to create a new video with your edits.
+            </div>
+            <div id="manualEditButtons" class="button-group">
+              <!-- Buttons will be populated based on presentation type -->
             </div>
           </div>
         </div>
@@ -485,8 +693,21 @@
             <span class="chevron">▼</span>
           </div>
           <div class="edit-option-content">
-            <div class="placeholder">
-              Upload new MP3 files or remove/replace existing songs
+            <div class="info-box">
+              ⚠️ This feature requires backend API support (coming soon). You'll be able to upload new MP3 files or remove existing songs.
+            </div>
+            <div class="form-group">
+              <label>Current Songs</label>
+              <div id="songList" class="song-list">
+                <!-- Will be populated dynamically -->
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="newSongUpload">Upload New Songs (MP3 only)</label>
+              <input type="file" id="newSongUpload" accept=".mp3,audio/mpeg" multiple disabled>
+              <div class="upload-progress" id="uploadProgress">
+                <div class="upload-progress-bar" id="uploadProgressBar"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -516,9 +737,12 @@
     const jobId = urlParams.get('job');
     const isFinalized = urlParams.get('finalized') === 'true';
     
-    // OPTION 2: Prevent going back if finalized (more aggressive)
+    // Track changes made by user
+    let pendingChanges = {};
+    let currentSettings = {};
+    
+    // Prevent going back if finalized
     if (isFinalized) {
-      // Push multiple states to make it harder to go back
       history.pushState(null, null, location.href);
       history.pushState(null, null, location.href);
       
@@ -546,6 +770,12 @@
         const data = await response.json();
         console.log('[API] Response:', data);
         
+        // Store current settings
+        if (data.settings) {
+          currentSettings = data.settings;
+          populateFormDefaults(data.settings);
+        }
+        
         // Auto-redirect to finalized page if job is already finalized
         if (data.isFinalized && !isFinalized) {
           console.log('[REDIRECT] Job is finalized, redirecting...');
@@ -554,10 +784,101 @@
         }
         
         displayVideo(data);
+        setupManualEditButtons(data);
+        setupSongList(data);
       } catch (error) {
         console.error('[API ERROR]', error);
         showError('Failed to load video data: ' + error.message);
       }
+    }
+    
+    // Populate form defaults from settings
+    function populateFormDefaults(settings) {
+      // Transitions
+      if (settings.visualPackage) {
+        document.getElementById('visualPackage').value = settings.visualPackage;
+      }
+      
+      // Timing
+      if (settings.timingMode) {
+        const radio = document.querySelector(`input[name="timingMode"][value="${settings.timingMode}"]`);
+        if (radio) {
+          radio.checked = true;
+          handleTimingModeChange(settings.timingMode);
+        }
+      }
+      if (settings.perSlideSec) {
+        document.getElementById('perSlideSec').value = settings.perSlideSec;
+      }
+      if (settings.fixedRuntimeSec) {
+        document.getElementById('fixedRuntimeSec').value = settings.fixedRuntimeSec;
+      }
+      
+      // Song Logic
+      if (settings.musicDistribution) {
+        document.getElementById('musicDistribution').value = settings.musicDistribution;
+      }
+      if (settings.audioMatchPolicy) {
+        document.getElementById('audioMatchPolicy').value = settings.audioMatchPolicy;
+      }
+      if (settings.targetLufs !== undefined) {
+        document.getElementById('targetLufs').value = settings.targetLufs;
+      }
+      if (settings.fadeInSec !== undefined) {
+        document.getElementById('fadeInSec').value = settings.fadeInSec;
+      }
+      if (settings.fadeOutSec !== undefined) {
+        document.getElementById('fadeOutSec').value = settings.fadeOutSec;
+      }
+    }
+    
+    // Setup manual edit buttons based on presentation type
+    function setupManualEditButtons(data) {
+      const container = document.getElementById('manualEditButtons');
+      
+      if (data.presentationType === 'google_slides' && data.slides_url) {
+        container.innerHTML = `
+          <button class="btn btn-primary" onclick="window.open('${data.slides_url}', '_blank')">
+            📊 Open in Google Slides
+          </button>
+        `;
+      } else if (data.presentationType === 'powerpoint' && data.pptx_url) {
+        container.innerHTML = `
+          <a href="${data.pptx_url}" download class="btn btn-primary">
+            📥 Download PowerPoint
+          </a>
+        `;
+      } else {
+        container.innerHTML = `
+          <div style="color: #999; font-style: italic;">
+            Presentation files not available for this job.
+          </div>
+        `;
+      }
+    }
+    
+    // Setup song list
+    function setupSongList(data) {
+      const container = document.getElementById('songList');
+      const audioCount = data.settings?.audioCount || 0;
+      
+      if (audioCount === 0) {
+        container.innerHTML = '<div style="color: #999; font-style: italic;">No songs found</div>';
+        return;
+      }
+      
+      let html = '';
+      for (let i = 1; i <= audioCount; i++) {
+        html += `
+          <div class="song-item">
+            <span class="song-name">🎵 Song ${i}.mp3</span>
+            <button class="btn btn-small btn-danger" onclick="alert('Delete functionality requires backend API')" disabled>
+              🗑️ Remove
+            </button>
+          </div>
+        `;
+      }
+      container.innerHTML = html;
     }
     
     // Display video and controls
@@ -570,7 +891,6 @@
       
       // Check if finalized
       if (isFinalized) {
-        // Show finalized message instead of video
         container.innerHTML = `
           <div class="video-wrapper">
             <video controls preload="auto">
@@ -586,7 +906,7 @@
         return;
       }
       
-      // Create video element with better loading
+      // Create video element
       container.innerHTML = `
         <div class="video-wrapper">
           <video controls preload="auto" crossorigin="anonymous">
@@ -596,7 +916,7 @@
         </div>
       `;
       
-      // Add video event listeners for debugging
+      // Video event listeners
       const video = container.querySelector('video');
       video.addEventListener('loadstart', () => console.log('[VIDEO] Loading started'));
       video.addEventListener('loadedmetadata', () => console.log('[VIDEO] Metadata loaded'));
@@ -608,14 +928,16 @@
       });
       
       // Show action buttons
+      document.getElementById('editBtn').style.display = 'inline-flex';
       document.getElementById('finalizeBtn').style.display = 'inline-flex';
       document.getElementById('shareBtn').style.display = 'inline-flex';
       
-      // Store video data globally for finalize button
+      // Store video data globally
       window.videoData = data;
       
-      // Setup finalize button handler (after button is visible)
+      // Setup handlers
       setupFinalizeButton();
+      setupEditButton();
     }
     
     // Show error message
@@ -632,7 +954,25 @@
       
       setTimeout(() => {
         toast.classList.remove('show');
-      }, 3000);
+      }, 4000);
+    }
+    
+    // Edit button handler - toggles edit sections
+    function setupEditButton() {
+      document.getElementById('editBtn').addEventListener('click', () => {
+        const editSections = document.getElementById('editSections');
+        const isVisible = editSections.style.display !== 'none';
+        
+        if (isVisible) {
+          editSections.style.display = 'none';
+          document.getElementById('editBtn').innerHTML = '✏️ Edit & Resubmit';
+        } else {
+          editSections.style.display = 'block';
+          document.getElementById('editBtn').innerHTML = '❌ Hide Edit Options';
+          // Scroll to edit sections
+          editSections.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
     }
     
     // Finalize button handler
@@ -668,13 +1008,9 @@
             throw new Error('Failed to finalize order');
           }
           
-          // Nuclear option: Replace current URL in history, then navigate
+          // Redirect to finalized page
           const finalizedUrl = `${window.location.origin}${window.location.pathname}?job=${jobId}&finalized=true`;
-          
-          // Replace the current history entry
           history.replaceState(null, '', finalizedUrl);
-          
-          // Force reload to new URL
           location.reload();
           
         } catch (error) {
@@ -687,7 +1023,7 @@
     // Share button handler
     document.getElementById('shareBtn').addEventListener('click', async () => {
       try {
-        const shareUrl = `${window.location.origin}/?job=${jobId}`;
+        const shareUrl = `${window.location.origin}${window.location.pathname}?job=${jobId}`;
         await navigator.clipboard.writeText(shareUrl);
         showToast('Share link copied to clipboard!');
       } catch (error) {
@@ -703,14 +1039,161 @@
       });
     });
     
-    // Resubmit button
-    document.getElementById('resubmitBtn').addEventListener('click', async () => {
-      if (confirm('Create a new video with your changes?')) {
-        try {
-          showToast('Video resubmitted! You\'ll receive an email in 5-15 minutes.');
-        } catch (error) {
-          showToast('Failed to resubmit: ' + error.message, 'error');
+    // Track form changes for all inputs
+    function trackChange(fieldName, value) {
+      if (value === '' || value === null || value === undefined) {
+        delete pendingChanges[fieldName];
+      } else {
+        pendingChanges[fieldName] = value;
+      }
+      updateResubmitButton();
+      console.log('[CHANGES]', pendingChanges);
+    }
+    
+    // Update resubmit button state
+    function updateResubmitButton() {
+      const btn = document.getElementById('resubmitBtn');
+      const hasChanges = Object.keys(pendingChanges).length > 0;
+      btn.disabled = !hasChanges;
+      
+      if (hasChanges) {
+        btn.textContent = `🚀 Resubmit Changes (${Object.keys(pendingChanges).length})`;
+      } else {
+        btn.textContent = '🚀 Resubmit Changes';
+      }
+    }
+    
+    // Setup change tracking for all form elements
+    document.getElementById('visualPackage').addEventListener('change', (e) => {
+      trackChange('visualPackage', e.target.value);
+    });
+    
+    // Timing mode radio buttons
+    document.querySelectorAll('input[name="timingMode"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        const mode = e.target.value;
+        handleTimingModeChange(mode);
+        trackChange('timingMode', mode);
+        
+        // Track the associated value
+        if (mode === 'perSlide') {
+          trackChange('perSlideSec', document.getElementById('perSlideSec').value);
+        } else if (mode === 'fixedRuntime') {
+          trackChange('fixedRuntimeSec', document.getElementById('fixedRuntimeSec').value);
         }
+      });
+    });
+    
+    function handleTimingModeChange(mode) {
+      // Hide all conditional inputs
+      document.getElementById('perSlideInput').style.display = 'none';
+      document.getElementById('fixedRuntimeInput').style.display = 'none';
+      
+      // Remove selected class from all options
+      document.querySelectorAll('.radio-option').forEach(opt => {
+        opt.classList.remove('selected');
+      });
+      
+      // Show the selected one
+      const selectedRadio = document.querySelector(`input[name="timingMode"][value="${mode}"]`);
+      if (selectedRadio) {
+        selectedRadio.closest('.radio-option').classList.add('selected');
+        
+        if (mode === 'perSlide') {
+          document.getElementById('perSlideInput').style.display = 'block';
+        } else if (mode === 'fixedRuntime') {
+          document.getElementById('fixedRuntimeInput').style.display = 'block';
+        }
+      }
+    }
+    
+    document.getElementById('perSlideSec').addEventListener('input', (e) => {
+      trackChange('perSlideSec', parseFloat(e.target.value));
+    });
+    
+    document.getElementById('fixedRuntimeSec').addEventListener('input', (e) => {
+      trackChange('fixedRuntimeSec', parseFloat(e.target.value));
+    });
+    
+    // Song logic fields
+    document.getElementById('musicDistribution').addEventListener('change', (e) => {
+      trackChange('musicDistribution', e.target.value);
+    });
+    
+    document.getElementById('audioMatchPolicy').addEventListener('change', (e) => {
+      trackChange('audioMatchPolicy', e.target.value);
+    });
+    
+    document.getElementById('targetLufs').addEventListener('input', (e) => {
+      trackChange('targetLufs', parseFloat(e.target.value));
+    });
+    
+    document.getElementById('fadeInSec').addEventListener('input', (e) => {
+      trackChange('fadeInSec', parseFloat(e.target.value));
+    });
+    
+    document.getElementById('fadeOutSec').addEventListener('input', (e) => {
+      trackChange('fadeOutSec', parseFloat(e.target.value));
+    });
+    
+    // Resubmit button handler
+    document.getElementById('resubmitBtn').addEventListener('click', async () => {
+      if (Object.keys(pendingChanges).length === 0) {
+        showToast('No changes to submit', 'error');
+        return;
+      }
+      
+      const confirmed = confirm(
+        `Create a new video with ${Object.keys(pendingChanges).length} change(s)?\n\n` +
+        'You will receive an email in 5-15 minutes with your new video.'
+      );
+      
+      if (!confirmed) return;
+      
+      try {
+        showToast('Submitting changes...', 'success');
+        
+        console.log('[RESUBMIT] Sending changes:', pendingChanges);
+        
+        // Call resubmit API
+        const response = await fetch(`${API_BASE}/jobs/${jobId}/resubmit`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            originalJobId: jobId,
+            changes: pendingChanges
+          })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || `HTTP ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('[RESUBMIT] Success:', result);
+        
+        showToast(
+          `✅ Video resubmitted successfully! New job: ${result.newJobId || 'pending'}. ` +
+          'You\'ll receive an email in 5-15 minutes.',
+          'success'
+        );
+        
+        // Clear changes and disable button
+        pendingChanges = {};
+        updateResubmitButton();
+        
+        // Hide edit sections after 2 seconds
+        setTimeout(() => {
+          document.getElementById('editSections').style.display = 'none';
+          document.getElementById('editBtn').innerHTML = '✏️ Edit & Resubmit';
+        }, 2000);
+        
+      } catch (error) {
+        console.error('[RESUBMIT ERROR]', error);
+        showToast('Failed to resubmit: ' + error.message, 'error');
       }
     });
   </script>
