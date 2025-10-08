@@ -238,7 +238,7 @@
     }
     
     .edit-option.expanded .edit-option-content {
-      max-height: 1000px;
+      max-height: 2000px;
       padding: 0 20px 20px;
     }
     
@@ -409,6 +409,58 @@
       transition: width 0.3s;
       width: 0%;
     }
+
+    /* Song Range Sliders */
+    .song-ranges-container {
+      margin-top: 15px;
+    }
+
+    .song-range-item {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 12px;
+    }
+
+    .song-range-header {
+      font-weight: 600;
+      color: #667eea;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .slide-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .slide-input-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .slide-input-group label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    .slide-input-group input {
+      padding: 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .slide-input-group input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
     
     /* Resubmit Button */
     .resubmit-section {
@@ -478,6 +530,7 @@
       .actions { flex-direction: column; }
       .btn { width: 100%; justify-content: center; }
       .toast { right: 20px; left: 20px; max-width: none; }
+      .slide-inputs { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -528,6 +581,35 @@
           <h2>✏️ Make Changes to Your Video</h2>
         </div>
         
+        <!-- Change Songs (MOVED TO TOP) -->
+        <div class="edit-option" data-section="songs">
+          <div class="edit-option-header">
+            <div class="edit-option-title">
+              <span class="edit-option-icon">🎵</span>
+              <span>Change Songs</span>
+            </div>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="edit-option-content">
+            <div class="info-box">
+              ⚠️ This feature requires backend API support (coming soon). You'll be able to upload new MP3 files or remove existing songs.
+            </div>
+            <div class="form-group">
+              <label>Current Songs</label>
+              <div id="songList" class="song-list">
+                <!-- Will be populated dynamically -->
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="newSongUpload">Upload New Songs (MP3 only)</label>
+              <input type="file" id="newSongUpload" accept=".mp3,audio/mpeg" multiple disabled>
+              <div class="upload-progress" id="uploadProgress">
+                <div class="upload-progress-bar" id="uploadProgressBar"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Change Transitions -->
         <div class="edit-option" data-section="transitions">
           <div class="edit-option-header">
@@ -622,44 +704,18 @@
               <select id="musicDistribution" name="musicDistribution">
                 <option value="">-- Select distribution --</option>
                 <option value="evenlyDistributed">Evenly Distributed</option>
-                <option value="specifyPlacement">Specify Placement (Advanced)</option>
+                <option value="specifyPlacement">Specify Placement</option>
               </select>
             </div>
 
-            <div class="form-group">
-              <label for="audioMatchPolicy">
-                Audio Match Policy
-                <div class="help-text">How to handle audio length vs video length</div>
-              </label>
-              <select id="audioMatchPolicy" name="audioMatchPolicy">
-                <option value="">-- Select policy --</option>
-                <option value="fitTo">Fit audio to video length</option>
-                <option value="leave">Leave audio as-is</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="targetLufs">
-                Target Volume (LUFS)
-                <div class="help-text">Audio normalization level (-20 to -10, recommended: -16)</div>
-              </label>
-              <input type="number" id="targetLufs" name="targetLufs" min="-20" max="-10" step="0.5" value="-16">
-            </div>
-
-            <div class="form-group">
-              <label for="fadeInSec">
-                Fade In Duration (seconds)
-                <div class="help-text">How long the music takes to fade in at the start</div>
-              </label>
-              <input type="number" id="fadeInSec" name="fadeInSec" min="0" max="10" step="0.5" value="2">
-            </div>
-
-            <div class="form-group">
-              <label for="fadeOutSec">
-                Fade Out Duration (seconds)
-                <div class="help-text">How long the music takes to fade out at the end</div>
-              </label>
-              <input type="number" id="fadeOutSec" name="fadeOutSec" min="0" max="10" step="0.5" value="2">
+            <!-- Conditional Song Range Sliders -->
+            <div id="songRangesContainer" class="song-ranges-container" style="display:none;">
+              <div class="info-box">
+                📍 Specify which slides each song should play during. The backend will automatically prevent overlaps and fill gaps.
+              </div>
+              <div id="songRangesList">
+                <!-- Will be populated dynamically based on number of songs -->
+              </div>
             </div>
           </div>
         </div>
@@ -679,35 +735,6 @@
             </div>
             <div id="manualEditButtons" class="button-group">
               <!-- Buttons will be populated based on presentation type -->
-            </div>
-          </div>
-        </div>
-        
-        <!-- Change Songs -->
-        <div class="edit-option" data-section="songs">
-          <div class="edit-option-header">
-            <div class="edit-option-title">
-              <span class="edit-option-icon">🎵</span>
-              <span>Change Songs</span>
-            </div>
-            <span class="chevron">▼</span>
-          </div>
-          <div class="edit-option-content">
-            <div class="info-box">
-              ⚠️ This feature requires backend API support (coming soon). You'll be able to upload new MP3 files or remove existing songs.
-            </div>
-            <div class="form-group">
-              <label>Current Songs</label>
-              <div id="songList" class="song-list">
-                <!-- Will be populated dynamically -->
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="newSongUpload">Upload New Songs (MP3 only)</label>
-              <input type="file" id="newSongUpload" accept=".mp3,audio/mpeg" multiple disabled>
-              <div class="upload-progress" id="uploadProgress">
-                <div class="upload-progress-bar" id="uploadProgressBar"></div>
-              </div>
             </div>
           </div>
         </div>
@@ -740,6 +767,7 @@
     // Track changes made by user
     let pendingChanges = {};
     let currentSettings = {};
+    let currentSongCount = 0;
     
     // Prevent going back if finalized
     if (isFinalized) {
@@ -773,6 +801,7 @@
         // Store current settings
         if (data.settings) {
           currentSettings = data.settings;
+          currentSongCount = data.settings.audioCount || 0;
           populateFormDefaults(data.settings);
         }
         
@@ -786,6 +815,7 @@
         displayVideo(data);
         setupManualEditButtons(data);
         setupSongList(data);
+        setupSongRangeSliders(); // Initialize sliders based on song count
       } catch (error) {
         console.error('[API ERROR]', error);
         showError('Failed to load video data: ' + error.message);
@@ -817,18 +847,7 @@
       // Song Logic
       if (settings.musicDistribution) {
         document.getElementById('musicDistribution').value = settings.musicDistribution;
-      }
-      if (settings.audioMatchPolicy) {
-        document.getElementById('audioMatchPolicy').value = settings.audioMatchPolicy;
-      }
-      if (settings.targetLufs !== undefined) {
-        document.getElementById('targetLufs').value = settings.targetLufs;
-      }
-      if (settings.fadeInSec !== undefined) {
-        document.getElementById('fadeInSec').value = settings.fadeInSec;
-      }
-      if (settings.fadeOutSec !== undefined) {
-        document.getElementById('fadeOutSec').value = settings.fadeOutSec;
+        handleMusicDistributionChange(settings.musicDistribution);
       }
     }
     
@@ -861,6 +880,7 @@
     function setupSongList(data) {
       const container = document.getElementById('songList');
       const audioCount = data.settings?.audioCount || 0;
+      currentSongCount = audioCount;
       
       if (audioCount === 0) {
         container.innerHTML = '<div style="color: #999; font-style: italic;">No songs found</div>';
@@ -879,6 +899,104 @@
         `;
       }
       container.innerHTML = html;
+    }
+    
+    // Setup song range sliders (called when musicDistribution changes or on load)
+    function setupSongRangeSliders() {
+      const container = document.getElementById('songRangesList');
+      
+      if (currentSongCount === 0) {
+        container.innerHTML = '<div style="color: #999; font-style: italic;">No songs available. Add songs first.</div>';
+        return;
+      }
+      
+      let html = '';
+      for (let i = 1; i <= currentSongCount; i++) {
+        html += `
+          <div class="song-range-item">
+            <div class="song-range-header">
+              🎵 Song ${i}
+            </div>
+            <div class="slide-inputs">
+              <div class="slide-input-group">
+                <label>Start Slide</label>
+                <input type="number" 
+                       id="song${i}Start" 
+                       class="song-range-input"
+                       data-song="${i}"
+                       data-type="start"
+                       min="1" 
+                       max="250" 
+                       placeholder="e.g., 1">
+              </div>
+              <div class="slide-input-group">
+                <label>End Slide</label>
+                <input type="number" 
+                       id="song${i}End" 
+                       class="song-range-input"
+                       data-song="${i}"
+                       data-type="end"
+                       min="1" 
+                       max="250" 
+                       placeholder="e.g., 50">
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      
+      container.innerHTML = html;
+      
+      // Add event listeners to all song range inputs
+      document.querySelectorAll('.song-range-input').forEach(input => {
+        input.addEventListener('input', handleSongRangeChange);
+      });
+    }
+    
+    // Handle song range input changes
+    function handleSongRangeChange() {
+      const songRanges = [];
+      
+      for (let i = 1; i <= currentSongCount; i++) {
+        const startInput = document.getElementById(`song${i}Start`);
+        const endInput = document.getElementById(`song${i}End`);
+        const startVal = parseInt(startInput.value);
+        const endVal = parseInt(endInput.value);
+        
+        // Only include if both values are provided
+        if (!isNaN(startVal) && !isNaN(endVal)) {
+          songRanges.push({
+            song: `song${i}.mp3`,
+            startSlide: startVal,
+            endSlide: endVal
+          });
+        }
+      }
+      
+      // Track changes
+      if (songRanges.length > 0) {
+        trackChange('songRanges', songRanges);
+      } else {
+        delete pendingChanges.songRanges;
+        updateResubmitButton();
+      }
+      
+      console.log('[SONG RANGES]', songRanges);
+    }
+    
+    // Handle music distribution change
+    function handleMusicDistributionChange(value) {
+      const container = document.getElementById('songRangesContainer');
+      
+      if (value === 'specifyPlacement') {
+        container.style.display = 'block';
+        setupSongRangeSliders();
+      } else {
+        container.style.display = 'none';
+        // Clear songRanges from pending changes if switching away
+        delete pendingChanges.songRanges;
+        updateResubmitButton();
+      }
     }
     
     // Display video and controls
@@ -1117,23 +1235,9 @@
     
     // Song logic fields
     document.getElementById('musicDistribution').addEventListener('change', (e) => {
-      trackChange('musicDistribution', e.target.value);
-    });
-    
-    document.getElementById('audioMatchPolicy').addEventListener('change', (e) => {
-      trackChange('audioMatchPolicy', e.target.value);
-    });
-    
-    document.getElementById('targetLufs').addEventListener('input', (e) => {
-      trackChange('targetLufs', parseFloat(e.target.value));
-    });
-    
-    document.getElementById('fadeInSec').addEventListener('input', (e) => {
-      trackChange('fadeInSec', parseFloat(e.target.value));
-    });
-    
-    document.getElementById('fadeOutSec').addEventListener('input', (e) => {
-      trackChange('fadeOutSec', parseFloat(e.target.value));
+      const value = e.target.value;
+      trackChange('musicDistribution', value);
+      handleMusicDistributionChange(value);
     });
     
     // Resubmit button handler
