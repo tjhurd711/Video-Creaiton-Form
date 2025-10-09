@@ -45,6 +45,24 @@
       padding: 30px;
     }
     
+    /* Summary Sentence */
+    .summary-box {
+      background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+      border-left: 4px solid #667eea;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      font-size: 16px;
+      line-height: 1.6;
+      color: #333;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+    }
+    
+    .summary-box strong {
+      color: #667eea;
+      font-weight: 700;
+    }
+    
     /* Video Player Section */
     .video-section {
       margin-bottom: 30px;
@@ -519,6 +537,61 @@
       cursor: not-allowed;
     }
 
+    /* PowerPoint Upload Section */
+    .pptx-upload-section {
+      margin-top: 15px;
+      padding: 20px;
+      background: #fff9e6;
+      border: 2px dashed #FF9800;
+      border-radius: 8px;
+    }
+
+    .pptx-upload-section .upload-label {
+      background: #FF9800;
+      padding: 12px 24px;
+      font-size: 15px;
+    }
+
+    .pptx-upload-section .upload-label:hover {
+      background: #f57c00;
+    }
+
+    .pptx-file-preview {
+      margin-top: 15px;
+      padding: 12px;
+      background: white;
+      border: 2px solid #4CAF50;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pptx-file-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pptx-file-icon {
+      font-size: 24px;
+    }
+
+    .pptx-file-details {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pptx-file-name {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .pptx-file-size {
+      font-size: 13px;
+      color: #666;
+    }
+
     /* Song Range Sliders */
     .song-ranges-container {
       margin-top: 15px;
@@ -652,6 +725,11 @@
     </div>
     
     <div class="content">
+      <!-- Summary Sentence -->
+      <div id="summaryBox" class="summary-box" style="display:none;">
+        <!-- Will be populated dynamically -->
+      </div>
+      
       <!-- Video Player Section -->
       <div class="video-section">
         <div id="videoContainer" class="loading">
@@ -840,11 +918,25 @@
             <span class="chevron">▼</span>
           </div>
           <div class="edit-option-content">
-            <div class="info-box">
+            <div class="info-box" id="manualEditInfoBox">
               Edit your presentation directly, then come back here and click "Resubmit Changes" to create a new video with your edits.
             </div>
             <div id="manualEditButtons" class="button-group">
               <!-- Buttons will be populated based on presentation type -->
+            </div>
+            
+            <!-- PowerPoint Upload Section (Only shows for PowerPoint providers) -->
+            <div id="pptxUploadSection" class="pptx-upload-section" style="display:none;">
+              <div style="margin-bottom: 12px; font-weight: 600; color: #FF9800;">
+                📄 Upload a New PowerPoint File
+              </div>
+              <label class="upload-label">
+                📤 Choose PowerPoint File (.pptx)
+                <input type="file" id="newPptxUpload" accept=".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation" style="display: none;">
+              </label>
+              <div id="pptxFilePreview" style="display:none;">
+                <!-- File preview will appear here -->
+              </div>
             </div>
           </div>
         </div>
@@ -874,13 +966,14 @@
     const urlParams = new URLSearchParams(window.location.search);
     const jobId = urlParams.get('job');
     const isFinalized = urlParams.get('finalized') === 'true';
-    const isSharedView = urlParams.get('share') === 'true'; // NEW: Check if this is a shared view
+    const isSharedView = urlParams.get('share') === 'true';
     
     // Track changes made by user
     let pendingChanges = {};
     let currentSettings = {};
-    let currentSongs = []; // Array of {id, name, url, isNew, file}
+    let currentSongs = [];
     let currentlyPlayingAudio = null;
+    let newPptxFile = null; // Store uploaded PowerPoint file
     
     // Prevent going back if finalized
     if (isFinalized) {
@@ -915,11 +1008,11 @@
         if (data.settings) {
           currentSettings = data.settings;
           populateFormDefaults(data.settings);
+          displaySummary(data.settings);
         }
         
         // Initialize songs from API response
         if (data.songs && data.songs.length > 0) {
-          // Backend provides songs array with URLs
           currentSongs = data.songs.map(song => ({
             id: song.name,
             name: song.name,
@@ -929,14 +1022,13 @@
             file: null
           }));
         } else if (data.settings && data.settings.audioCount > 0) {
-          // Fallback: use audioCount to generate song list
           const audioCount = data.settings.audioCount;
           for (let i = 1; i <= audioCount; i++) {
             currentSongs.push({
               id: `song${i}.mp3`,
               name: `song${i}.mp3`,
-              displayName: `song${i}.mp3`, // Just show the backend filename
-              url: null, // No URL yet (backend needs to provide)
+              displayName: `song${i}.mp3`,
+              url: null,
               isNew: false,
               file: null
             });
@@ -958,6 +1050,58 @@
         console.error('[API ERROR]', error);
         showError('Failed to load video data: ' + error.message);
       }
+    }
+    
+    // Display summary sentence
+    function displaySummary(settings) {
+      const summaryBox = document.getElementById('summaryBox');
+      
+      // Format duration
+      let durationText = '';
+      if (settings.timingMode === 'fixedRuntime' && settings.fixedRuntimeSec) {
+        const minutes = Math.floor(settings.fixedRuntimeSec / 60);
+        const seconds = settings.fixedRuntimeSec % 60;
+        durationText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      } else if (settings.timingMode === 'perSlide' && settings.perSlideSec) {
+        durationText = `${settings.perSlideSec}s per slide`;
+      } else if (settings.timingMode === 'fitToSongs') {
+        durationText = 'matched to music length';
+      } else {
+        durationText = 'custom timing';
+      }
+      
+      // Timing mode display name
+      const timingModeNames = {
+        'fixedRuntime': 'Fixed Runtime',
+        'perSlide': 'Per Slide Duration',
+        'fitToSongs': 'Fit to Music'
+      };
+      const timingModeName = timingModeNames[settings.timingMode] || settings.timingMode;
+      
+      // Visual package display name
+      const visualPackageNames = {
+        'simple-fade-wipe': 'Simple Fade & Wipe',
+        'pages-of-life': 'Pages of Life',
+        'floating-frames': 'Floating Frames',
+        'zoom-through': 'Zoom Through',
+        'blinds-combs-bars': 'Blinds, Combs & Bars'
+      };
+      const visualPackageName = visualPackageNames[settings.visualPackage] || settings.visualPackage;
+      
+      // Music distribution display name
+      const musicDistNames = {
+        'evenlyDistributed': 'Evenly Distributed',
+        'specifyPlacement': 'Specify Placement'
+      };
+      const musicDistName = musicDistNames[settings.musicDistribution] || settings.musicDistribution;
+      
+      // Build summary
+      const audioCount = settings.audioCount || 3;
+      summaryBox.innerHTML = `
+        Your <strong>${durationText}</strong> video uses <strong>${timingModeName}</strong> mode with <strong>${visualPackageName}</strong> transitions and <strong>${audioCount} song${audioCount !== 1 ? 's' : ''}</strong> (${musicDistName}).
+      `;
+      
+      summaryBox.style.display = 'block';
     }
     
     // Populate form defaults from settings
@@ -1003,7 +1147,7 @@
         const audioId = `audio-${song.id}`;
         const newBadge = song.isNew ? '<span class="song-badge">NEW</span>' : '';
         const itemClass = song.isNew ? 'song-item new-upload' : 'song-item';
-        const position = index + 1; // 1-indexed position
+        const position = index + 1;
         
         html += `
           <div class="${itemClass}">
@@ -1031,11 +1175,9 @@
     function togglePlay(audioId, button) {
       const audio = document.getElementById(audioId);
       
-      // Stop currently playing audio
       if (currentlyPlayingAudio && currentlyPlayingAudio !== audio) {
         currentlyPlayingAudio.pause();
         currentlyPlayingAudio.currentTime = 0;
-        // Reset button of previously playing audio
         document.querySelectorAll('.btn-play').forEach(btn => {
           btn.textContent = '▶️';
           btn.classList.remove('playing');
@@ -1048,7 +1190,6 @@
         button.classList.add('playing');
         currentlyPlayingAudio = audio;
         
-        // Reset button when audio ends
         audio.onended = () => {
           button.textContent = '▶️';
           button.classList.remove('playing');
@@ -1124,15 +1265,13 @@
           return;
         }
         
-        // Create a local URL for preview
         const localUrl = URL.createObjectURL(file);
         
-        // Add to current songs
         currentSongs.push({
           id: `new-${Date.now()}-${Math.random()}`,
           name: file.name,
           displayName: file.name,
-          url: localUrl, // Local preview URL
+          url: localUrl,
           isNew: true,
           file: file
         });
@@ -1142,20 +1281,65 @@
       updateSongCount();
       updateSongRangeSliders();
       
-      // Reset file input
       e.target.value = '';
     });
     
+    // Handle PowerPoint file upload
+    document.getElementById('newPptxUpload').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      
+      if (!file) return;
+      
+      if (!file.name.endsWith('.pptx') && !file.type.includes('presentationml')) {
+        showToast('Please select a valid PowerPoint (.pptx) file', 'error');
+        e.target.value = '';
+        return;
+      }
+      
+      // Store the file
+      newPptxFile = file;
+      
+      // Show preview
+      const previewDiv = document.getElementById('pptxFilePreview');
+      const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      
+      previewDiv.innerHTML = `
+        <div class="pptx-file-preview">
+          <div class="pptx-file-info">
+            <span class="pptx-file-icon">📄</span>
+            <div class="pptx-file-details">
+              <span class="pptx-file-name">${file.name}</span>
+              <span class="pptx-file-size">${fileSizeMB} MB</span>
+            </div>
+          </div>
+          <button class="btn-small btn-danger" onclick="clearPptxUpload()">🗑️ Remove</button>
+        </div>
+      `;
+      previewDiv.style.display = 'block';
+      
+      // Track change
+      trackChange('newPresentationFile', true);
+      showToast('PowerPoint file ready to upload!', 'success');
+    });
+    
+    // Clear PowerPoint upload
+    function clearPptxUpload() {
+      newPptxFile = null;
+      document.getElementById('newPptxUpload').value = '';
+      document.getElementById('pptxFilePreview').style.display = 'none';
+      delete pendingChanges.newPresentationFile;
+      updateResubmitButton();
+      showToast('PowerPoint file removed', 'success');
+    }
+    
     // Track song changes for resubmit
     function updateSongTracking() {
-      // Build songOrder array for backend
       const songOrder = currentSongs.map(song => song.name);
       const newSongs = currentSongs.filter(s => s.isNew).map(s => ({
         originalName: s.name,
         file: s.file
       }));
       
-      // Only track if there are changes
       const hasChanges = currentSongs.some(s => s.isNew) || 
                         JSON.stringify(songOrder) !== JSON.stringify(currentSongs.map(s => s.name));
       
@@ -1167,7 +1351,7 @@
       }
     }
     
-    // Setup song range sliders (called when musicDistribution changes or song count changes)
+    // Setup song range sliders
     function setupSongRangeSliders() {
       const container = document.getElementById('songRangesList');
       
@@ -1218,7 +1402,6 @@
       
       container.innerHTML = html;
       
-      // Add event listeners to all song range inputs
       document.querySelectorAll('.song-range-input').forEach(input => {
         input.addEventListener('input', handleSongRangeChange);
       });
@@ -1244,7 +1427,6 @@
           const startVal = parseInt(startInput.value);
           const endVal = parseInt(endInput.value);
           
-          // Only include if both values are provided
           if (!isNaN(startVal) && !isNaN(endVal)) {
             songRanges.push({
               song: song.name,
@@ -1255,7 +1437,6 @@
         }
       });
       
-      // Track changes
       if (songRanges.length > 0) {
         trackChange('songRanges', songRanges);
       } else {
@@ -1275,7 +1456,6 @@
         setupSongRangeSliders();
       } else {
         container.style.display = 'none';
-        // Clear songRanges from pending changes if switching away
         delete pendingChanges.songRanges;
         updateResubmitButton();
       }
@@ -1284,13 +1464,16 @@
     // Setup manual edit buttons based on presentation type
     function setupManualEditButtons(data) {
       const container = document.getElementById('manualEditButtons');
-      const infoBox = container.previousElementSibling;
+      const infoBox = document.getElementById('manualEditInfoBox');
+      const pptxUploadSection = document.getElementById('pptxUploadSection');
       
       // Update info box text based on provider
       if (data.provider === 'google_slides') {
         infoBox.innerHTML = 'Select to edit your <strong>Google Slides</strong> to make manual changes, and once you are done you may select "Resubmit Changes" at the bottom along with any other changes you made. This version will be published in the next Video.';
+        pptxUploadSection.style.display = 'none';
       } else if (data.provider === 'powerpoint') {
-        infoBox.innerHTML = 'Select to edit your <strong>PowerPoint</strong> to make manual changes, and once you are done you may select "Resubmit Changes" at the bottom along with any other changes you made. This version will be published in the next Video.';
+        infoBox.innerHTML = 'Select to edit your <strong>PowerPoint</strong> to make manual changes, or upload a new PowerPoint file below. Once you are done, select "Resubmit Changes" at the bottom along with any other changes you made. This version will be published in the next Video.';
+        pptxUploadSection.style.display = 'block';
       }
       
       // Create button based on provider
@@ -1317,13 +1500,8 @@
     
     // Handle manual edit button click
     function handleManualEditClick(url) {
-      // Open the presentation
       window.open(url, '_blank');
-      
-      // Track that manual edits were accessed
       trackChange('manualEditsRequested', true);
-      
-      // Show a toast to inform user
       showToast('Presentation opened! Make your changes, then click "Resubmit Changes" when done.', 'success');
     }
     
@@ -1332,10 +1510,8 @@
       const container = document.getElementById('videoContainer');
       const jobInfo = document.getElementById('jobInfo');
       
-      // Update header
       jobInfo.textContent = `Order #${data.jobId}`;
       
-      // Check if finalized
       if (isFinalized) {
         container.innerHTML = `
           <div class="video-wrapper">
@@ -1352,7 +1528,6 @@
         return;
       }
       
-      // Check if this is a shared view (hide all action buttons)
       if (isSharedView) {
         container.innerHTML = `
           <div class="video-wrapper">
@@ -1363,12 +1538,10 @@
           </div>
         `;
         
-        // Hide all action buttons and edit sections
         document.getElementById('actionButtons').style.display = 'none';
         return;
       }
       
-      // Create video element
       container.innerHTML = `
         <div class="video-wrapper">
           <video controls preload="auto" crossorigin="anonymous">
@@ -1378,7 +1551,6 @@
         </div>
       `;
       
-      // Video event listeners
       const video = container.querySelector('video');
       video.addEventListener('loadstart', () => console.log('[VIDEO] Loading started'));
       video.addEventListener('loadedmetadata', () => console.log('[VIDEO] Metadata loaded'));
@@ -1389,15 +1561,12 @@
         showError('Video failed to load. The file may be corrupted or the URL expired.');
       });
       
-      // Show action buttons
       document.getElementById('editBtn').style.display = 'inline-flex';
       document.getElementById('finalizeBtn').style.display = 'inline-flex';
       document.getElementById('shareBtn').style.display = 'inline-flex';
       
-      // Store video data globally
       window.videoData = data;
       
-      // Setup handlers
       setupFinalizeButton();
       setupEditButton();
     }
@@ -1419,7 +1588,7 @@
       }, 4000);
     }
     
-    // Edit button handler - toggles edit sections
+    // Edit button handler
     function setupEditButton() {
       document.getElementById('editBtn').addEventListener('click', () => {
         const editSections = document.getElementById('editSections');
@@ -1431,7 +1600,6 @@
         } else {
           editSections.style.display = 'block';
           document.getElementById('editBtn').innerHTML = '❌ Hide Edit Options';
-          // Scroll to edit sections
           editSections.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       });
@@ -1448,7 +1616,6 @@
         if (!confirmed) return;
         
         try {
-          // Download the video
           const downloadUrl = window.videoData.downloadUrl || window.videoData.videoUrl;
           const link = document.createElement('a');
           link.href = downloadUrl;
@@ -1457,7 +1624,6 @@
           link.click();
           document.body.removeChild(link);
           
-          // Call finalize API
           showToast('Finalizing your order...', 'success');
           const response = await fetch(`${API_BASE}/jobs/${jobId}/finalize`, {
             method: 'POST',
@@ -1470,7 +1636,6 @@
             throw new Error('Failed to finalize order');
           }
           
-          // Redirect to finalized page
           const finalizedUrl = `${window.location.origin}${window.location.pathname}?job=${jobId}&finalized=true`;
           history.replaceState(null, '', finalizedUrl);
           location.reload();
@@ -1501,7 +1666,7 @@
       });
     });
     
-    // Track form changes for all inputs
+    // Track form changes
     function trackChange(fieldName, value) {
       if (value === '' || value === null || value === undefined) {
         delete pendingChanges[fieldName];
@@ -1530,14 +1695,12 @@
       trackChange('visualPackage', e.target.value);
     });
     
-    // Timing mode radio buttons
     document.querySelectorAll('input[name="timingMode"]').forEach(radio => {
       radio.addEventListener('change', (e) => {
         const mode = e.target.value;
         handleTimingModeChange(mode);
         trackChange('timingMode', mode);
         
-        // Track the associated value
         if (mode === 'perSlide') {
           trackChange('perSlideSec', document.getElementById('perSlideSec').value);
         } else if (mode === 'fixedRuntime') {
@@ -1547,16 +1710,13 @@
     });
     
     function handleTimingModeChange(mode) {
-      // Hide all conditional inputs
       document.getElementById('perSlideInput').style.display = 'none';
       document.getElementById('fixedRuntimeInput').style.display = 'none';
       
-      // Remove selected class from all options
       document.querySelectorAll('.radio-option').forEach(opt => {
         opt.classList.remove('selected');
       });
       
-      // Show the selected one
       const selectedRadio = document.querySelector(`input[name="timingMode"][value="${mode}"]`);
       if (selectedRadio) {
         selectedRadio.closest('.radio-option').classList.add('selected');
@@ -1577,7 +1737,6 @@
       trackChange('fixedRuntimeSec', parseFloat(e.target.value));
     });
     
-    // Song logic fields
     document.getElementById('musicDistribution').addEventListener('change', (e) => {
       const value = e.target.value;
       trackChange('musicDistribution', value);
@@ -1601,21 +1760,56 @@
       try {
         showToast('Submitting changes...', 'success');
         
-        console.log('[RESUBMIT] Sending changes:', pendingChanges);
+        console.log('[RESUBMIT] Preparing submission...');
         
-        // Note: newSongs with File objects can't be sent as JSON
-        // Backend will need to handle file uploads separately via presigned URLs
+        // Prepare submission data
         const submitData = {
           originalJobId: jobId,
-          changes: {...pendingChanges}
+          changes: {}
         };
         
-        // Remove file objects from changes (backend will handle via presigned URLs)
-        if (submitData.changes.newSongs) {
-          submitData.changes.newSongs = submitData.changes.newSongs.map(s => ({
-            originalName: s.originalName
-          }));
+        // Add all non-file changes
+        for (const [key, value] of Object.entries(pendingChanges)) {
+          if (key !== 'newSongs' && key !== 'newPresentationFile') {
+            submitData.changes[key] = value;
+          }
         }
+        
+        // Handle PowerPoint file upload
+        if (newPptxFile) {
+          const reader = new FileReader();
+          const pptxBase64 = await new Promise((resolve, reject) => {
+            reader.onload = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = reject;
+            reader.readAsDataURL(newPptxFile);
+          });
+          submitData.changes.newPresentationFile = pptxBase64;
+          console.log('[RESUBMIT] PowerPoint file encoded');
+        }
+        
+        // Handle new songs
+        if (pendingChanges.newSongs && pendingChanges.newSongs.length > 0) {
+          const encodedSongs = [];
+          
+          for (const song of pendingChanges.newSongs) {
+            const reader = new FileReader();
+            const songBase64 = await new Promise((resolve, reject) => {
+              reader.onload = () => resolve(reader.result.split(',')[1]);
+              reader.onerror = reject;
+              reader.readAsDataURL(song.file);
+            });
+            
+            encodedSongs.push({
+              originalName: song.originalName,
+              fileData: songBase64
+            });
+          }
+          
+          submitData.changes.newSongs = encodedSongs;
+          console.log('[RESUBMIT] Encoded', encodedSongs.length, 'new songs');
+        }
+        
+        console.log('[RESUBMIT] Submitting to API...');
         
         // Call resubmit API
         const response = await fetch(`${API_BASE}/jobs/${jobId}/resubmit`, {
@@ -1635,13 +1829,14 @@
         console.log('[RESUBMIT] Success:', result);
         
         showToast(
-          `✅ Video resubmitted successfully! New job: ${result.newJobId || 'pending'}. ` +
+          `✅ Video resubmitted successfully! New job: ${result.newJobId}. ` +
           'You\'ll receive an email in 5-15 minutes.',
           'success'
         );
         
         // Clear changes and disable button
         pendingChanges = {};
+        newPptxFile = null;
         updateResubmitButton();
         
         // Hide edit sections after 2 seconds
