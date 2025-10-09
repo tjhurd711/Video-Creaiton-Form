@@ -1480,13 +1480,13 @@
       if (data.provider === 'google_slides' && data.original_url) {
         container.innerHTML = `
           <button class="btn btn-primary" onclick="handleManualEditClick('${data.original_url}')">
-            📊 View Google Slides Version
+            📊 Edit Google Slides
           </button>
         `;
       } else if (data.provider === 'powerpoint' && data.original_url) {
         container.innerHTML = `
           <button class="btn btn-primary" onclick="handleManualEditClick('${data.original_url}')">
-            📄 View PowerPoint Version
+            📄 Edit PowerPoint
           </button>
         `;
       } else {
