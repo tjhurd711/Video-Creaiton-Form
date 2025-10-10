@@ -1744,112 +1744,156 @@
     });
     
     // Resubmit button handler
-    document.getElementById('resubmitBtn').addEventListener('click', async () => {
-      if (Object.keys(pendingChanges).length === 0) {
-        showToast('No changes to submit', 'error');
-        return;
+document.getElementById('resubmitBtn').addEventListener('click', async () => {
+  if (Object.keys(pendingChanges).length === 0) {
+    showToast('No changes to submit', 'error');
+    return;
+  }
+  
+  const confirmed = confirm(
+    `Create a new video with ${Object.keys(pendingChanges).length} change(s)?\n\n` +
+    'You will receive an email in 5-15 minutes with your new video.'
+  );
+  
+  if (!confirmed) return;
+  
+  try {
+    showToast('Uploading files...', 'success');
+    console.log('[RESUBMIT] Preparing submission...');
+    
+    // Prepare submission data
+    const submitData = {
+      originalJobId: jobId,
+      changes: {}
+    };
+    
+    // Add all non-file changes
+    for (const [key, value] of Object.entries(pendingChanges)) {
+      if (key !== 'newSongs' && key !== 'newPresentationFile') {
+        submitData.changes[key] = value;
       }
+    }
+    
+    // STEP 1: Upload PowerPoint file to S3 if present
+    if (newPptxFile) {
+      console.log('[UPLOAD] Getting presigned URL for PowerPoint...');
       
-      const confirmed = confirm(
-        `Create a new video with ${Object.keys(pendingChanges).length} change(s)?\n\n` +
-        'You will receive an email in 5-15 minutes with your new video.'
-      );
+      const urlResponse = await fetch(`${API_BASE}/generate-upload-url`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          jobId: jobId,
+          fileType: 'presentation',
+          fileExtension: 'pptx'
+        })
+      });
       
-      if (!confirmed) return;
+      if (!urlResponse.ok) throw new Error('Failed to get PowerPoint upload URL');
       
-      try {
-        showToast('Submitting changes...', 'success');
+      const {uploadUrl, s3Key} = await urlResponse.json();
+      
+      console.log('[UPLOAD] Uploading PowerPoint to S3...');
+      
+      const uploadResponse = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/vnd.openxmlformats-officedocument.presentationml.presentation'},
+        body: newPptxFile
+      });
+      
+      if (!uploadResponse.ok) throw new Error('Failed to upload PowerPoint');
+      
+      submitData.changes.newPresentationS3Key = s3Key;
+      console.log('[UPLOAD] PowerPoint uploaded successfully');
+    }
+    
+    // STEP 2: Upload new songs to S3 if present
+    if (pendingChanges.newSongs && pendingChanges.newSongs.length > 0) {
+      const uploadedSongs = [];
+      
+      for (let i = 0; i < pendingChanges.newSongs.length; i++) {
+        const song = pendingChanges.newSongs[i];
         
-        console.log('[RESUBMIT] Preparing submission...');
+        console.log(`[UPLOAD] Getting presigned URL for song ${i + 1}...`);
         
-        // Prepare submission data
-        const submitData = {
-          originalJobId: jobId,
-          changes: {}
-        };
-        
-        // Add all non-file changes
-        for (const [key, value] of Object.entries(pendingChanges)) {
-          if (key !== 'newSongs' && key !== 'newPresentationFile') {
-            submitData.changes[key] = value;
-          }
-        }
-        
-        // Handle PowerPoint file upload
-        if (newPptxFile) {
-          const reader = new FileReader();
-          const pptxBase64 = await new Promise((resolve, reject) => {
-            reader.onload = () => resolve(reader.result.split(',')[1]);
-            reader.onerror = reject;
-            reader.readAsDataURL(newPptxFile);
-          });
-          submitData.changes.newPresentationFile = pptxBase64;
-          console.log('[RESUBMIT] PowerPoint file encoded');
-        }
-        
-        // Handle new songs
-        if (pendingChanges.newSongs && pendingChanges.newSongs.length > 0) {
-          const encodedSongs = [];
-          
-          for (const song of pendingChanges.newSongs) {
-            const reader = new FileReader();
-            const songBase64 = await new Promise((resolve, reject) => {
-              reader.onload = () => resolve(reader.result.split(',')[1]);
-              reader.onerror = reject;
-              reader.readAsDataURL(song.file);
-            });
-            
-            encodedSongs.push({
-              originalName: song.originalName,
-              fileData: songBase64
-            });
-          }
-          
-          submitData.changes.newSongs = encodedSongs;
-          console.log('[RESUBMIT] Encoded', encodedSongs.length, 'new songs');
-        }
-        
-        console.log('[RESUBMIT] Submitting to API...');
-        
-        // Call resubmit API
-        const response = await fetch(`${API_BASE}/jobs/${jobId}/resubmit`, {
+        const urlResponse = await fetch(`${API_BASE}/generate-upload-url`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(submitData)
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            jobId: jobId,
+            fileType: 'song',
+            fileNumber: i + 1,
+            fileExtension: 'mp3'
+          })
         });
         
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || `HTTP ${response.status}`);
-        }
+        if (!urlResponse.ok) throw new Error(`Failed to get upload URL for song ${i + 1}`);
         
-        const result = await response.json();
-        console.log('[RESUBMIT] Success:', result);
+        const {uploadUrl, s3Key} = await urlResponse.json();
         
-        showToast(
-          `✅ Video resubmitted successfully! New job: ${result.newJobId}. ` +
-          'You\'ll receive an email in 5-15 minutes.',
-          'success'
-        );
+        console.log(`[UPLOAD] Uploading song ${i + 1} to S3...`);
         
-        // Clear changes and disable button
-        pendingChanges = {};
-        newPptxFile = null;
-        updateResubmitButton();
+        const uploadResponse = await fetch(uploadUrl, {
+          method: 'PUT',
+          headers: {'Content-Type': 'audio/mpeg'},
+          body: song.file
+        });
         
-        // Hide edit sections after 2 seconds
-        setTimeout(() => {
-          document.getElementById('editSections').style.display = 'none';
-          document.getElementById('editBtn').innerHTML = '✏️ Edit & Resubmit';
-        }, 2000);
+        if (!uploadResponse.ok) throw new Error(`Failed to upload song ${i + 1}`);
         
-      } catch (error) {
-        console.error('[RESUBMIT ERROR]', error);
-        showToast('Failed to resubmit: ' + error.message, 'error');
+        uploadedSongs.push({
+          originalName: song.originalName,
+          s3Key: s3Key  // Send S3 key instead of file data
+        });
+        
+        console.log(`[UPLOAD] Song ${i + 1} uploaded successfully`);
       }
+      
+      submitData.changes.newSongs = uploadedSongs;
+      console.log('[UPLOAD] All songs uploaded');
+    }
+    
+    // STEP 3: Submit metadata to resubmit API (small payload now!)
+    console.log('[RESUBMIT] Submitting metadata to API...');
+    showToast('Processing changes...', 'success');
+    
+    const response = await fetch(`${API_BASE}/jobs/${jobId}/resubmit`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(submitData)
     });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || errorData.details || `HTTP ${response.status}`);
+    }
+    
+    const result = await response.json();
+    console.log('[RESUBMIT] Success:', result);
+    
+    showToast(
+      `✅ Video resubmitted successfully! New job: ${result.newJobId}. ` +
+      'You\'ll receive an email in 5-15 minutes.',
+      'success'
+    );
+    
+    // Clear changes and disable button
+    pendingChanges = {};
+    newPptxFile = null;
+    updateResubmitButton();
+    
+    // Hide edit sections after 2 seconds
+    setTimeout(() => {
+      document.getElementById('editSections').style.display = 'none';
+      document.getElementById('editBtn').innerHTML = '✏️ Edit & Resubmit';
+    }, 2000);
+    
+  } catch (error) {
+    console.error('[RESUBMIT ERROR]', error);
+    showToast('Failed to resubmit: ' + error.message, 'error');
+  }
+});
   </script>
 </body>
 </html>
