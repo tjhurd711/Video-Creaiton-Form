@@ -1744,6 +1744,7 @@
     });
     
     // Resubmit button handler
+// Resubmit button handler
 document.getElementById('resubmitBtn').addEventListener('click', async () => {
   if (Object.keys(pendingChanges).length === 0) {
     showToast('No changes to submit', 'error');
@@ -1761,18 +1762,36 @@ document.getElementById('resubmitBtn').addEventListener('click', async () => {
     showToast('Uploading files...', 'success');
     console.log('[RESUBMIT] Preparing submission...');
     
+    // ===================================================================
+    // CRITICAL: Build COMPLETE settings (not just deltas)
+    // ===================================================================
+    const completeSettings = {
+      // Start with all current settings from the loaded job
+      ...currentSettings,
+      
+      // Remove metadata fields that will be regenerated
+      jobId: undefined,
+      originalJobId: undefined,
+      
+      // ALWAYS include complete song order (REQUIRED)
+      songOrder: currentSongs.map(s => s.name),
+      audioCount: currentSongs.length  // Explicitly set
+    };
+    
+    // Remove undefined fields
+    Object.keys(completeSettings).forEach(key => {
+      if (completeSettings[key] === undefined) {
+        delete completeSettings[key];
+      }
+    });
+    
+    console.log('[RESUBMIT] Complete settings:', completeSettings);
+    
     // Prepare submission data
     const submitData = {
       originalJobId: jobId,
-      changes: {}
+      changes: completeSettings  // Send COMPLETE settings, not delta
     };
-    
-    // Add all non-file changes
-    for (const [key, value] of Object.entries(pendingChanges)) {
-      if (key !== 'newSongs' && key !== 'newPresentationFile') {
-        submitData.changes[key] = value;
-      }
-    }
     
     // STEP 1: Upload PowerPoint file to S3 if present
     if (newPptxFile) {
@@ -1807,11 +1826,13 @@ document.getElementById('resubmitBtn').addEventListener('click', async () => {
     }
     
     // STEP 2: Upload new songs to S3 if present
-    if (pendingChanges.newSongs && pendingChanges.newSongs.length > 0) {
+    const newSongFiles = currentSongs.filter(s => s.isNew && s.file);
+    
+    if (newSongFiles.length > 0) {
       const uploadedSongs = [];
       
-      for (let i = 0; i < pendingChanges.newSongs.length; i++) {
-        const song = pendingChanges.newSongs[i];
+      for (let i = 0; i < newSongFiles.length; i++) {
+        const song = newSongFiles[i];
         
         console.log(`[UPLOAD] Getting presigned URL for song ${i + 1}...`);
         
@@ -1841,8 +1862,8 @@ document.getElementById('resubmitBtn').addEventListener('click', async () => {
         if (!uploadResponse.ok) throw new Error(`Failed to upload song ${i + 1}`);
         
         uploadedSongs.push({
-          originalName: song.originalName,
-          s3Key: s3Key  // Send S3 key instead of file data
+          originalName: song.name,
+          s3Key: s3Key
         });
         
         console.log(`[UPLOAD] Song ${i + 1} uploaded successfully`);
@@ -1852,8 +1873,14 @@ document.getElementById('resubmitBtn').addEventListener('click', async () => {
       console.log('[UPLOAD] All songs uploaded');
     }
     
-    // STEP 3: Submit metadata to resubmit API (small payload now!)
-    console.log('[RESUBMIT] Submitting metadata to API...');
+    // Add manualEditsRequested flag if it was set
+    if (pendingChanges.manualEditsRequested) {
+      submitData.changes.manualEditsRequested = true;
+    }
+    
+    // STEP 3: Submit metadata to resubmit API
+    console.log('[RESUBMIT] Submitting to API...');
+    console.log('[RESUBMIT] Payload:', JSON.stringify(submitData, null, 2));
     showToast('Processing changes...', 'success');
     
     const response = await fetch(`${API_BASE}/jobs/${jobId}/resubmit`, {
