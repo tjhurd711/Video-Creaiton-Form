@@ -1067,73 +1067,73 @@
     const API_BASE = 'https://4hyy6kr2id.execute-api.us-east-2.amazonaws.com/prod';
     const MAX_SONGS = 6;
     
-    // Song Library with Dropbox URLs (converted to direct download)
+    // Song Library with S3 URLs
     const SONG_LIBRARY = [
       {
         id: 'lib-abandoned-house',
         name: 'abandoned-house-115974.mp3',
         displayName: 'Abandoned House',
-        url: 'https://www.dropbox.com/scl/fi/h8oqxf510cdz5h92rpu3g/abandoned-house-115974.mp3?rlkey=87f4gyyb8r7rxek210d7s7e2o&st=98y2vgtz&dl=1'
+        url: 'https://order-by-age-uploads.s3.us-east-2.amazonaws.com/library-songs/abandoned-house-115974.mp3'
       },
       {
         id: 'lib-cathedral',
         name: 'cathedral-164234.mp3',
         displayName: 'Cathedral',
-        url: 'https://www.dropbox.com/scl/fi/3pojfy46og1vdnvsneytg/cathedral-164234.mp3?rlkey=lum8xn7s9lfmg1luhdwvm5il8&st=yujzd6c0&dl=1'
+        url: 'https://order-by-age-uploads.s3.us-east-2.amazonaws.com/library-songs/cathedral-164234.mp3'
       },
       {
         id: 'lib-eulogy',
         name: 'eulogy-ambient-piano-music-for-furneral-exit-download-royalty-free-196437.mp3',
         displayName: 'Eulogy - Ambient Piano',
-        url: 'https://www.dropbox.com/scl/fi/7wgnngpkupnewuxu51ja4/eulogy-ambient-piano-music-for-furneral-exit-download-royalty-free-196437.mp3?rlkey=vyrfes4lvozwjczlg7o862qsg&st=qilhjxu9&dl=1'
+        url: 'https://order-by-age-uploads.s3.us-east-2.amazonaws.com/library-songs/eulogy-ambient-piano-music-for-furneral-exit-download-royalty-free-196437.mp3'
       },
       {
         id: 'lib-flowers',
         name: 'flowers-of-sorrow-115981.mp3',
         displayName: 'Flowers of Sorrow',
-        url: 'https://www.dropbox.com/scl/fi/9575ftnvoje8qctma04qu/flowers-of-sorrow-115981.mp3?rlkey=bwvc4oqte82gkv2jhktjln99u&st=cfbv796e&dl=1'
+        url: 'https://order-by-age-uploads.s3.us-east-2.amazonaws.com/library-songs/flowers-of-sorrow-115981.mp3'
       },
       {
         id: 'lib-funeral-memories',
         name: 'funeral-memories-sad-asmr-piano-soft-farewell-334314.mp3',
         displayName: 'Funeral Memories - Soft Farewell',
-        url: 'https://www.dropbox.com/scl/fi/92d9eru6cw0tcf5txp98i/funeral-memories-sad-asmr-piano-soft-farewell-334314.mp3?rlkey=buxrdni2wd63proy9wjyaruir&st=g4jjiipw&dl=1'
+        url: 'https://order-by-age-uploads.s3.us-east-2.amazonaws.com/library-songs/funeral-memories-sad-asmr-piano-soft-farewell-334314.mp3'
       },
       {
         id: 'lib-gentle-remembrance',
         name: 'gentle-remembrance-359855.mp3',
         displayName: 'Gentle Remembrance',
-        url: 'https://www.dropbox.com/scl/fi/k4mkq8t7fyld9bg31ecv6/gentle-remembrance-359855.mp3?rlkey=tn8fysl4n0xnhgc3wpsu1ta39&st=f9i0evii&dl=1'
+        url: 'https://order-by-age-uploads.s3.us-east-2.amazonaws.com/library-songs/gentle-remembrance-359855.mp3'
       },
       {
         id: 'lib-sad-cinematic',
         name: 'sad-cinematic-despair-mourning-tragic-music-340712.mp3',
         displayName: 'Sad Cinematic - Mourning',
-        url: 'https://www.dropbox.com/scl/fi/iojuve26k3s8d3unpixd7/sad-cinematic-despair-mourning-tragic-music-340712.mp3?rlkey=zo3u5u9806az3je5gf5irzgvp&st=j6pidlra&dl=1'
+        url: 'https://order-by-age-uploads.s3.us-east-2.amazonaws.com/library-songs/sad-cinematic-despair-mourning-tragic-music-340712.mp3'
       },
       {
         id: 'lib-shadows-towers',
         name: 'shadows-of-the-wailing-towers-2-304723.mp3',
         displayName: 'Shadows of the Wailing Towers',
-        url: 'https://www.dropbox.com/scl/fi/kxs6g974sesxgse1rdzqx/shadows-of-the-wailing-towers-2-304723.mp3?rlkey=csi5d9o02euo3dn0kfu9mlvc8&st=c3a92236&dl=1'
+        url: 'https://order-by-age-uploads.s3.us-east-2.amazonaws.com/library-songs/shadows-of-the-wailing-towers-2-304723.mp3'
       },
       {
         id: 'lib-souls-silence',
         name: 'souls-of-silence-369585.mp3',
         displayName: 'Souls of Silence',
-        url: 'https://www.dropbox.com/scl/fi/yejg0rtqze4g3eha2qphg/souls-of-silence-369585.mp3?rlkey=nad10k7hu1ifitekjf0v42ovd&st=b4wbv3ua&dl=1'
+        url: 'https://order-by-age-uploads.s3.us-east-2.amazonaws.com/library-songs/souls-of-silence-369585.mp3'
       },
       {
         id: 'lib-hands-loved',
         name: 'the-hands-that-loved-me-301869.mp3',
         displayName: 'The Hands That Loved Me',
-        url: 'https://www.dropbox.com/scl/fi/j5xw454df7e4m4ljo3va2/the-hands-that-loved-me-301869.mp3?rlkey=ao2q65tnxx96zikslfxjnwdoo&st=xs5cka3s&dl=1'
+        url: 'https://order-by-age-uploads.s3.us-east-2.amazonaws.com/library-songs/the-hands-that-loved-me-301869.mp3'
       },
       {
         id: 'lib-voices-eternity',
         name: 'voices-of-eternity-church-cathedral-choir-195196.mp3',
         displayName: 'Voices of Eternity - Cathedral Choir',
-        url: 'https://www.dropbox.com/scl/fi/tlhz9hrretu6rbnsmc79l/voices-of-eternity-church-cathedral-choir-195196.mp3?rlkey=6dbyrke1cd0hpmscgndcj2o5b&st=r3bssrjv&dl=1'
+        url: 'https://order-by-age-uploads.s3.us-east-2.amazonaws.com/library-songs/voices-of-eternity-church-cathedral-choir-195196.mp3'
       }
     ];
     
