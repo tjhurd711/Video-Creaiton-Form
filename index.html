@@ -1766,16 +1766,23 @@ document.getElementById('resubmitBtn').addEventListener('click', async () => {
     // CRITICAL: Build COMPLETE settings (not just deltas)
     // ===================================================================
     const completeSettings = {
-      // Start with all current settings from the loaded job
+      // Start with all current settings
       ...currentSettings,
-      
-      // Remove metadata fields that will be regenerated
+  
+      // Override with current form values (even if user didn't change them)
+      timingMode: document.querySelector('input[name="timingMode"]:checked')?.value || currentSettings.timingMode || 'perSlide',
+      perSlideSec: parseFloat(document.getElementById('perSlideSec').value) || currentSettings.perSlideSec || 5,
+      fixedRuntimeSec: parseFloat(document.getElementById('fixedRuntimeSec').value) || currentSettings.fixedRuntimeSec || 350,
+      visualPackage: document.getElementById('visualPackage').value || currentSettings.visualPackage || 'simple-fade-wipe',
+      musicDistribution: document.getElementById('musicDistribution').value || currentSettings.musicDistribution || 'evenlyDistributed',
+  
+      // Remove metadata
       jobId: undefined,
       originalJobId: undefined,
-      
-      // ALWAYS include complete song order (REQUIRED)
+  
+      // ALWAYS include song order
       songOrder: currentSongs.map(s => s.name),
-      audioCount: currentSongs.length  // Explicitly set
+      audioCount: currentSongs.length
     };
     
     // Remove undefined fields
