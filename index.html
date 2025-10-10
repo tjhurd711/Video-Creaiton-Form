@@ -256,7 +256,7 @@
     }
     
     .edit-option.expanded .edit-option-content {
-      max-height: 2000px;
+      max-height: 3000px;
       padding: 0 20px 20px;
     }
     
@@ -405,6 +405,11 @@
       background: #f1f8f4;
     }
 
+    .song-item.library-song {
+      border-color: #FF9800;
+      background: #fff9f0;
+    }
+
     .song-info {
       display: flex;
       align-items: center;
@@ -447,6 +452,10 @@
       border-radius: 4px;
       font-size: 11px;
       font-weight: 600;
+    }
+
+    .song-badge.library {
+      background: #FF9800;
     }
 
     .song-controls {
@@ -500,6 +509,91 @@
 
     .btn-danger:hover {
       background: #d32f2f;
+    }
+
+    /* Song Library Styles */
+    .library-section {
+      background: linear-gradient(135deg, #fff9f0 0%, #ffe8cc 100%);
+      border: 2px solid #FF9800;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .library-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #e65100;
+    }
+
+    .library-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    .library-song-card {
+      background: white;
+      border: 2px solid #FFE0B2;
+      border-radius: 10px;
+      padding: 12px;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .library-song-card:hover {
+      border-color: #FF9800;
+      box-shadow: 0 4px 12px rgba(255, 152, 0, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .library-song-card.added {
+      border-color: #4CAF50;
+      background: #f1f8f4;
+    }
+
+    .library-song-name {
+      font-weight: 600;
+      font-size: 14px;
+      color: #333;
+      line-height: 1.3;
+    }
+
+    .library-song-controls {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-add-library {
+      flex: 1;
+      padding: 8px 12px;
+      background: #FF9800;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-add-library:hover:not(:disabled) {
+      background: #f57c00;
+    }
+
+    .btn-add-library:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .btn-add-library.added {
+      background: #4CAF50;
     }
 
     .upload-section {
@@ -714,6 +808,7 @@
       .toast { right: 20px; left: 20px; max-width: none; }
       .slide-inputs { grid-template-columns: 1fr; }
       .song-controls { flex-wrap: wrap; }
+      .library-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -779,8 +874,18 @@
             <span class="chevron">▼</span>
           </div>
           <div class="edit-option-content">
+            <!-- Song Library -->
+            <div class="library-section">
+              <div class="library-header">
+                🎼 Song Library - Choose from our curated memorial music
+              </div>
+              <div class="library-grid" id="libraryGrid">
+                <!-- Will be populated dynamically -->
+              </div>
+            </div>
+
             <div class="form-group">
-              <label>Your Songs (drag to reorder, max 6 total)</label>
+              <label>Your Selected Songs (drag to reorder, max 6 total)</label>
               <div id="songList" class="song-list">
                 <!-- Will be populated dynamically -->
               </div>
@@ -788,7 +893,7 @@
             
             <div class="upload-section" id="uploadSection">
               <label class="upload-label" id="uploadLabel">
-                📤 Upload New Songs (MP3)
+                📤 Upload Your Own Songs (MP3)
                 <input type="file" id="newSongUpload" accept=".mp3,audio/mpeg" multiple style="display: none;">
               </label>
               <div style="margin-top: 8px; font-size: 13px; color: #666;">
@@ -962,6 +1067,76 @@
     const API_BASE = 'https://4hyy6kr2id.execute-api.us-east-2.amazonaws.com/prod';
     const MAX_SONGS = 6;
     
+    // Song Library with Dropbox URLs (converted to direct download)
+    const SONG_LIBRARY = [
+      {
+        id: 'lib-abandoned-house',
+        name: 'abandoned-house-115974.mp3',
+        displayName: 'Abandoned House',
+        url: 'https://www.dropbox.com/scl/fi/h8oqxf510cdz5h92rpu3g/abandoned-house-115974.mp3?rlkey=87f4gyyb8r7rxek210d7s7e2o&st=98y2vgtz&dl=1'
+      },
+      {
+        id: 'lib-cathedral',
+        name: 'cathedral-164234.mp3',
+        displayName: 'Cathedral',
+        url: 'https://www.dropbox.com/scl/fi/3pojfy46og1vdnvsneytg/cathedral-164234.mp3?rlkey=lum8xn7s9lfmg1luhdwvm5il8&st=yujzd6c0&dl=1'
+      },
+      {
+        id: 'lib-eulogy',
+        name: 'eulogy-ambient-piano-music-for-furneral-exit-download-royalty-free-196437.mp3',
+        displayName: 'Eulogy - Ambient Piano',
+        url: 'https://www.dropbox.com/scl/fi/7wgnngpkupnewuxu51ja4/eulogy-ambient-piano-music-for-furneral-exit-download-royalty-free-196437.mp3?rlkey=vyrfes4lvozwjczlg7o862qsg&st=qilhjxu9&dl=1'
+      },
+      {
+        id: 'lib-flowers',
+        name: 'flowers-of-sorrow-115981.mp3',
+        displayName: 'Flowers of Sorrow',
+        url: 'https://www.dropbox.com/scl/fi/9575ftnvoje8qctma04qu/flowers-of-sorrow-115981.mp3?rlkey=bwvc4oqte82gkv2jhktjln99u&st=cfbv796e&dl=1'
+      },
+      {
+        id: 'lib-funeral-memories',
+        name: 'funeral-memories-sad-asmr-piano-soft-farewell-334314.mp3',
+        displayName: 'Funeral Memories - Soft Farewell',
+        url: 'https://www.dropbox.com/scl/fi/92d9eru6cw0tcf5txp98i/funeral-memories-sad-asmr-piano-soft-farewell-334314.mp3?rlkey=buxrdni2wd63proy9wjyaruir&st=g4jjiipw&dl=1'
+      },
+      {
+        id: 'lib-gentle-remembrance',
+        name: 'gentle-remembrance-359855.mp3',
+        displayName: 'Gentle Remembrance',
+        url: 'https://www.dropbox.com/scl/fi/k4mkq8t7fyld9bg31ecv6/gentle-remembrance-359855.mp3?rlkey=tn8fysl4n0xnhgc3wpsu1ta39&st=f9i0evii&dl=1'
+      },
+      {
+        id: 'lib-sad-cinematic',
+        name: 'sad-cinematic-despair-mourning-tragic-music-340712.mp3',
+        displayName: 'Sad Cinematic - Mourning',
+        url: 'https://www.dropbox.com/scl/fi/iojuve26k3s8d3unpixd7/sad-cinematic-despair-mourning-tragic-music-340712.mp3?rlkey=zo3u5u9806az3je5gf5irzgvp&st=j6pidlra&dl=1'
+      },
+      {
+        id: 'lib-shadows-towers',
+        name: 'shadows-of-the-wailing-towers-2-304723.mp3',
+        displayName: 'Shadows of the Wailing Towers',
+        url: 'https://www.dropbox.com/scl/fi/kxs6g974sesxgse1rdzqx/shadows-of-the-wailing-towers-2-304723.mp3?rlkey=csi5d9o02euo3dn0kfu9mlvc8&st=c3a92236&dl=1'
+      },
+      {
+        id: 'lib-souls-silence',
+        name: 'souls-of-silence-369585.mp3',
+        displayName: 'Souls of Silence',
+        url: 'https://www.dropbox.com/scl/fi/yejg0rtqze4g3eha2qphg/souls-of-silence-369585.mp3?rlkey=nad10k7hu1ifitekjf0v42ovd&st=b4wbv3ua&dl=1'
+      },
+      {
+        id: 'lib-hands-loved',
+        name: 'the-hands-that-loved-me-301869.mp3',
+        displayName: 'The Hands That Loved Me',
+        url: 'https://www.dropbox.com/scl/fi/j5xw454df7e4m4ljo3va2/the-hands-that-loved-me-301869.mp3?rlkey=ao2q65tnxx96zikslfxjnwdoo&st=xs5cka3s&dl=1'
+      },
+      {
+        id: 'lib-voices-eternity',
+        name: 'voices-of-eternity-church-cathedral-choir-195196.mp3',
+        displayName: 'Voices of Eternity - Cathedral Choir',
+        url: 'https://www.dropbox.com/scl/fi/tlhz9hrretu6rbnsmc79l/voices-of-eternity-church-cathedral-choir-195196.mp3?rlkey=6dbyrke1cd0hpmscgndcj2o5b&st=r3bssrjv&dl=1'
+      }
+    ];
+    
     // Parse job ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const jobId = urlParams.get('job');
@@ -973,7 +1148,7 @@
     let currentSettings = {};
     let currentSongs = [];
     let currentlyPlayingAudio = null;
-    let newPptxFile = null; // Store uploaded PowerPoint file
+    let newPptxFile = null;
     
     // Prevent going back if finalized
     if (isFinalized) {
@@ -989,6 +1164,68 @@
       showError('No job ID provided in URL. Please check your link.');
     } else {
       loadJobData(jobId);
+    }
+    
+    // Render song library
+    function renderLibrary() {
+      const container = document.getElementById('libraryGrid');
+      
+      let html = '';
+      SONG_LIBRARY.forEach(song => {
+        const isAdded = currentSongs.some(s => s.id === song.id);
+        const cardClass = isAdded ? 'library-song-card added' : 'library-song-card';
+        const btnClass = isAdded ? 'btn-add-library added' : 'btn-add-library';
+        const btnText = isAdded ? '✓ Added' : '+ Add to Video';
+        const audioId = `audio-lib-${song.id}`;
+        
+        html += `
+          <div class="${cardClass}" data-song-id="${song.id}">
+            <div class="library-song-name">${song.displayName}</div>
+            <div class="library-song-controls">
+              <button class="btn-small btn-play" onclick="togglePlay('${audioId}', this)">▶️</button>
+              <button class="${btnClass}" onclick="addLibrarySong('${song.id}')" ${isAdded || currentSongs.length >= MAX_SONGS ? 'disabled' : ''}>
+                ${btnText}
+              </button>
+            </div>
+            <audio id="${audioId}" src="${song.url}" preload="none"></audio>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+    }
+    
+    // Add library song to current songs
+    function addLibrarySong(songId) {
+      if (currentSongs.length >= MAX_SONGS) {
+        showToast(`Maximum ${MAX_SONGS} songs reached`, 'error');
+        return;
+      }
+      
+      const libSong = SONG_LIBRARY.find(s => s.id === songId);
+      if (!libSong) return;
+      
+      // Check if already added
+      if (currentSongs.some(s => s.id === songId)) {
+        showToast('Song already added', 'error');
+        return;
+      }
+      
+      currentSongs.push({
+        id: libSong.id,
+        name: libSong.name,
+        displayName: libSong.displayName,
+        url: libSong.url,
+        isNew: false,
+        isLibrary: true,
+        file: null
+      });
+      
+      renderLibrary();
+      renderSongList();
+      updateSongCount();
+      updateSongRangeSliders();
+      showToast(`Added "${libSong.displayName}"`, 'success');
     }
     
     // Load job data from API
@@ -1013,14 +1250,20 @@
         
         // Initialize songs from API response
         if (data.songs && data.songs.length > 0) {
-          currentSongs = data.songs.map(song => ({
-            id: song.name,
-            name: song.name,
-            displayName: song.displayName || song.name,
-            url: song.url,
-            isNew: false,
-            file: null
-          }));
+          currentSongs = data.songs.map(song => {
+            // Check if this is a library song
+            const libSong = SONG_LIBRARY.find(lib => lib.name === song.name);
+            
+            return {
+              id: libSong ? libSong.id : song.name,
+              name: song.name,
+              displayName: song.displayName || song.name,
+              url: song.url,
+              isNew: false,
+              isLibrary: !!libSong,
+              file: null
+            };
+          });
         } else if (data.settings && data.settings.audioCount > 0) {
           const audioCount = data.settings.audioCount;
           for (let i = 1; i <= audioCount; i++) {
@@ -1030,6 +1273,7 @@
               displayName: `song${i}.mp3`,
               url: null,
               isNew: false,
+              isLibrary: false,
               file: null
             });
           }
@@ -1044,6 +1288,7 @@
         
         displayVideo(data);
         setupManualEditButtons(data);
+        renderLibrary();
         renderSongList();
         updateSongCount();
       } catch (error) {
@@ -1138,7 +1383,7 @@
       const container = document.getElementById('songList');
       
       if (currentSongs.length === 0) {
-        container.innerHTML = '<div style="color: #999; font-style: italic;">No songs yet. Upload some MP3s below!</div>';
+        container.innerHTML = '<div style="color: #999; font-style: italic;">No songs selected. Choose from the library above or upload your own!</div>';
         return;
       }
       
@@ -1146,7 +1391,12 @@
       currentSongs.forEach((song, index) => {
         const audioId = `audio-${song.id}`;
         const newBadge = song.isNew ? '<span class="song-badge">NEW</span>' : '';
-        const itemClass = song.isNew ? 'song-item new-upload' : 'song-item';
+        const libraryBadge = song.isLibrary ? '<span class="song-badge library">LIBRARY</span>' : '';
+        
+        let itemClass = 'song-item';
+        if (song.isNew) itemClass += ' new-upload';
+        if (song.isLibrary) itemClass += ' library-song';
+        
         const position = index + 1;
         
         html += `
@@ -1155,6 +1405,7 @@
               <div class="song-position">${position}</div>
               <span class="song-name">${song.displayName}</span>
               ${newBadge}
+              ${libraryBadge}
             </div>
             <div class="song-controls">
               ${song.url ? `<button class="btn-small btn-play" onclick="togglePlay('${audioId}', this)">▶️</button>` : ''}
@@ -1228,6 +1479,7 @@
     function removeSong(index) {
       if (!confirm(`Remove "${currentSongs[index].displayName}"?`)) return;
       currentSongs.splice(index, 1);
+      renderLibrary();
       renderSongList();
       updateSongCount();
       updateSongRangeSliders();
@@ -1248,6 +1500,9 @@
         uploadSection.classList.remove('max-reached');
         uploadLabel.classList.remove('disabled');
       }
+      
+      // Update library add buttons
+      renderLibrary();
     }
     
     // Handle new song uploads
@@ -1273,6 +1528,7 @@
           displayName: file.name,
           url: localUrl,
           isNew: true,
+          isLibrary: false,
           file: file
         });
       });
@@ -1296,10 +1552,8 @@
         return;
       }
       
-      // Store the file
       newPptxFile = file;
       
-      // Show preview
       const previewDiv = document.getElementById('pptxFilePreview');
       const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
       
@@ -1317,7 +1571,6 @@
       `;
       previewDiv.style.display = 'block';
       
-      // Track change
       trackChange('newPresentationFile', true);
       showToast('PowerPoint file ready to upload!', 'success');
     });
@@ -1467,7 +1720,6 @@
       const infoBox = document.getElementById('manualEditInfoBox');
       const pptxUploadSection = document.getElementById('pptxUploadSection');
       
-      // Update info box text based on provider
       if (data.provider === 'google_slides') {
         infoBox.innerHTML = 'Select to edit your <strong>Google Slides</strong> to make manual changes, and once you are done you may select "Resubmit Changes" at the bottom along with any other changes you made. This version will be published in the next Video.';
         pptxUploadSection.style.display = 'none';
@@ -1476,7 +1728,6 @@
         pptxUploadSection.style.display = 'block';
       }
       
-      // Create button based on provider
       if (data.provider === 'google_slides' && data.original_url) {
         container.innerHTML = `
           <button class="btn btn-primary" onclick="handleManualEditClick('${data.original_url}')">
@@ -1744,190 +1995,179 @@
     });
     
     // Resubmit button handler
-// Resubmit button handler
-document.getElementById('resubmitBtn').addEventListener('click', async () => {
-  if (Object.keys(pendingChanges).length === 0) {
-    showToast('No changes to submit', 'error');
-    return;
-  }
-  
-  const confirmed = confirm(
-    `Create a new video with ${Object.keys(pendingChanges).length} change(s)?\n\n` +
-    'You will receive an email in 5-15 minutes with your new video.'
-  );
-  
-  if (!confirmed) return;
-  
-  try {
-    showToast('Uploading files...', 'success');
-    console.log('[RESUBMIT] Preparing submission...');
-    
-    // ===================================================================
-    // CRITICAL: Build COMPLETE settings (not just deltas)
-    // ===================================================================
-    const completeSettings = {
-      // Start with all current settings
-      ...currentSettings,
-  
-      // Override with current form values (even if user didn't change them)
-      timingMode: document.querySelector('input[name="timingMode"]:checked')?.value || currentSettings.timingMode || 'perSlide',
-      perSlideSec: parseFloat(document.getElementById('perSlideSec').value) || currentSettings.perSlideSec || 5,
-      fixedRuntimeSec: parseFloat(document.getElementById('fixedRuntimeSec').value) || currentSettings.fixedRuntimeSec || 350,
-      visualPackage: document.getElementById('visualPackage').value || currentSettings.visualPackage || 'simple-fade-wipe',
-      musicDistribution: document.getElementById('musicDistribution').value || currentSettings.musicDistribution || 'evenlyDistributed',
-  
-      // Remove metadata
-      jobId: undefined,
-      originalJobId: undefined,
-  
-      // ALWAYS include song order
-      songOrder: currentSongs.map(s => s.name),
-      audioCount: currentSongs.length
-    };
-    
-    // Remove undefined fields
-    Object.keys(completeSettings).forEach(key => {
-      if (completeSettings[key] === undefined) {
-        delete completeSettings[key];
+    document.getElementById('resubmitBtn').addEventListener('click', async () => {
+      if (Object.keys(pendingChanges).length === 0) {
+        showToast('No changes to submit', 'error');
+        return;
       }
-    });
-    
-    console.log('[RESUBMIT] Complete settings:', completeSettings);
-    
-    // Prepare submission data
-    const submitData = {
-      originalJobId: jobId,
-      changes: completeSettings  // Send COMPLETE settings, not delta
-    };
-    
-    // STEP 1: Upload PowerPoint file to S3 if present
-    if (newPptxFile) {
-      console.log('[UPLOAD] Getting presigned URL for PowerPoint...');
       
-      const urlResponse = await fetch(`${API_BASE}/generate-upload-url`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          jobId: jobId,
-          fileType: 'presentation',
-          fileExtension: 'pptx'
-        })
-      });
+      const confirmed = confirm(
+        `Create a new video with ${Object.keys(pendingChanges).length} change(s)?\n\n` +
+        'You will receive an email in 5-15 minutes with your new video.'
+      );
       
-      if (!urlResponse.ok) throw new Error('Failed to get PowerPoint upload URL');
+      if (!confirmed) return;
       
-      const {uploadUrl, s3Key} = await urlResponse.json();
-      
-      console.log('[UPLOAD] Uploading PowerPoint to S3...');
-      
-      const uploadResponse = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: {'Content-Type': 'application/vnd.openxmlformats-officedocument.presentationml.presentation'},
-        body: newPptxFile
-      });
-      
-      if (!uploadResponse.ok) throw new Error('Failed to upload PowerPoint');
-      
-      submitData.changes.newPresentationS3Key = s3Key;
-      console.log('[UPLOAD] PowerPoint uploaded successfully');
-    }
-    
-    // STEP 2: Upload new songs to S3 if present
-    const newSongFiles = currentSongs.filter(s => s.isNew && s.file);
-    
-    if (newSongFiles.length > 0) {
-      const uploadedSongs = [];
-      
-      for (let i = 0; i < newSongFiles.length; i++) {
-        const song = newSongFiles[i];
+      try {
+        showToast('Uploading files...', 'success');
+        console.log('[RESUBMIT] Preparing submission...');
         
-        console.log(`[UPLOAD] Getting presigned URL for song ${i + 1}...`);
+        // Build COMPLETE settings (not just deltas)
+        const completeSettings = {
+          ...currentSettings,
+          timingMode: document.querySelector('input[name="timingMode"]:checked')?.value || currentSettings.timingMode || 'perSlide',
+          perSlideSec: parseFloat(document.getElementById('perSlideSec').value) || currentSettings.perSlideSec || 5,
+          fixedRuntimeSec: parseFloat(document.getElementById('fixedRuntimeSec').value) || currentSettings.fixedRuntimeSec || 350,
+          visualPackage: document.getElementById('visualPackage').value || currentSettings.visualPackage || 'simple-fade-wipe',
+          musicDistribution: document.getElementById('musicDistribution').value || currentSettings.musicDistribution || 'evenlyDistributed',
+          jobId: undefined,
+          originalJobId: undefined,
+          songOrder: currentSongs.map(s => s.name),
+          audioCount: currentSongs.length
+        };
         
-        const urlResponse = await fetch(`${API_BASE}/generate-upload-url`, {
+        // Remove undefined fields
+        Object.keys(completeSettings).forEach(key => {
+          if (completeSettings[key] === undefined) {
+            delete completeSettings[key];
+          }
+        });
+        
+        console.log('[RESUBMIT] Complete settings:', completeSettings);
+        
+        const submitData = {
+          originalJobId: jobId,
+          changes: completeSettings
+        };
+        
+        // STEP 1: Upload PowerPoint file to S3 if present
+        if (newPptxFile) {
+          console.log('[UPLOAD] Getting presigned URL for PowerPoint...');
+          
+          const urlResponse = await fetch(`${API_BASE}/generate-upload-url`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              jobId: jobId,
+              fileType: 'presentation',
+              fileExtension: 'pptx'
+            })
+          });
+          
+          if (!urlResponse.ok) throw new Error('Failed to get PowerPoint upload URL');
+          
+          const {uploadUrl, s3Key} = await urlResponse.json();
+          
+          console.log('[UPLOAD] Uploading PowerPoint to S3...');
+          
+          const uploadResponse = await fetch(uploadUrl, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/vnd.openxmlformats-officedocument.presentationml.presentation'},
+            body: newPptxFile
+          });
+          
+          if (!uploadResponse.ok) throw new Error('Failed to upload PowerPoint');
+          
+          submitData.changes.newPresentationS3Key = s3Key;
+          console.log('[UPLOAD] PowerPoint uploaded successfully');
+        }
+        
+        // STEP 2: Upload new songs to S3 if present
+        const newSongFiles = currentSongs.filter(s => s.isNew && s.file);
+        
+        if (newSongFiles.length > 0) {
+          const uploadedSongs = [];
+          
+          for (let i = 0; i < newSongFiles.length; i++) {
+            const song = newSongFiles[i];
+            
+            console.log(`[UPLOAD] Getting presigned URL for song ${i + 1}...`);
+            
+            const urlResponse = await fetch(`${API_BASE}/generate-upload-url`, {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({
+                jobId: jobId,
+                fileType: 'song',
+                fileNumber: i + 1,
+                fileExtension: 'mp3'
+              })
+            });
+            
+            if (!urlResponse.ok) throw new Error(`Failed to get upload URL for song ${i + 1}`);
+            
+            const {uploadUrl, s3Key} = await urlResponse.json();
+            
+            console.log(`[UPLOAD] Uploading song ${i + 1} to S3...`);
+            
+            const uploadResponse = await fetch(uploadUrl, {
+              method: 'PUT',
+              headers: {'Content-Type': 'audio/mpeg'},
+              body: song.file
+            });
+            
+            if (!uploadResponse.ok) throw new Error(`Failed to upload song ${i + 1}`);
+            
+            uploadedSongs.push({
+              originalName: song.name,
+              s3Key: s3Key
+            });
+            
+            console.log(`[UPLOAD] Song ${i + 1} uploaded successfully`);
+          }
+          
+          submitData.changes.newSongs = uploadedSongs;
+          console.log('[UPLOAD] All songs uploaded');
+        }
+        
+        // Add manualEditsRequested flag if it was set
+        if (pendingChanges.manualEditsRequested) {
+          submitData.changes.manualEditsRequested = true;
+        }
+        
+        // STEP 3: Submit metadata to resubmit API
+        console.log('[RESUBMIT] Submitting to API...');
+        console.log('[RESUBMIT] Payload:', JSON.stringify(submitData, null, 2));
+        showToast('Processing changes...', 'success');
+        
+        const response = await fetch(`${API_BASE}/jobs/${jobId}/resubmit`, {
           method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            jobId: jobId,
-            fileType: 'song',
-            fileNumber: i + 1,
-            fileExtension: 'mp3'
-          })
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(submitData)
         });
         
-        if (!urlResponse.ok) throw new Error(`Failed to get upload URL for song ${i + 1}`);
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || errorData.details || `HTTP ${response.status}`);
+        }
         
-        const {uploadUrl, s3Key} = await urlResponse.json();
+        const result = await response.json();
+        console.log('[RESUBMIT] Success:', result);
         
-        console.log(`[UPLOAD] Uploading song ${i + 1} to S3...`);
+        showToast(
+          `✅ Video resubmitted successfully! New job: ${result.newJobId}. ` +
+          'You\'ll receive an email in 5-15 minutes.',
+          'success'
+        );
         
-        const uploadResponse = await fetch(uploadUrl, {
-          method: 'PUT',
-          headers: {'Content-Type': 'audio/mpeg'},
-          body: song.file
-        });
+        // Clear changes and disable button
+        pendingChanges = {};
+        newPptxFile = null;
+        updateResubmitButton();
         
-        if (!uploadResponse.ok) throw new Error(`Failed to upload song ${i + 1}`);
+        // Hide edit sections after 2 seconds
+        setTimeout(() => {
+          document.getElementById('editSections').style.display = 'none';
+          document.getElementById('editBtn').innerHTML = '✏️ Edit & Resubmit';
+        }, 2000);
         
-        uploadedSongs.push({
-          originalName: song.name,
-          s3Key: s3Key
-        });
-        
-        console.log(`[UPLOAD] Song ${i + 1} uploaded successfully`);
+      } catch (error) {
+        console.error('[RESUBMIT ERROR]', error);
+        showToast('Failed to resubmit: ' + error.message, 'error');
       }
-      
-      submitData.changes.newSongs = uploadedSongs;
-      console.log('[UPLOAD] All songs uploaded');
-    }
-    
-    // Add manualEditsRequested flag if it was set
-    if (pendingChanges.manualEditsRequested) {
-      submitData.changes.manualEditsRequested = true;
-    }
-    
-    // STEP 3: Submit metadata to resubmit API
-    console.log('[RESUBMIT] Submitting to API...');
-    console.log('[RESUBMIT] Payload:', JSON.stringify(submitData, null, 2));
-    showToast('Processing changes...', 'success');
-    
-    const response = await fetch(`${API_BASE}/jobs/${jobId}/resubmit`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(submitData)
     });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || errorData.details || `HTTP ${response.status}`);
-    }
-    
-    const result = await response.json();
-    console.log('[RESUBMIT] Success:', result);
-    
-    showToast(
-      `✅ Video resubmitted successfully! New job: ${result.newJobId}. ` +
-      'You\'ll receive an email in 5-15 minutes.',
-      'success'
-    );
-    
-    // Clear changes and disable button
-    pendingChanges = {};
-    newPptxFile = null;
-    updateResubmitButton();
-    
-    // Hide edit sections after 2 seconds
-    setTimeout(() => {
-      document.getElementById('editSections').style.display = 'none';
-      document.getElementById('editBtn').innerHTML = '✏️ Edit & Resubmit';
-    }, 2000);
-    
-  } catch (error) {
-    console.error('[RESUBMIT ERROR]', error);
-    showToast('Failed to resubmit: ' + error.message, 'error');
-  }
-});
   </script>
 </body>
 </html>
