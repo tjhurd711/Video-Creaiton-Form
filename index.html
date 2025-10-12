@@ -2047,10 +2047,14 @@
           }
         });
 
-        // ADD SONG RANGES IF THEY EXIST IN PENDING CHANGES
-        if (pendingChanges.songRanges && pendingChanges.songRanges.length > 0) {
+        // ✅ ONLY ADD SONG RANGES IF musicDistribution is specifyPlacement AND they exist in pendingChanges
+        if (completeSettings.musicDistribution === 'specifyPlacement' && pendingChanges.songRanges && pendingChanges.songRanges.length > 0) {
           completeSettings.songRanges = pendingChanges.songRanges;
           console.log('[RESUBMIT] Including songRanges:', pendingChanges.songRanges);
+        } else {
+          // ✅ EXPLICITLY REMOVE songRanges if not using specifyPlacement
+          delete completeSettings.songRanges;
+          console.log('[RESUBMIT] Removed songRanges (not using specifyPlacement)');
         }
 
         console.log('[RESUBMIT] Complete settings:', completeSettings);
