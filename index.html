@@ -2032,7 +2032,13 @@
             delete completeSettings[key];
           }
         });
-        
+
+        // ADD SONG RANGES IF THEY EXIST IN PENDING CHANGES
+        if (pendingChanges.songRanges && pendingChanges.songRanges.length > 0) {
+          completeSettings.songRanges = pendingChanges.songRanges;
+          console.log('[RESUBMIT] Including songRanges:', pendingChanges.songRanges);
+        }
+
         console.log('[RESUBMIT] Complete settings:', completeSettings);
         
         const submitData = {
