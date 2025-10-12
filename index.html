@@ -1660,45 +1660,50 @@
       });
     }
     
-    // Update song range sliders when song count changes
-    function updateSongRangeSliders() {
-      const musicDist = document.getElementById('musicDistribution').value;
-      if (musicDist === 'specifyPlacement') {
-        setupSongRangeSliders();
-      }
-    }
-    
     // Handle song range input changes
     function handleSongRangeChange() {
       const songRanges = [];
-      
+  
       currentSongs.forEach((song, index) => {
         const startInput = document.getElementById(`songRange${index}Start`);
         const endInput = document.getElementById(`songRange${index}End`);
-        
+    
         if (startInput && endInput) {
           const startVal = parseInt(startInput.value);
           const endVal = parseInt(endInput.value);
-          
-          if (!isNaN(startVal) && !isNaN(endVal)) {
-            songRanges.push({
-              song: songIdentifier,
-              startSlide: startVal,
-              endSlide: endVal
-            });
+      
+        if (!isNaN(startVal) && !isNaN(endVal)) {
+          // FIX: For uploaded songs, extract filename from S3 URL
+          // For library songs, use the original name
+          let songIdentifier = song.name;  // ✅ DECLARE THE VARIABLE!
+        
+          if (!song.isLibrary && song.url && song.url.startsWith('blob:')) {
+            // New upload with blob URL - use the original filename
+            songIdentifier = song.name;
+          } else if (!song.isLibrary && song.url && song.url.includes('/temp-uploads/')) {
+            // Previously uploaded song - extract filename from S3 URL
+            songIdentifier = song.url.split('/').pop();
+            console.log(`[SONG RANGE] Mapped uploaded song: ${song.name} -> ${songIdentifier}`);
           }
+        
+          songRanges.push({
+            song: songIdentifier,  // ✅ NOW IT'S DEFINED!
+            startSlide: startVal,
+            endSlide: endVal
+          });
         }
-      });
-      
-      if (songRanges.length > 0) {
-        trackChange('songRanges', songRanges);
-      } else {
-        delete pendingChanges.songRanges;
-        updateResubmitButton();
       }
-      
-      console.log('[SONG RANGES]', songRanges);
+    });
+  
+    if (songRanges.length > 0) {
+      trackChange('songRanges', songRanges);
+    } else {
+      delete pendingChanges.songRanges;
+      updateResubmitButton();
     }
+  
+    console.log('[SONG RANGES]', songRanges);
+  }
     
     // Handle music distribution change
     function handleMusicDistributionChange(value) {
