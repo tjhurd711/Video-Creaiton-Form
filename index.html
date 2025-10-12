@@ -1660,6 +1660,15 @@
       });
     }
     
+    // Update song range sliders (wrapper for setup)
+    function updateSongRangeSliders() {
+      const musicDist = document.getElementById('musicDistribution').value;
+      
+      if (musicDist === 'specifyPlacement') {
+        setupSongRangeSliders();
+      }
+    }
+    
     // Handle song range input changes
     function handleSongRangeChange() {
       const songRanges = [];
