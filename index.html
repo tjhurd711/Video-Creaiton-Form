@@ -1607,17 +1607,25 @@
     // Setup song range sliders
     function setupSongRangeSliders() {
       const container = document.getElementById('songRangesList');
-      
-      if (currentSongs.length === 0) {
+  
+      if (selectedSongs.length === 0) {
         container.innerHTML = '<div style="color: #999; font-style: italic;">No songs available. Add songs first.</div>';
         return;
       }
-      
+  
       let html = '';
-      currentSongs.forEach((song, index) => {
+      selectedSongs.forEach((song, index) => {
         const audioId = `audio-range-${song.id}`;
         const playButton = song.url ? `<button class="btn-small btn-play" onclick="togglePlay('${audioId}', this)" style="margin-left: 8px;">▶️</button>` : '';
-        
+    
+        // Calculate start value: 1 for first song, otherwise based on previous song's end
+        let startValue = '';
+        let startDisabled = '';
+        if (index === 0) {
+          startValue = 'value="1"';
+          startDisabled = 'readonly';
+        }
+    
         html += `
           <div class="song-range-item">
             <div class="song-range-header">
@@ -1635,30 +1643,56 @@
                        data-type="start"
                        min="1" 
                        max="250" 
+                       ${startValue}
+                       ${startDisabled}
                        placeholder="e.g., 1">
-              </div>
-              <div class="slide-input-group">
-                <label>End Slide</label>
-                <input type="number" 
-                       id="songRange${index}End" 
-                       class="song-range-input"
-                       data-song-index="${index}"
-                       data-type="end"
-                       min="1" 
-                       max="250" 
-                       placeholder="e.g., 50">
-              </div>
-            </div>
+               </div>
+               <div class="slide-input-group">
+                 <label>End Slide</label>
+                 <input type="number" 
+                        id="songRange${index}End" 
+                        class="song-range-input"
+                        data-song-index="${index}"
+                        data-type="end"
+                        min="1" 
+                        max="250" 
+                        placeholder="e.g., 50">
+               </div>
+             </div>
           </div>
-        `;
-      });
+       `;
+     });
+  
+     container.innerHTML = html;
+  
+     // Add event listeners to all range inputs
+     document.querySelectorAll('.song-range-input').forEach(input => {
+       input.addEventListener('input', handleSongRangeChange);
+     });
+  
+     // Auto-fill start values for songs after the first
+     updateChainedStartValues();
+   }
+    
+   // Auto-fill start values based on previous song's end value
+   function updateChainedStartValues() {
+     for (let i = 1; i < selectedSongs.length; i++) {
+       const prevEndInput = document.getElementById(`songRange${i-1}End`);
+       const currentStartInput = document.getElementById(`songRange${i}Start`);
+    
+       if (prevEndInput && currentStartInput) {
+         const prevEndValue = parseInt(prevEndInput.value);
       
-      container.innerHTML = html;
-      
-      document.querySelectorAll('.song-range-input').forEach(input => {
-        input.addEventListener('input', handleSongRangeChange);
-      });
-    }
+         if (!isNaN(prevEndValue) && prevEndValue > 0) {
+           currentStartInput.value = prevEndValue + 1;
+           currentStartInput.readOnly = true;
+         } else {
+           currentStartInput.value = '';
+           currentStartInput.readOnly = false;
+         }
+       }
+     }
+   } 
     
     // Update song range sliders (wrapper for setup)
     function updateSongRangeSliders() {
@@ -1670,39 +1704,42 @@
     }
     
     // Handle song range input changes
-    function handleSongRangeChange() {
-      const songRanges = [];
+    function handleSongRangeChange(e) {
+      // If an end slide was changed, update the next song's start slide
+      if (e.target.dataset.type === 'end') {
+        updateChainedStartValues();
+      }
   
-      currentSongs.forEach((song, index) => {
+      songRanges = [];
+
+      selectedSongs.forEach((song, index) => {
         const startInput = document.getElementById(`songRange${index}Start`);
         const endInput = document.getElementById(`songRange${index}End`);
-    
+
         if (startInput && endInput) {
           const startVal = parseInt(startInput.value);
           const endVal = parseInt(endInput.value);
-      
-        if (!isNaN(startVal) && !isNaN(endVal)) {
-          // FIX: For uploaded songs, extract filename from S3 URL
-          // For library songs, use the original name
-          let songIdentifier = song.name;  // ✅ DECLARE THE VARIABLE!
-        
-          if (!song.isLibrary && song.url && song.url.startsWith('blob:')) {
-            // New upload with blob URL - use the original filename
-            songIdentifier = song.name;
-          } else if (!song.isLibrary && song.url && song.url.includes('/temp-uploads/')) {
-            // Previously uploaded song - extract filename from S3 URL
-            songIdentifier = song.url.split('/').pop();
-            console.log(`[SONG RANGE] Mapped uploaded song: ${song.name} -> ${songIdentifier}`);
-          }
-        
-          songRanges.push({
-            song: songIdentifier,  // ✅ NOW IT'S DEFINED!
-            startSlide: startVal,
-            endSlide: endVal
-          });
-        }
+  
+          if (!isNaN(startVal) && !isNaN(endVal)) {
+            let songIdentifier;
+    
+            if (song.isLibrary) {
+              songIdentifier = song.name;
+            } else {
+              songIdentifier = `song${index + 1}.mp3`;
+            }
+    
+            songRanges.push({
+              song: songIdentifier,
+              startSlide: startVal,
+              endSlide: endVal
+            });
+         }
       }
     });
+
+    console.log('[SONG RANGES]', songRanges);
+  }
   
     if (songRanges.length > 0) {
       trackChange('songRanges', songRanges);
