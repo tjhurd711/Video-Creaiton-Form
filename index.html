@@ -1233,27 +1233,27 @@
       try {
         console.log('[API] Calling:', `${API_BASE}/jobs/${jobId}`);
         const response = await fetch(`${API_BASE}/jobs/${jobId}`);
-        
+    
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-        
+    
         const data = await response.json();
         console.log('[API] Response:', data);
-        
+    
         // Store current settings
         if (data.settings) {
           currentSettings = data.settings;
-          populateFormDefaults(data.settings);
+          // ❌ REMOVED: populateFormDefaults(data.settings);  
           displaySummary(data.settings);
         }
-        
+    
         // Initialize songs from API response
         if (data.songs && data.songs.length > 0) {
           currentSongs = data.songs.map(song => {
             // Check if this is a library song
             const libSong = SONG_LIBRARY.find(lib => lib.name === song.name);
-            
+        
             return {
               id: libSong ? libSong.id : song.name,
               name: song.name,
@@ -1278,14 +1278,19 @@
             });
           }
         }
-        
+    
+        // ✅ MOVED HERE: populate form defaults AFTER songs are loaded
+        if (data.settings) {
+          populateFormDefaults(data.settings);
+        }
+    
         // Auto-redirect to finalized page if job is already finalized
         if (data.isFinalized && !isFinalized) {
           console.log('[REDIRECT] Job is finalized, redirecting...');
           window.location.replace(`${window.location.origin}${window.location.pathname}?job=${jobId}&finalized=true`);
           return;
         }
-        
+    
         displayVideo(data);
         setupManualEditButtons(data);
         renderLibrary();
