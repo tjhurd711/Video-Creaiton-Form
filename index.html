@@ -1607,17 +1607,20 @@
     // Setup song range sliders
     function setupSongRangeSliders() {
       const container = document.getElementById('songRangesList');
-      
+  
       if (currentSongs.length === 0) {
         container.innerHTML = '<div style="color: #999; font-style: italic;">No songs available. Add songs first.</div>';
         return;
       }
-      
+  
       let html = '';
       currentSongs.forEach((song, index) => {
         const audioId = `audio-range-${song.id}`;
         const playButton = song.url ? `<button class="btn-small btn-play" onclick="togglePlay('${audioId}', this)" style="margin-left: 8px;">▶️</button>` : '';
-        
+    
+        // Auto-populate start value: first song starts at 1, others start at previous end + 1
+        const startValue = index === 0 ? '1' : '';
+    
         html += `
           <div class="song-range-item">
             <div class="song-range-header">
@@ -1634,7 +1637,8 @@
                        data-song-index="${index}"
                        data-type="start"
                        min="1" 
-                       max="250" 
+                       max="250"
+                       value="${startValue}"
                        placeholder="e.g., 1">
               </div>
               <div class="slide-input-group">
@@ -1648,17 +1652,17 @@
                        max="250" 
                        placeholder="e.g., 50">
               </div>
-            </div>
-          </div>
-        `;
-      });
-      
-      container.innerHTML = html;
-      
-      document.querySelectorAll('.song-range-input').forEach(input => {
-        input.addEventListener('input', handleSongRangeChange);
-      });
-    }
+           </div>
+        </div>
+      `;
+    });
+  
+    container.innerHTML = html;
+  
+    document.querySelectorAll('.song-range-input').forEach(input => {
+      input.addEventListener('input', handleSongRangeChange);
+    });
+  }
     
     // Update song range sliders (wrapper for setup)
     function updateSongRangeSliders() {
@@ -1670,49 +1674,64 @@
     }
     
     // Handle song range input changes
-    function handleSongRangeChange() {
-      const songRanges = [];
+    function handleSongRangeChange(e) {
+      const changedIndex = parseInt(e.target.dataset.songIndex);
+      const changedType = e.target.dataset.type;
   
-      currentSongs.forEach((song, index) => {
-        const startInput = document.getElementById(`songRange${index}Start`);
-        const endInput = document.getElementById(`songRange${index}End`);
-    
-        if (startInput && endInput) {
-          const startVal = parseInt(startInput.value);
-          const endVal = parseInt(endInput.value);
-      
-        if (!isNaN(startVal) && !isNaN(endVal)) {
-          // FIX: For uploaded songs, extract filename from S3 URL
-          // For library songs, use the original name
-          let songIdentifier = song.name;  // ✅ DECLARE THE VARIABLE!
-        
-          if (!song.isLibrary && song.url && song.url.startsWith('blob:')) {
-            // New upload with blob URL - use the original filename
-            songIdentifier = song.name;
-          } else if (!song.isLibrary && song.url && song.url.includes('/temp-uploads/')) {
-            // Previously uploaded song - extract filename from S3 URL
-            songIdentifier = song.url.split('/').pop();
-            console.log(`[SONG RANGE] Mapped uploaded song: ${song.name} -> ${songIdentifier}`);
+      // If an "End Slide" changed, update the next song's start slide
+      if (changedType === 'end' && changedIndex < currentSongs.length - 1) {
+        const endValue = parseInt(e.target.value);
+        if (!isNaN(endValue)) {
+          const nextStartInput = document.getElementById(`songRange${changedIndex + 1}Start`);
+          if (nextStartInput) {
+            nextStartInput.value = endValue + 1;
           }
-        
-          songRanges.push({
-            song: songIdentifier,  // ✅ NOW IT'S DEFINED!
-            startSlide: startVal,
-            endSlide: endVal
-          });
         }
-      }
-    });
+     }
   
-    if (songRanges.length > 0) {
-      trackChange('songRanges', songRanges);
-    } else {
-      delete pendingChanges.songRanges;
-      updateResubmitButton();
-    }
+     // Rebuild songRanges array
+     const songRanges = [];
+
+     currentSongs.forEach((song, index) => {
+       const startInput = document.getElementById(`songRange${index}Start`);
+       const endInput = document.getElementById(`songRange${index}End`);
+
+       if (startInput && endInput) {
+         const startVal = parseInt(startInput.value);
+         const endVal = parseInt(endInput.value);
   
-    console.log('[SONG RANGES]', songRanges);
-  }
+         if (!isNaN(startVal) && !isNaN(endVal)) {
+           // FIX: For uploaded songs, extract filename from S3 URL
+           // For library songs, use the original name
+           let songIdentifier = song.name;
+        
+           if (!song.isLibrary && song.url && song.url.startsWith('blob:')) {
+             // New upload with blob URL - use the original filename
+             songIdentifier = song.name;
+           } else if (!song.isLibrary && song.url && song.url.includes('/temp-uploads/')) {
+             // Previously uploaded song - extract filename from S3 URL
+             songIdentifier = song.url.split('/').pop();
+             console.log(`[SONG RANGE] Mapped uploaded song: ${song.name} -> ${songIdentifier}`);
+           }
+        
+           songRanges.push({
+             song: songIdentifier,
+             startSlide: startVal,
+             endSlide: endVal
+           });
+         }
+       }
+     });
+
+     if (songRanges.length > 0) {
+       trackChange('songRanges', songRanges);
+     } else {
+       delete pendingChanges.songRanges;
+       updateResubmitButton();
+     }
+
+     console.log('[SONG RANGES]', songRanges);
+   }
     
     // Handle music distribution change
     function handleMusicDistributionChange(value) {
