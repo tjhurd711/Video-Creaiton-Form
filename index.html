@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Customize Your Memorial Video</title>
+  <title>Your Memorial Video</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
@@ -27,75 +27,241 @@
     .header {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
-      padding: 40px 30px;
+      padding: 30px;
       text-align: center;
     }
     
     .header h1 {
-      font-size: 32px;
-      margin-bottom: 12px;
+      font-size: 28px;
+      margin-bottom: 8px;
     }
     
     .header p {
-      opacity: 0.95;
-      font-size: 16px;
-      line-height: 1.5;
+      opacity: 0.9;
+      font-size: 14px;
     }
     
     .content {
-      padding: 40px 30px;
+      padding: 30px;
     }
     
-    .intro-box {
+    /* Summary Sentence */
+    .summary-box {
       background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
       border-left: 4px solid #667eea;
       border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 30px;
-      line-height: 1.7;
+      padding: 20px;
+      margin-bottom: 20px;
+      font-size: 16px;
+      line-height: 1.6;
+      color: #333;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
     }
     
-    .intro-box h2 {
+    .summary-box strong {
       color: #667eea;
-      font-size: 20px;
-      margin-bottom: 12px;
+      font-weight: 700;
     }
     
-    .section {
-      background: #f9f9f9;
-      border: 2px solid #e0e0e0;
+    /* Video Player Section */
+    .video-section {
+      margin-bottom: 30px;
+    }
+    
+    .video-wrapper {
+      position: relative;
+      background: #000;
       border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 24px;
-      transition: all 0.3s;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
     
-    .section:hover {
-      border-color: #667eea;
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+    video {
+      width: 100%;
+      display: block;
+    }
+    
+    .loading {
+      padding: 100px 20px;
+      text-align: center;
+      color: #999;
+    }
+    
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .error {
+      padding: 30px;
+      background: #fee;
+      border-left: 4px solid #e33;
+      border-radius: 8px;
+      color: #c33;
+    }
+    
+    /* Action Buttons */
+    .actions {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      padding: 14px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-primary {
+      background: #4CAF50;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #45a049;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+    }
+    
+    .btn-secondary {
+      background: #2196F3;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #0b7dda;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+    }
+    
+    .btn-outline {
+      background: white;
+      color: #667eea;
+      border: 2px solid #667eea;
+    }
+    
+    .btn-outline:hover {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-edit {
+      background: #FF9800;
+      color: white;
+    }
+
+    .btn-edit:hover {
+      background: #f57c00;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+    }
+    
+    /* Edit Sections */
+    .edit-sections {
+      border-top: 2px solid #f0f0f0;
+      padding-top: 30px;
+      margin-top: 30px;
     }
     
     .section-header {
       display: flex;
       align-items: center;
       gap: 12px;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
-      border-bottom: 2px solid #e0e0e0;
+      margin-bottom: 25px;
     }
     
-    .section-icon {
-      font-size: 28px;
-    }
-    
-    .section-title {
+    .section-header h2 {
       font-size: 22px;
-      font-weight: 700;
       color: #333;
     }
     
+    .section-header .badge {
+      background: #667eea;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .edit-option {
+      background: #f9f9f9;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      transition: all 0.3s;
+    }
+    
+    .edit-option:hover {
+      border-color: #667eea;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+    }
+    
+    .edit-option-header {
+      padding: 20px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+    
+    .edit-option-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .edit-option-icon {
+      font-size: 24px;
+    }
+    
+    .chevron {
+      font-size: 20px;
+      transition: transform 0.3s;
+      color: #999;
+    }
+    
+    .edit-option.expanded .chevron {
+      transform: rotate(180deg);
+    }
+    
+    .edit-option-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      padding: 0 20px;
+    }
+    
+    .edit-option.expanded .edit-option-content {
+      max-height: 3000px;
+      padding: 0 20px 20px;
+    }
+    
     .form-group {
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
     
     .form-group label {
@@ -103,21 +269,18 @@
       font-weight: 600;
       margin-bottom: 8px;
       color: #555;
-      font-size: 15px;
+      font-size: 14px;
     }
-    
+
     .form-group .help-text {
       font-size: 13px;
       color: #777;
       font-weight: 400;
-      margin-top: 6px;
-      line-height: 1.4;
+      margin-top: 4px;
     }
     
     .form-group select,
     .form-group input[type="number"],
-    .form-group input[type="text"],
-    .form-group input[type="url"],
     .form-group input[type="file"] {
       width: 100%;
       padding: 12px;
@@ -125,7 +288,6 @@
       border-radius: 8px;
       font-size: 15px;
       transition: border-color 0.2s;
-      font-family: inherit;
     }
     
     .form-group select:focus,
@@ -143,20 +305,19 @@
     .radio-option {
       display: flex;
       align-items: flex-start;
-      gap: 12px;
-      padding: 14px;
+      gap: 10px;
+      padding: 12px;
       border: 2px solid #e0e0e0;
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.2s;
-      background: white;
     }
     
     .radio-option:hover {
       border-color: #667eea;
       background: #f8f9ff;
     }
-    
+
     .radio-option.selected {
       border-color: #667eea;
       background: #f8f9ff;
@@ -169,161 +330,59 @@
       margin-top: 2px;
       flex-shrink: 0;
     }
-    
+
     .radio-option-content {
       flex: 1;
     }
-    
+
     .radio-option-label {
       font-weight: 600;
       display: block;
       margin-bottom: 4px;
-      font-size: 15px;
     }
-    
+
     .radio-option-desc {
       font-size: 13px;
       color: #666;
-      line-height: 1.4;
     }
-    
+
     .conditional-input {
       margin-top: 12px;
       padding: 12px;
-      background: #f5f5f5;
+      background: white;
       border-radius: 6px;
     }
     
+    .placeholder {
+      padding: 20px;
+      background: #fff9e6;
+      border: 2px dashed #ffd700;
+      border-radius: 8px;
+      text-align: center;
+      color: #886600;
+      font-style: italic;
+    }
+
     .info-box {
       padding: 16px;
-      background: #fff9e6;
-      border-left: 4px solid #FFC107;
+      background: #e3f2fd;
+      border-left: 4px solid #2196F3;
       border-radius: 8px;
       margin-bottom: 20px;
       font-size: 14px;
-      color: #886600;
-      line-height: 1.5;
-    }
-    
-    .info-box.blue {
-      background: #e3f2fd;
-      border-left-color: #2196F3;
       color: #1565c0;
     }
-    
-    /* Song Library */
-    .library-section {
-      background: linear-gradient(135deg, #fff9f0 0%, #ffe8cc 100%);
-      border: 2px solid #FF9800;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-    
-    .library-header {
+
+    .button-group {
       display: flex;
-      align-items: center;
       gap: 10px;
-      margin-bottom: 15px;
-      font-size: 16px;
-      font-weight: 700;
-      color: #e65100;
+      flex-wrap: wrap;
     }
-    
-    .library-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 12px;
-    }
-    
-    .library-song-card {
-      background: white;
-      border: 2px solid #FFE0B2;
-      border-radius: 10px;
-      padding: 12px;
-      transition: all 0.2s;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    
-    .library-song-card:hover {
-      border-color: #FF9800;
-      box-shadow: 0 4px 12px rgba(255, 152, 0, 0.2);
-      transform: translateY(-2px);
-    }
-    
-    .library-song-card.added {
-      border-color: #4CAF50;
-      background: #f1f8f4;
-    }
-    
-    .library-song-name {
-      font-weight: 600;
-      font-size: 14px;
-      color: #333;
-      line-height: 1.3;
-    }
-    
-    .library-song-controls {
-      display: flex;
-      gap: 6px;
-    }
-    
-    .btn-small {
-      padding: 6px 12px;
-      font-size: 13px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-weight: 600;
-    }
-    
-    .btn-play {
-      background: #2196F3;
-      color: white;
-    }
-    
-    .btn-play:hover {
-      background: #0b7dda;
-    }
-    
-    .btn-play.playing {
-      background: #FF9800;
-    }
-    
-    .btn-add-library {
-      flex: 1;
-      padding: 8px 12px;
-      background: #FF9800;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .btn-add-library:hover:not(:disabled) {
-      background: #f57c00;
-    }
-    
-    .btn-add-library:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-    }
-    
-    .btn-add-library.added {
-      background: #4CAF50;
-    }
-    
-    /* Song List */
+
     .song-list {
       margin-bottom: 20px;
     }
-    
+
     .song-item {
       display: flex;
       justify-content: space-between;
@@ -335,22 +394,22 @@
       margin-bottom: 10px;
       transition: all 0.2s;
     }
-    
+
     .song-item:hover {
       border-color: #667eea;
       box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
     }
-    
+
     .song-item.new-upload {
       border-color: #4CAF50;
       background: #f1f8f4;
     }
-    
+
     .song-item.library-song {
       border-color: #FF9800;
       background: #fff9f0;
     }
-    
+
     .song-info {
       display: flex;
       align-items: center;
@@ -358,7 +417,7 @@
       flex: 1;
       min-width: 0;
     }
-    
+
     .song-position {
       width: 32px;
       height: 32px;
@@ -371,15 +430,21 @@
       font-weight: 700;
       font-size: 16px;
       flex-shrink: 0;
+      transition: all 0.3s ease;
     }
-    
+
+    .song-item:hover .song-position {
+      transform: scale(1.1);
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    }
+
     .song-name {
       font-weight: 600;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    
+
     .song-badge {
       background: #4CAF50;
       color: white;
@@ -388,41 +453,149 @@
       font-size: 11px;
       font-weight: 600;
     }
-    
+
     .song-badge.library {
       background: #FF9800;
     }
-    
+
     .song-controls {
       display: flex;
       gap: 6px;
       flex-shrink: 0;
     }
-    
+
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 13px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 600;
+    }
+
+    .btn-play {
+      background: #2196F3;
+      color: white;
+    }
+
+    .btn-play:hover {
+      background: #0b7dda;
+    }
+
+    .btn-play.playing {
+      background: #FF9800;
+    }
+
     .btn-move {
       background: #f5f5f5;
       color: #666;
       border: 1px solid #ddd;
     }
-    
+
     .btn-move:hover {
       background: #e0e0e0;
     }
-    
+
     .btn-move:disabled {
       opacity: 0.4;
       cursor: not-allowed;
     }
-    
+
     .btn-danger {
       background: #f44336;
       color: white;
     }
-    
+
     .btn-danger:hover {
       background: #d32f2f;
     }
-    
+
+    /* Song Library Styles */
+    .library-section {
+      background: linear-gradient(135deg, #fff9f0 0%, #ffe8cc 100%);
+      border: 2px solid #FF9800;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .library-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #e65100;
+    }
+
+    .library-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    .library-song-card {
+      background: white;
+      border: 2px solid #FFE0B2;
+      border-radius: 10px;
+      padding: 12px;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .library-song-card:hover {
+      border-color: #FF9800;
+      box-shadow: 0 4px 12px rgba(255, 152, 0, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .library-song-card.added {
+      border-color: #4CAF50;
+      background: #f1f8f4;
+    }
+
+    .library-song-name {
+      font-weight: 600;
+      font-size: 14px;
+      color: #333;
+      line-height: 1.3;
+    }
+
+    .library-song-controls {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-add-library {
+      flex: 1;
+      padding: 8px 12px;
+      background: #FF9800;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-add-library:hover:not(:disabled) {
+      background: #f57c00;
+    }
+
+    .btn-add-library:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .btn-add-library.added {
+      background: #4CAF50;
+    }
+
     .upload-section {
       margin-top: 15px;
       padding: 15px;
@@ -430,12 +603,12 @@
       border-radius: 8px;
       border: 2px dashed #ccc;
     }
-    
+
     .upload-section.max-reached {
       opacity: 0.6;
       pointer-events: none;
     }
-    
+
     .upload-label {
       display: inline-block;
       padding: 10px 20px;
@@ -447,181 +620,72 @@
       font-size: 14px;
       transition: all 0.2s;
     }
-    
+
     .upload-label:hover {
       background: #5568d3;
       transform: translateY(-1px);
     }
-    
+
     .upload-label.disabled {
       background: #ccc;
       cursor: not-allowed;
     }
-    
-    /* Presentation Preview */
-    .preview-section {
+
+    /* PowerPoint Upload Section */
+    .pptx-upload-section {
       margin-top: 15px;
       padding: 20px;
-      background: #f0f7ff;
-      border: 2px solid #2196F3;
+      background: #fff9e6;
+      border: 2px dashed #FF9800;
       border-radius: 8px;
     }
-    
-    .preview-header {
-      font-weight: 600;
-      color: #1565c0;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+
+    .pptx-upload-section .upload-label {
+      background: #FF9800;
+      padding: 12px 24px;
+      font-size: 15px;
     }
-    
-    .preview-iframe {
-      width: 100%;
-      height: 400px;
-      border: 2px solid #90caf9;
-      border-radius: 8px;
-      background: white;
+
+    .pptx-upload-section .upload-label:hover {
+      background: #f57c00;
     }
-    
-    .preview-url {
-      margin-top: 10px;
-      padding: 10px;
-      background: white;
-      border-radius: 6px;
-      font-size: 13px;
-      color: #666;
-      word-break: break-all;
-    }
-    
-    /* Submit Button */
-    .submit-section {
-      margin-top: 40px;
-      padding-top: 30px;
-      border-top: 3px solid #e0e0e0;
-      text-align: center;
-    }
-    
-    .btn-submit {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 20px 50px;
-      font-size: 20px;
-      font-weight: 700;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-    }
-    
-    .btn-submit:hover:not(:disabled) {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
-    }
-    
-    .btn-submit:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-    
-    .submit-note {
+
+    .pptx-file-preview {
       margin-top: 15px;
-      color: #999;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-    
-    /* Toast */
-    .toast {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      padding: 16px 24px;
-      background: #333;
-      color: white;
-      border-radius: 8px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-      opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.3s;
-      z-index: 1000;
-      max-width: 400px;
-    }
-    
-    .toast.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    
-    .toast.success {
-      background: #4CAF50;
-    }
-    
-    .toast.error {
-      background: #f44336;
-    }
-    
-    /* Loading Overlay */
-    .loading-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.8);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-    }
-    
-    .loading-overlay.show {
-      display: flex;
-    }
-    
-    .loading-content {
+      padding: 12px;
       background: white;
-      padding: 40px;
-      border-radius: 16px;
-      text-align: center;
-      max-width: 400px;
+      border: 2px solid #4CAF50;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
-    
-    .spinner {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #667eea;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 20px;
+
+    .pptx-file-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+
+    .pptx-file-icon {
+      font-size: 24px;
     }
-    
-    .loading-text {
-      font-size: 18px;
+
+    .pptx-file-details {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pptx-file-name {
       font-weight: 600;
       color: #333;
-      margin-bottom: 10px;
     }
-    
-    .loading-subtext {
-      font-size: 14px;
+
+    .pptx-file-size {
+      font-size: 13px;
       color: #666;
     }
 
-    .loading-subtext {
-      font-size: 14px;
-      color: #666;
-    }
-    
     /* Song Range Sliders */
     .song-ranges-container {
       margin-top: 15px;
@@ -674,247 +738,323 @@
       border-color: #667eea;
     }
     
-    @media (max-width: 768px) {
-      .header h1 { font-size: 26px; }
+    /* Resubmit Button */
+    .resubmit-section {
+      margin-top: 30px;
+      padding-top: 30px;
+      border-top: 2px solid #f0f0f0;
+      text-align: center;
+    }
+    
+    .btn-resubmit {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 18px 40px;
+      font-size: 18px;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-resubmit:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+    }
+    
+    .btn-resubmit:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    /* Notification Toast */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      padding: 16px 24px;
+      background: #333;
+      color: white;
+      border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s;
+      z-index: 1000;
+      max-width: 400px;
+    }
+    
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .toast.success {
+      background: #4CAF50;
+    }
+    
+    .toast.error {
+      background: #f44336;
+    }
     
     @media (max-width: 768px) {
-      .header h1 { font-size: 26px; }
-      .section { padding: 20px; }
-      .library-grid { grid-template-columns: 1fr; }
-      .song-controls { flex-wrap: wrap; }
+      .header h1 { font-size: 24px; }
+      .actions { flex-direction: column; }
+      .btn { width: 100%; justify-content: center; }
       .toast { right: 20px; left: 20px; max-width: none; }
+      .slide-inputs { grid-template-columns: 1fr; }
+      .song-controls { flex-wrap: wrap; }
+      .library-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>✨ Customize Your Memorial Video</h1>
-      <p>Review your slideshow and choose your preferences below</p>
+      <h1>✨ Your Memorial Video</h1>
+      <p id="jobInfo">Loading...</p>
     </div>
     
     <div class="content">
-      <div class="intro-box">
-        <h2>📋 Next Steps</h2>
-        <p>We've created a draft slideshow from your photos. Please review the settings below and confirm your slideshow link. Once you submit, we'll create your memorial video and send it to you via email in 5-15 minutes.</p>
+      <!-- Summary Sentence -->
+      <div id="summaryBox" class="summary-box" style="display:none;">
+        <!-- Will be populated dynamically -->
       </div>
       
-      <!-- SECTION 1: Slideshow Confirmation -->
-      <div class="section">
+      <!-- Video Player Section -->
+      <div class="video-section">
+        <div id="videoContainer" class="loading">
+          <div class="spinner"></div>
+          <p>Loading your video...</p>
+        </div>
+      </div>
+      
+      <!-- Primary Actions -->
+      <div class="actions" id="actionButtons">
+        <button id="editBtn" class="btn btn-edit" style="display:none;">
+          ✏️ Edit & Resubmit
+        </button>
+        <button id="finalizeBtn" class="btn btn-primary" style="display:none;">
+          ✅ I'm Finished (Download Video)
+        </button>
+        <button id="shareBtn" class="btn btn-secondary" style="display:none;">
+          🔗 Share Video
+        </button>
+      </div>
+      
+      <!-- Finalized State -->
+      <div id="finalizedMessage" style="display:none;">
+        <div style="background: #e8f5e9; border: 2px solid #4CAF50; border-radius: 12px; padding: 30px; text-align: center;">
+          <div style="font-size: 48px; margin-bottom: 15px;">✅</div>
+          <h2 style="color: #2e7d32; margin-bottom: 10px;">Order Complete!</h2>
+          <p style="color: #555; margin-bottom: 20px;">Your memorial video has been finalized. A backup copy has been sent to your email.</p>
+          <a id="finalDownloadBtn" href="#" class="btn btn-primary">
+            📥 Download Video Again
+          </a>
+        </div>
+      </div>
+      
+      <!-- Edit Sections -->
+      <div class="edit-sections" id="editSections" style="display:none;">
         <div class="section-header">
-          <span class="section-icon">📊</span>
-          <span class="section-title">Confirm Your Slideshow</span>
+          <h2>✏️ Make Changes to Your Video</h2>
         </div>
         
-        <div class="info-box blue">
-          We've prepared a draft slideshow for you. Please confirm which version you'd like to use for your video.
-        </div>
-        
-        <div class="form-group">
-          <label>
-            Did you edit the document using the link shared by MemorialVideo.AI? Or, did you make a copy/download a separate version?
-            <div class="help-text">Note: If you did not actively press "make a copy" or "download", then you likely edited the slideshow document provided.</div>
-          </label>
-          <div class="radio-group">
-            <label class="radio-option">
-              <input type="radio" name="slideshowVersion" value="original" checked>
-              <div class="radio-option-content">
-                <span class="radio-option-label">I edited the document using the link provided</span>
-                <span class="radio-option-desc">Use the original slideshow that was shared with you</span>
+        <!-- Change Songs (MOVED TO TOP) -->
+        <div class="edit-option" data-section="songs">
+          <div class="edit-option-header">
+            <div class="edit-option-title">
+              <span class="edit-option-icon">🎵</span>
+              <span>Change Songs</span>
+            </div>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="edit-option-content">
+            <!-- Song Library -->
+            <div class="library-section">
+              <div class="library-header">
+                🎼 Song Library - Choose from our curated memorial music
               </div>
-            </label>
+              <div class="library-grid" id="libraryGrid">
+                <!-- Will be populated dynamically -->
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Your Selected Songs (drag to reorder, max 6 total)</label>
+              <div id="songList" class="song-list">
+                <!-- Will be populated dynamically -->
+              </div>
+            </div>
             
-            <label class="radio-option">
-              <input type="radio" name="slideshowVersion" value="copy">
-              <div class="radio-option-content">
-                <span class="radio-option-label">I made a copy and used a separate online document for my revisions</span>
-                <span class="radio-option-desc">Provide a new Google Slides URL (e.g., slideshow_v2)</span>
-                <div class="conditional-input" id="copyUrlInput" style="display:none;">
-                  <label for="newGoogleSlidesUrl" style="font-size: 13px; margin-bottom: 6px;">New Google Slides URL:</label>
-                  <input type="url" id="newGoogleSlidesUrl" name="newGoogleSlidesUrl" placeholder="https://docs.google.com/presentation/d/...">
-                </div>
+            <div class="upload-section" id="uploadSection">
+              <label class="upload-label" id="uploadLabel">
+                📤 Upload Your Own Songs (MP3)
+                <input type="file" id="newSongUpload" accept=".mp3,audio/mpeg" multiple style="display: none;">
+              </label>
+              <div style="margin-top: 8px; font-size: 13px; color: #666;">
+                <span id="songCountDisplay">0 of 6 songs</span>
               </div>
-            </label>
-            
-            <label class="radio-option">
-              <input type="radio" name="slideshowVersion" value="download">
-              <div class="radio-option-content">
-                <span class="radio-option-label">I downloaded a version to my PC</span>
-                <span class="radio-option-desc">Upload your PowerPoint file (.pptx) or provide a PowerPoint URL</span>
-                <div class="conditional-input" id="downloadInput" style="display:none;">
-                  <div style="margin-bottom: 12px;">
-                    <label for="pptxFile" style="font-size: 13px; margin-bottom: 6px;">Upload PowerPoint File:</label>
-                    <input type="file" id="pptxFile" name="pptxFile" accept=".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation">
-                  </div>
-                  <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #ddd;">
-                    <div style="text-align: center; margin-bottom: 8px; font-weight: 600; font-size: 13px;">OR</div>
-                    <label for="pptxUrl" style="font-size: 13px; margin-bottom: 6px;">PowerPoint URL (OneDrive/SharePoint):</label>
-                    <input type="url" id="pptxUrl" name="pptxUrl" placeholder="https://onedrive.live.com/... or https://sharepoint.com/...">
-                  </div>
-                </div>
-              </div>
-            </label>
+            </div>
           </div>
-        </div>
-        
-        <!-- Slideshow Preview (Conditional) -->
-        <div id="slideshowPreview" class="preview-section" style="display:none;">
-          <div class="preview-header" id="previewHeader">
-            🔍 Preview: Slideshow
-          </div>
-          <iframe id="previewIframe" class="preview-iframe" src="" frameborder="0"></iframe>
-          <div class="preview-url" id="previewUrl"></div>
-        </div>
-        
-        <!-- PowerPoint File Preview (Filename only) -->
-        <div id="pptxFilePreview" class="preview-section" style="display:none; background: #fff9e6; border-color: #FF9800;">
-          <div class="preview-header" style="color: #e65100;">
-            📄 PowerPoint File Selected
-          </div>
-          <div style="padding: 15px; background: white; border-radius: 8px; font-weight: 600; color: #333;">
-            <span id="pptxFileName"></span>
-          </div>
-        </div>
-      </div>
-      
-      <!-- SECTION 2: Choose Music -->
-      <div class="section">
-        <div class="section-header">
-          <span class="section-icon">🎵</span>
-          <span class="section-title">Choose Your Music</span>
-        </div>
-        
-        <div class="library-section">
-          <div class="library-header">
-            🎼 Song Library - Choose from our curated memorial music
-          </div>
-          <div class="library-grid" id="libraryGrid">
-            <!-- Populated by JS -->
-          </div>
-        </div>
-        
-        <div class="form-group">
-          <label>Your Selected Songs (drag to reorder, max 6 total)</label>
-          <div id="songList" class="song-list">
-            <!-- Populated by JS -->
-          </div>
-        </div>
-        
-        <div class="upload-section" id="uploadSection">
-          <label class="upload-label" id="uploadLabel">
-            📤 Upload Your Own Songs (MP3)
-            <input type="file" id="customSongUpload" accept=".mp3,audio/mpeg" multiple style="display: none;">
-          </label>
-          <div style="margin-top: 8px; font-size: 13px; color: #666;">
-            <span id="songCountDisplay">0 of 6 songs</span>
-          </div>
-        </div>
-      </div>
-      
-      <!-- SECTION 3: Video Timing -->
-      <div class="section">
-        <div class="section-header">
-          <span class="section-icon">⏱️</span>
-          <span class="section-title">Video Timing</span>
-        </div>
-        
-        <div class="form-group">
-          <label>How should we time your video?</label>
-          <div class="radio-group">
-            <label class="radio-option">
-              <input type="radio" name="timingMode" value="perSlide">
-              <div class="radio-option-content">
-                <span class="radio-option-label">Per Slide Duration</span>
-                <span class="radio-option-desc">Set how many seconds each slide should display</span>
-                <div class="conditional-input" id="perSlideInput" style="display:none;">
-                  <label for="perSlideSec" style="font-size: 13px; margin-bottom: 6px;">Seconds per slide:</label>
-                  <input type="number" id="perSlideSec" name="perSlideSec" min="2" max="30" value="5">
-                </div>
-              </div>
-            </label>
-            
-            <label class="radio-option selected">
-              <input type="radio" name="timingMode" value="fixedRuntime" checked>
-              <div class="radio-option-content">
-                <span class="radio-option-label">Fixed Total Runtime</span>
-                <span class="radio-option-desc">Set the total video length in seconds (recommended)</span>
-                <div class="conditional-input" id="fixedRuntimeInput">
-                  <label for="fixedRuntimeSec" style="font-size: 13px; margin-bottom: 6px;">Total runtime (seconds):</label>
-                  <input type="number" id="fixedRuntimeSec" name="fixedRuntimeSec" min="30" max="1800" value="350">
-                </div>
-              </div>
-            </label>
-            
-            <label class="radio-option">
-              <input type="radio" name="timingMode" value="fitToSongs">
-              <div class="radio-option-content">
-                <span class="radio-option-label">Fit to Music Length</span>
-                <span class="radio-option-desc">Video duration matches your music (automatic)</span>
-              </div>
-            </label>
-          </div>
-        </div>
-      </div>
-      
-      <!-- SECTION 4: Transitions -->
-      <div class="section">
-        <div class="section-header">
-          <span class="section-icon">🎨</span>
-          <span class="section-title">Transition Style</span>
-        </div>
-        
-        <div class="form-group">
-          <label for="visualPackage">
-            Visual Package
-            <div class="help-text">Choose the style of transitions between slides</div>
-          </label>
-          <select id="visualPackage" name="visualPackage">
-            <option value="simple-fade-wipe">Simple Fade & Wipe</option>
-            <option value="pages-of-life">Pages of Life</option>
-            <option value="floating-frames">Floating Frames</option>
-            <option value="zoom-through">Zoom Through</option>
-            <option value="blinds-combs-bars">Blinds, Combs & Bars</option>
-          </select>
-        </div>
-      </div>
-      
-      <!-- SECTION 5: Music Distribution -->
-      <div class="section">
-        <div class="section-header">
-          <span class="section-icon">🎼</span>
-          <span class="section-title">Music Distribution</span>
-        </div>
-        
-        <div class="form-group">
-          <label for="musicDistribution">
-            How should songs be distributed?
-            <div class="help-text">Choose how your selected songs play throughout the video</div>
-          </label>
-          <select id="musicDistribution" name="musicDistribution">
-            <option value="evenlyDistributed">Evenly Distributed (Recommended)</option>
-            <option value="specifyPlacement">Specify Placement (Advanced)</option>
-          </select>
         </div>
 
-        <!-- Conditional Song Range Sliders -->
-        <div id="songRangesContainer" class="song-ranges-container" style="display:none;">
-          <div class="info-box">
-            📍 Specify which slides each song should play during. The backend will automatically prevent overlaps and fill gaps.
+        <!-- Change Transitions -->
+        <div class="edit-option" data-section="transitions">
+          <div class="edit-option-header">
+            <div class="edit-option-title">
+              <span class="edit-option-icon">🎨</span>
+              <span>Change Transitions</span>
+            </div>
+            <span class="chevron">▼</span>
           </div>
-          <div id="songRangesList">
-            <!-- Will be populated dynamically based on number of songs -->
+          <div class="edit-option-content">
+            <div class="form-group">
+              <label for="visualPackage">
+                Visual Package
+                <div class="help-text">Choose the style of transitions between slides</div>
+              </label>
+              <select id="visualPackage" name="visualPackage">
+                <option value="">-- Select a package --</option>
+                <option value="simple-fade-wipe">Simple Fade & Wipe</option>
+                <option value="pages-of-life">Pages of Life</option>
+                <option value="floating-frames">Floating Frames</option>
+                <option value="zoom-through">Zoom Through</option>
+                <option value="blinds-combs-bars">Blinds, Combs & Bars</option>
+              </select>
+            </div>
           </div>
         </div>
-      </div>
-      
-      <!-- SUBMIT SECTION -->
-      <div class="submit-section">
-        <button id="submitBtn" class="btn-submit" disabled>
-          🚀 Create My Memorial Video
-        </button>
-        <p class="submit-note">
-          You'll receive an email with your video in 5-15 minutes
-        </p>
+        
+        <!-- Change Timing -->
+        <div class="edit-option" data-section="timing">
+          <div class="edit-option-header">
+            <div class="edit-option-title">
+              <span class="edit-option-icon">⏱️</span>
+              <span>Change Video Length</span>
+            </div>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="edit-option-content">
+            <div class="form-group">
+              <label>Timing Mode</label>
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="timingMode" value="perSlide">
+                  <div class="radio-option-content">
+                    <span class="radio-option-label">Per Slide Duration</span>
+                    <span class="radio-option-desc">Set how many seconds each slide should display</span>
+                    <div class="conditional-input" id="perSlideInput" style="display:none;">
+                      <label for="perSlideSec" style="font-size: 13px; margin-bottom: 6px;">Seconds per slide:</label>
+                      <input type="number" id="perSlideSec" name="perSlideSec" min="2" max="30" value="5" style="padding: 8px;">
+                    </div>
+                  </div>
+                </label>
+                
+                <label class="radio-option">
+                  <input type="radio" name="timingMode" value="fixedRuntime">
+                  <div class="radio-option-content">
+                    <span class="radio-option-label">Fixed Total Runtime</span>
+                    <span class="radio-option-desc">Set the total video length in seconds</span>
+                    <div class="conditional-input" id="fixedRuntimeInput" style="display:none;">
+                      <label for="fixedRuntimeSec" style="font-size: 13px; margin-bottom: 6px;">Total runtime (seconds):</label>
+                      <input type="number" id="fixedRuntimeSec" name="fixedRuntimeSec" min="30" max="1800" value="320" style="padding: 8px;">
+                    </div>
+                  </div>
+                </label>
+                
+                <label class="radio-option">
+                  <input type="radio" name="timingMode" value="fitToSongs">
+                  <div class="radio-option-content">
+                    <span class="radio-option-label">Fit to Music Length</span>
+                    <span class="radio-option-desc">Video duration matches your music (automatic)</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Change Song Logic -->
+        <div class="edit-option" data-section="songlogic">
+          <div class="edit-option-header">
+            <div class="edit-option-title">
+              <span class="edit-option-icon">🎼</span>
+              <span>Change Song Logic</span>
+            </div>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="edit-option-content">
+            <div class="form-group">
+              <label for="musicDistribution">
+                Music Distribution
+                <div class="help-text">How songs should be spread across the video</div>
+              </label>
+              <select id="musicDistribution" name="musicDistribution">
+                <option value="">-- Select distribution --</option>
+                <option value="evenlyDistributed">Evenly Distributed</option>
+                <option value="specifyPlacement">Specify Placement</option>
+              </select>
+            </div>
+
+            <!-- Conditional Song Range Sliders -->
+            <div id="songRangesContainer" class="song-ranges-container" style="display:none;">
+              <div class="info-box">
+                📍 Specify which slides each song should play during. The backend will automatically prevent overlaps and fill gaps.
+              </div>
+              <div id="songRangesList">
+                <!-- Will be populated dynamically based on number of songs -->
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Manual Changes -->
+        <div class="edit-option" data-section="manual">
+          <div class="edit-option-header">
+            <div class="edit-option-title">
+              <span class="edit-option-icon">✏️</span>
+              <span>Make Manual Changes</span>
+            </div>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="edit-option-content">
+            <div class="info-box" id="manualEditInfoBox">
+              Edit your presentation directly, then come back here and click "Resubmit Changes" to create a new video with your edits.
+            </div>
+            <div id="manualEditButtons" class="button-group">
+              <!-- Buttons will be populated based on presentation type -->
+            </div>
+            
+            <!-- PowerPoint Upload Section (Only shows for PowerPoint providers) -->
+            <div id="pptxUploadSection" class="pptx-upload-section" style="display:none;">
+              <div style="margin-bottom: 12px; font-weight: 600; color: #FF9800;">
+                📄 Upload a New PowerPoint File
+              </div>
+              <label class="upload-label">
+                📤 Choose PowerPoint File (.pptx)
+                <input type="file" id="newPptxUpload" accept=".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation" style="display: none;">
+              </label>
+              <div id="pptxFilePreview" style="display:none;">
+                <!-- File preview will appear here -->
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Resubmit Section -->
+        <div class="resubmit-section">
+          <button id="resubmitBtn" class="btn-resubmit" disabled>
+            🚀 Resubmit Changes
+          </button>
+          <p style="margin-top:12px; color:#999; font-size:14px;">
+            Make changes above, then click to create a new video
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -922,22 +1062,12 @@
   <!-- Toast Notification -->
   <div id="toast" class="toast"></div>
   
-  <!-- Loading Overlay -->
-  <div id="loadingOverlay" class="loading-overlay">
-    <div class="loading-content">
-      <div class="spinner"></div>
-      <div class="loading-text">Creating Your Video...</div>
-      <div class="loading-subtext">Please wait, this may take a few moments</div>
-    </div>
-  </div>
-  
   <script>
     // Configuration
-    const API_ENDPOINT = 'https://p273y4lw2j.execute-api.us-east-2.amazonaws.com/prod/process-job';
-    const S3_UPLOAD_API = 'https://4hyy6kr2id.execute-api.us-east-2.amazonaws.com/prod/generate-upload-url';
+    const API_BASE = 'https://4hyy6kr2id.execute-api.us-east-2.amazonaws.com/prod';
     const MAX_SONGS = 6;
     
-    // Song Library
+    // Song Library with S3 URLs
     const SONG_LIBRARY = [
       {
         id: 'lib-abandoned-house',
@@ -1007,283 +1137,45 @@
       }
     ];
     
-    // Parse URL parameters
+    // Parse job ID from URL
     const urlParams = new URLSearchParams(window.location.search);
-    const uid = urlParams.get('uid');
-    const email = urlParams.get('email');
-    const firstName = urlParams.get('firstName') || 'there';
-    const fullName = urlParams.get('fullName') || '';
-    const slideshowUrl = urlParams.get('slideshowUrl') || '';
-    const dropboxUrl = urlParams.get('dropboxUrl') || '';
+    const jobId = urlParams.get('job');
+    const isFinalized = urlParams.get('finalized') === 'true';
+    const isSharedView = urlParams.get('share') === 'true';
     
-    // State
-    let selectedSongs = [];
+    // Track changes made by user
+    let pendingChanges = {};
+    let currentSettings = {};
+    let currentSongs = [];
     let currentlyPlayingAudio = null;
-    let songRanges = [];
+    let newPptxFile = null;
     
-    // Initialize
-    if (!uid || !email) {
-      showToast('Missing required parameters in URL', 'error');
+    // Prevent going back if finalized
+    if (isFinalized) {
+      history.pushState(null, null, location.href);
+      history.pushState(null, null, location.href);
+      
+      window.addEventListener('popstate', function(event) {
+        history.pushState(null, null, location.href);
+      });
+    }
+    
+    if (!jobId) {
+      showError('No job ID provided in URL. Please check your link.');
     } else {
-      initializePage();
+      loadJobData(jobId);
     }
     
-    function initializePage() {
-      // Set up slideshow preview
-      setupSlideshowPreview();
-      
-      // Render song library
-      renderLibrary();
-      renderSongList();
-      updateSongCount();
-      
-      // Setup event listeners
-      setupEventListeners();
-      
-      // Validate form
-      validateForm();
-    }
-    
-    function setupSlideshowPreview() {
-      const iframe = document.getElementById('previewIframe');
-      const urlDisplay = document.getElementById('previewUrl');
-      const previewSection = document.getElementById('slideshowPreview');
-      const previewHeader = document.getElementById('previewHeader');
-      
-      if (slideshowUrl) {
-        let embedUrl = slideshowUrl;
-        
-        if (slideshowUrl.includes('docs.google.com/presentation')) {
-          // Google Slides
-          embedUrl = slideshowUrl.replace('/edit', '/embed');
-          previewHeader.textContent = '🔍 Preview: Original Slideshow';
-          previewSection.style.display = 'block';
-          iframe.src = embedUrl;
-          urlDisplay.textContent = `URL: ${slideshowUrl}`;
-        } else if (slideshowUrl.includes('sharepoint.com') || slideshowUrl.includes('onedrive.live.com') || slideshowUrl.includes('1drv.ms')) {
-          // PowerPoint URL - use SharePoint native embed
-          if (!slideshowUrl.includes('action=embedview')) {
-            const separator = slideshowUrl.includes('?') ? '&' : '?';
-            embedUrl = slideshowUrl + separator + 'action=embedview&wdStartOn=1';
-          }
-          previewHeader.textContent = '🔍 Preview: Original PowerPoint';
-          previewSection.style.display = 'block';
-          iframe.src = embedUrl;
-          urlDisplay.textContent = `URL: ${slideshowUrl}`;
-          
-          console.log('[PREVIEW] Initial PowerPoint embed URL:', embedUrl);
-        }
-      }
-    }
-    
-    function setupEventListeners() {
-      // Slideshow version radio buttons
-      document.querySelectorAll('input[name="slideshowVersion"]').forEach(radio => {
-        radio.addEventListener('change', handleSlideshowVersionChange);
-      });
-      
-      // New Google Slides URL input - update preview on input
-      document.getElementById('newGoogleSlidesUrl').addEventListener('input', (e) => {
-        const selectedVersion = document.querySelector('input[name="slideshowVersion"]:checked').value;
-        if (selectedVersion === 'copy') {
-          updateCopyPreview(e.target.value);
-        }
-        validateForm();
-      });
-      
-      // PowerPoint URL input - update preview on input
-      document.getElementById('pptxUrl').addEventListener('input', (e) => {
-        const selectedVersion = document.querySelector('input[name="slideshowVersion"]:checked').value;
-        if (selectedVersion === 'download') {
-          updatePowerPointUrlPreview(e.target.value);
-        }
-        validateForm();
-      });
-      
-      // PowerPoint file upload - show filename
-      document.getElementById('pptxFile').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        const selectedVersion = document.querySelector('input[name="slideshowVersion"]:checked').value;
-        
-        if (file && selectedVersion === 'download') {
-          document.getElementById('pptxFileName').textContent = file.name;
-          document.getElementById('pptxFilePreview').style.display = 'block';
-          document.getElementById('slideshowPreview').style.display = 'none';
-        }
-        validateForm();
-      });
-      
-      // Timing mode radio buttons
-      document.querySelectorAll('input[name="timingMode"]').forEach(radio => {
-        radio.addEventListener('change', handleTimingModeChange);
-      });
-      
-      // Custom song upload
-      document.getElementById('customSongUpload').addEventListener('change', handleCustomSongUpload);
-      
-      // Form changes
-      document.querySelectorAll('select, input').forEach(element => {
-        element.addEventListener('change', validateForm);
-        element.addEventListener('input', validateForm);
-      });
-
-      // Music distribution change handler
-      document.getElementById('musicDistribution').addEventListener('change', (e) => {
-        const value = e.target.value;
-        handleMusicDistributionChange(value);
-      });
-      
-      // Submit button
-      document.getElementById('submitBtn').addEventListener('click', handleSubmit);
-    }
-    
-    function handleSlideshowVersionChange(e) {
-      const value = e.target.value;
-      
-      // Update radio option selected class
-      document.querySelectorAll('.radio-option').forEach(opt => {
-        opt.classList.remove('selected');
-      });
-      e.target.closest('.radio-option').classList.add('selected');
-      
-      // Show/hide conditional inputs
-      document.getElementById('copyUrlInput').style.display = value === 'copy' ? 'block' : 'none';
-      document.getElementById('downloadInput').style.display = value === 'download' ? 'block' : 'none';
-      
-      // Handle preview visibility
-      const slideshowPreview = document.getElementById('slideshowPreview');
-      const pptxFilePreview = document.getElementById('pptxFilePreview');
-      const iframe = document.getElementById('previewIframe');
-      const urlDisplay = document.getElementById('previewUrl');
-      const previewHeader = document.getElementById('previewHeader');
-      
-      // Hide all previews first
-      slideshowPreview.style.display = 'none';
-      pptxFilePreview.style.display = 'none';
-      
-      if (value === 'original') {
-        // Show original slideshow preview
-        if (slideshowUrl) {
-          let embedUrl = slideshowUrl;
-          if (slideshowUrl.includes('docs.google.com/presentation')) {
-            embedUrl = slideshowUrl.replace('/edit', '/embed');
-            previewHeader.textContent = '🔍 Preview: Original Slideshow';
-          } else if (slideshowUrl.includes('onedrive.live.com') || slideshowUrl.includes('sharepoint.com')) {
-            const encodedUrl = encodeURIComponent(slideshowUrl);
-            embedUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodedUrl}`;
-            previewHeader.textContent = '🔍 Preview: Original PowerPoint';
-          }
-          iframe.src = embedUrl;
-          urlDisplay.textContent = `URL: ${slideshowUrl}`;
-          slideshowPreview.style.display = 'block';
-        }
-      } else if (value === 'copy') {
-        // Preview will update when user enters URL (handled in input event listener)
-        const newUrl = document.getElementById('newGoogleSlidesUrl').value;
-        if (newUrl) {
-          updateCopyPreview(newUrl);
-        }
-      } else if (value === 'download') {
-        // Check if file is uploaded
-        const pptxFile = document.getElementById('pptxFile').files[0];
-        const pptxUrl = document.getElementById('pptxUrl').value;
-        
-        if (pptxFile) {
-          document.getElementById('pptxFileName').textContent = pptxFile.name;
-          pptxFilePreview.style.display = 'block';
-        } else if (pptxUrl) {
-          updatePowerPointUrlPreview(pptxUrl);
-        }
-      }
-      
-      validateForm();
-    }
-    
-    function updateCopyPreview(url) {
-      const slideshowPreview = document.getElementById('slideshowPreview');
-      const iframe = document.getElementById('previewIframe');
-      const urlDisplay = document.getElementById('previewUrl');
-      const previewHeader = document.getElementById('previewHeader');
-      
-      if (url && url.includes('docs.google.com/presentation')) {
-        // Google Slides
-        const embedUrl = url.replace('/edit', '/embed');
-        previewHeader.textContent = '🔍 Preview: Your Copy';
-        iframe.src = embedUrl;
-        urlDisplay.textContent = `URL: ${url}`;
-        slideshowPreview.style.display = 'block';
-      } else if (url && (url.includes('sharepoint.com') || url.includes('onedrive.live.com') || url.includes('1drv.ms'))) {
-        // PowerPoint URL - use SharePoint native embed
-        let embedUrl = url;
-        if (!url.includes('action=embedview')) {
-          const separator = url.includes('?') ? '&' : '?';
-          embedUrl = url + separator + 'action=embedview&wdStartOn=1';
-        }
-        previewHeader.textContent = '🔍 Preview: Your PowerPoint Copy';
-        iframe.src = embedUrl;
-        urlDisplay.textContent = `URL: ${url}`;
-        slideshowPreview.style.display = 'block';
-        
-        console.log('[PREVIEW] Copy PowerPoint embed URL:', embedUrl);
-      } else {
-        slideshowPreview.style.display = 'none';
-      }
-    }
-    
-    function updatePowerPointUrlPreview(url) {
-      const slideshowPreview = document.getElementById('slideshowPreview');
-      const pptxFilePreview = document.getElementById('pptxFilePreview');
-      const iframe = document.getElementById('previewIframe');
-      const urlDisplay = document.getElementById('previewUrl');
-      const previewHeader = document.getElementById('previewHeader');
-      
-      if (url && (url.includes('sharepoint.com') || url.includes('onedrive.live.com') || url.includes('1drv.ms'))) {
-        // Use SharePoint's native embed format
-        let embedUrl = url;
-        
-        // Add embed parameters if not already present
-        if (!url.includes('action=embedview')) {
-          const separator = url.includes('?') ? '&' : '?';
-          embedUrl = url + separator + 'action=embedview&wdStartOn=1';
-        }
-        
-        previewHeader.textContent = '🔍 Preview: PowerPoint';
-        iframe.src = embedUrl;
-        urlDisplay.textContent = `URL: ${url}`;
-        slideshowPreview.style.display = 'block';
-        
-        console.log('[PREVIEW] PowerPoint embed URL:', embedUrl);
-      } else {
-        slideshowPreview.style.display = 'none';
-        pptxFilePreview.style.display = 'none';
-      }
-    }
-    
-    function handleTimingModeChange(e) {
-      const value = e.target.value;
-      
-      // Update radio option selected class
-      document.querySelectorAll('.radio-option').forEach(opt => {
-        opt.classList.remove('selected');
-      });
-      e.target.closest('.radio-option').classList.add('selected');
-      
-      // Show/hide conditional inputs
-      document.getElementById('perSlideInput').style.display = value === 'perSlide' ? 'block' : 'none';
-      document.getElementById('fixedRuntimeInput').style.display = value === 'fixedRuntime' ? 'block' : 'none';
-      
-      validateForm();
-    }
-    
+    // Render song library
     function renderLibrary() {
       const container = document.getElementById('libraryGrid');
       
       let html = '';
       SONG_LIBRARY.forEach(song => {
-        const isAdded = selectedSongs.some(s => s.id === song.id);
+        const isAdded = currentSongs.some(s => s.id === song.id);
         const cardClass = isAdded ? 'library-song-card added' : 'library-song-card';
         const btnClass = isAdded ? 'btn-add-library added' : 'btn-add-library';
-        const btnText = isAdded ? '✓ Added' : '+ Add';
+        const btnText = isAdded ? '✓ Added' : '+ Add to Video';
         const audioId = `audio-lib-${song.id}`;
         
         html += `
@@ -1291,7 +1183,7 @@
             <div class="library-song-name">${song.displayName}</div>
             <div class="library-song-controls">
               <button class="btn-small btn-play" onclick="togglePlay('${audioId}', this)">▶️</button>
-              <button class="${btnClass}" onclick="addLibrarySong('${song.id}')" ${isAdded || selectedSongs.length >= MAX_SONGS ? 'disabled' : ''}>
+              <button class="${btnClass}" onclick="addLibrarySong('${song.id}')" ${isAdded || currentSongs.length >= MAX_SONGS ? 'disabled' : ''}>
                 ${btnText}
               </button>
             </div>
@@ -1303,8 +1195,9 @@
       container.innerHTML = html;
     }
     
+    // Add library song to current songs
     function addLibrarySong(songId) {
-      if (selectedSongs.length >= MAX_SONGS) {
+      if (currentSongs.length >= MAX_SONGS) {
         showToast(`Maximum ${MAX_SONGS} songs reached`, 'error');
         return;
       }
@@ -1312,16 +1205,18 @@
       const libSong = SONG_LIBRARY.find(s => s.id === songId);
       if (!libSong) return;
       
-      if (selectedSongs.some(s => s.id === songId)) {
+      // Check if already added
+      if (currentSongs.some(s => s.id === songId)) {
         showToast('Song already added', 'error');
         return;
       }
       
-      selectedSongs.push({
+      currentSongs.push({
         id: libSong.id,
         name: libSong.name,
         displayName: libSong.displayName,
         url: libSong.url,
+        isNew: false,
         isLibrary: true,
         file: null
       });
@@ -1330,35 +1225,192 @@
       renderSongList();
       updateSongCount();
       updateSongRangeSliders();
-      validateForm();
       showToast(`Added "${libSong.displayName}"`, 'success');
     }
     
+    // Load job data from API
+    async function loadJobData(jobId) {
+      try {
+        console.log('[API] Calling:', `${API_BASE}/jobs/${jobId}`);
+        const response = await fetch(`${API_BASE}/jobs/${jobId}`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('[API] Response:', data);
+        
+        // Store current settings
+        if (data.settings) {
+          currentSettings = data.settings;
+          populateFormDefaults(data.settings);
+          displaySummary(data.settings);
+        }
+        
+        // Initialize songs from API response
+        if (data.songs && data.songs.length > 0) {
+          currentSongs = data.songs.map(song => {
+            // Check if this is a library song
+            const libSong = SONG_LIBRARY.find(lib => lib.name === song.name);
+            
+            return {
+              id: libSong ? libSong.id : song.name,
+              name: song.name,
+              displayName: song.displayName || song.name,
+              url: song.url,
+              isNew: false,
+              isLibrary: !!libSong,
+              file: null
+            };
+          });
+        } else if (data.settings && data.settings.audioCount > 0) {
+          const audioCount = data.settings.audioCount;
+          for (let i = 1; i <= audioCount; i++) {
+            currentSongs.push({
+              id: `song${i}.mp3`,
+              name: `song${i}.mp3`,
+              displayName: `song${i}.mp3`,
+              url: null,
+              isNew: false,
+              isLibrary: false,
+              file: null
+            });
+          }
+        }
+        
+        // Auto-redirect to finalized page if job is already finalized
+        if (data.isFinalized && !isFinalized) {
+          console.log('[REDIRECT] Job is finalized, redirecting...');
+          window.location.replace(`${window.location.origin}${window.location.pathname}?job=${jobId}&finalized=true`);
+          return;
+        }
+        
+        displayVideo(data);
+        setupManualEditButtons(data);
+        renderLibrary();
+        renderSongList();
+        updateSongCount();
+      } catch (error) {
+        console.error('[API ERROR]', error);
+        showError('Failed to load video data: ' + error.message);
+      }
+    }
+    
+    // Display summary sentence
+    function displaySummary(settings) {
+      const summaryBox = document.getElementById('summaryBox');
+      
+      // Format duration
+      let durationText = '';
+      if (settings.timingMode === 'fixedRuntime' && settings.fixedRuntimeSec) {
+        const minutes = Math.floor(settings.fixedRuntimeSec / 60);
+        const seconds = settings.fixedRuntimeSec % 60;
+        durationText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      } else if (settings.timingMode === 'perSlide' && settings.perSlideSec) {
+        durationText = `${settings.perSlideSec}s per slide`;
+      } else if (settings.timingMode === 'fitToSongs') {
+        durationText = 'matched to music length';
+      } else {
+        durationText = 'custom timing';
+      }
+      
+      // Timing mode display name
+      const timingModeNames = {
+        'fixedRuntime': 'Fixed Runtime',
+        'perSlide': 'Per Slide Duration',
+        'fitToSongs': 'Fit to Music'
+      };
+      const timingModeName = timingModeNames[settings.timingMode] || settings.timingMode;
+      
+      // Visual package display name
+      const visualPackageNames = {
+        'simple-fade-wipe': 'Simple Fade & Wipe',
+        'pages-of-life': 'Pages of Life',
+        'floating-frames': 'Floating Frames',
+        'zoom-through': 'Zoom Through',
+        'blinds-combs-bars': 'Blinds, Combs & Bars'
+      };
+      const visualPackageName = visualPackageNames[settings.visualPackage] || settings.visualPackage;
+      
+      // Music distribution display name
+      const musicDistNames = {
+        'evenlyDistributed': 'Evenly Distributed',
+        'specifyPlacement': 'Specify Placement'
+      };
+      const musicDistName = musicDistNames[settings.musicDistribution] || settings.musicDistribution;
+      
+      // Build summary
+      const audioCount = settings.audioCount || 3;
+      summaryBox.innerHTML = `
+        Your <strong>${durationText}</strong> video uses <strong>${timingModeName}</strong> mode with <strong>${visualPackageName}</strong> transitions and <strong>${audioCount} song${audioCount !== 1 ? 's' : ''}</strong> (${musicDistName}).
+      `;
+      
+      summaryBox.style.display = 'block';
+    }
+    
+    // Populate form defaults from settings
+    function populateFormDefaults(settings) {
+      // Transitions
+      if (settings.visualPackage) {
+        document.getElementById('visualPackage').value = settings.visualPackage;
+      }
+      
+      // Timing
+      if (settings.timingMode) {
+        const radio = document.querySelector(`input[name="timingMode"][value="${settings.timingMode}"]`);
+        if (radio) {
+          radio.checked = true;
+          handleTimingModeChange(settings.timingMode);
+        }
+      }
+      if (settings.perSlideSec) {
+        document.getElementById('perSlideSec').value = settings.perSlideSec;
+      }
+      if (settings.fixedRuntimeSec) {
+        document.getElementById('fixedRuntimeSec').value = settings.fixedRuntimeSec;
+      }
+      
+      // Song Logic
+      if (settings.musicDistribution) {
+        document.getElementById('musicDistribution').value = settings.musicDistribution;
+        handleMusicDistributionChange(settings.musicDistribution);
+      }
+    }
+    
+    // Render song list
     function renderSongList() {
       const container = document.getElementById('songList');
       
-      if (selectedSongs.length === 0) {
-        container.innerHTML = '<div style="color: #999; font-style: italic; padding: 20px; text-align: center;">No songs selected. Choose from the library above or upload your own!</div>';
+      if (currentSongs.length === 0) {
+        container.innerHTML = '<div style="color: #999; font-style: italic;">No songs selected. Choose from the library above or upload your own!</div>';
         return;
       }
       
       let html = '';
-      selectedSongs.forEach((song, index) => {
+      currentSongs.forEach((song, index) => {
         const audioId = `audio-${song.id}`;
-        const badge = song.isLibrary ? '<span class="song-badge library">LIBRARY</span>' : '<span class="song-badge">CUSTOM</span>';
-        const itemClass = song.isLibrary ? 'song-item library-song' : 'song-item new-upload';
+        const newBadge = song.isNew ? '<span class="song-badge">NEW</span>' : '';
+        const libraryBadge = song.isLibrary ? '<span class="song-badge library">LIBRARY</span>' : '';
+        
+        let itemClass = 'song-item';
+        if (song.isNew) itemClass += ' new-upload';
+        if (song.isLibrary) itemClass += ' library-song';
+        
+        const position = index + 1;
         
         html += `
           <div class="${itemClass}">
             <div class="song-info">
-              <div class="song-position">${index + 1}</div>
+              <div class="song-position">${position}</div>
               <span class="song-name">${song.displayName}</span>
-              ${badge}
+              ${newBadge}
+              ${libraryBadge}
             </div>
             <div class="song-controls">
               ${song.url ? `<button class="btn-small btn-play" onclick="togglePlay('${audioId}', this)">▶️</button>` : ''}
               <button class="btn-small btn-move" onclick="moveSongUp(${index})" ${index === 0 ? 'disabled' : ''}>⬆️</button>
-              <button class="btn-small btn-move" onclick="moveSongDown(${index})" ${index === selectedSongs.length - 1 ? 'disabled' : ''}>⬇️</button>
+              <button class="btn-small btn-move" onclick="moveSongDown(${index})" ${index === currentSongs.length - 1 ? 'disabled' : ''}>⬇️</button>
               <button class="btn-small btn-danger" onclick="removeSong(${index})">🗑️</button>
             </div>
             ${song.url ? `<audio id="${audioId}" src="${song.url}" preload="none"></audio>` : ''}
@@ -1367,8 +1419,10 @@
       });
       
       container.innerHTML = html;
+      updateSongTracking();
     }
     
+    // Toggle audio play/pause
     function togglePlay(audioId, button) {
       const audio = document.getElementById(audioId);
       
@@ -1401,55 +1455,62 @@
       }
     }
     
+    // Move song up
     function moveSongUp(index) {
       if (index === 0) return;
-      const temp = selectedSongs[index];
-      selectedSongs[index] = selectedSongs[index - 1];
-      selectedSongs[index - 1] = temp;
+      const temp = currentSongs[index];
+      currentSongs[index] = currentSongs[index - 1];
+      currentSongs[index - 1] = temp;
       renderSongList();
       updateSongRangeSliders();
     }
     
+    // Move song down
     function moveSongDown(index) {
-      if (index === selectedSongs.length - 1) return;
-      const temp = selectedSongs[index];
-      selectedSongs[index] = selectedSongs[index + 1];
-      selectedSongs[index + 1] = temp;
+      if (index === currentSongs.length - 1) return;
+      const temp = currentSongs[index];
+      currentSongs[index] = currentSongs[index + 1];
+      currentSongs[index + 1] = temp;
       renderSongList();
       updateSongRangeSliders();
     }
     
+    // Remove song
     function removeSong(index) {
-      if (!confirm(`Remove "${selectedSongs[index].displayName}"?`)) return;
-      selectedSongs.splice(index, 1);
+      if (!confirm(`Remove "${currentSongs[index].displayName}"?`)) return;
+      currentSongs.splice(index, 1);
       renderLibrary();
       renderSongList();
       updateSongCount();
       updateSongRangeSliders();
-      validateForm();
     }
     
+    // Update song count display
     function updateSongCount() {
       const display = document.getElementById('songCountDisplay');
       const uploadSection = document.getElementById('uploadSection');
       const uploadLabel = document.getElementById('uploadLabel');
       
-      display.textContent = `${selectedSongs.length} of ${MAX_SONGS} songs`;
+      display.textContent = `${currentSongs.length} of ${MAX_SONGS} songs`;
       
-      if (selectedSongs.length >= MAX_SONGS) {
+      if (currentSongs.length >= MAX_SONGS) {
         uploadSection.classList.add('max-reached');
         uploadLabel.classList.add('disabled');
       } else {
         uploadSection.classList.remove('max-reached');
         uploadLabel.classList.remove('disabled');
       }
+      
+      // Update library add buttons
+      renderLibrary();
     }
     
-    function handleCustomSongUpload(e) {
+    // Handle new song uploads
+    document.getElementById('newSongUpload').addEventListener('change', (e) => {
       const files = Array.from(e.target.files);
       
       files.forEach(file => {
-        if (selectedSongs.length >= MAX_SONGS) {
+        if (currentSongs.length >= MAX_SONGS) {
           showToast(`Maximum ${MAX_SONGS} songs reached`, 'error');
           return;
         }
@@ -1461,11 +1522,12 @@
         
         const localUrl = URL.createObjectURL(file);
         
-        selectedSongs.push({
-          id: `custom-${Date.now()}-${Math.random()}`,
+        currentSongs.push({
+          id: `new-${Date.now()}-${Math.random()}`,
           name: file.name,
           displayName: file.name,
           url: localUrl,
+          isNew: true,
           isLibrary: false,
           file: file
         });
@@ -1474,48 +1536,71 @@
       renderSongList();
       updateSongCount();
       updateSongRangeSliders();
-      validateForm();
       
       e.target.value = '';
+    });
+    
+    // Handle PowerPoint file upload
+    document.getElementById('newPptxUpload').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      
+      if (!file) return;
+      
+      if (!file.name.endsWith('.pptx') && !file.type.includes('presentationml')) {
+        showToast('Please select a valid PowerPoint (.pptx) file', 'error');
+        e.target.value = '';
+        return;
+      }
+      
+      newPptxFile = file;
+      
+      const previewDiv = document.getElementById('pptxFilePreview');
+      const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      
+      previewDiv.innerHTML = `
+        <div class="pptx-file-preview">
+          <div class="pptx-file-info">
+            <span class="pptx-file-icon">📄</span>
+            <div class="pptx-file-details">
+              <span class="pptx-file-name">${file.name}</span>
+              <span class="pptx-file-size">${fileSizeMB} MB</span>
+            </div>
+          </div>
+          <button class="btn-small btn-danger" onclick="clearPptxUpload()">🗑️ Remove</button>
+        </div>
+      `;
+      previewDiv.style.display = 'block';
+      
+      trackChange('newPresentationFile', true);
+      showToast('PowerPoint file ready to upload!', 'success');
+    });
+    
+    // Clear PowerPoint upload
+    function clearPptxUpload() {
+      newPptxFile = null;
+      document.getElementById('newPptxUpload').value = '';
+      document.getElementById('pptxFilePreview').style.display = 'none';
+      delete pendingChanges.newPresentationFile;
+      updateResubmitButton();
+      showToast('PowerPoint file removed', 'success');
     }
     
-    function validateForm() {
-      const slideshowVersion = document.querySelector('input[name="slideshowVersion"]:checked').value;
-      const submitBtn = document.getElementById('submitBtn');
+    // Track song changes for resubmit
+    function updateSongTracking() {
+      const songOrder = currentSongs.map(song => song.name);
+      const newSongs = currentSongs.filter(s => s.isNew).map(s => ({
+        originalName: s.name,
+        file: s.file
+      }));
       
-      let isValid = true;
+      const hasChanges = currentSongs.some(s => s.isNew) || 
+                        JSON.stringify(songOrder) !== JSON.stringify(currentSongs.map(s => s.name));
       
-      // Check slideshow
-      if (slideshowVersion === 'copy') {
-        const newUrl = document.getElementById('newGoogleSlidesUrl').value;
-        if (!newUrl || !newUrl.includes('docs.google.com/presentation')) {
-          isValid = false;
+      if (hasChanges || newSongs.length > 0) {
+        trackChange('songOrder', songOrder);
+        if (newSongs.length > 0) {
+          trackChange('newSongs', newSongs);
         }
-      } else if (slideshowVersion === 'download') {
-        const pptxFile = document.getElementById('pptxFile').files[0];
-        const pptxUrl = document.getElementById('pptxUrl').value;
-        if (!pptxFile && !pptxUrl) {
-          isValid = false;
-        }
-      }
-      
-      // Check songs
-      if (selectedSongs.length === 0) {
-        isValid = false;
-      }
-      
-      submitBtn.disabled = !isValid;
-    }
-
-    // Handle music distribution change
-    function handleMusicDistributionChange(value) {
-      const container = document.getElementById('songRangesContainer');
-      
-      if (value === 'specifyPlacement') {
-        container.style.display = 'block';
-        setupSongRangeSliders();
-      } else {
-        container.style.display = 'none';
       }
     }
     
@@ -1523,13 +1608,13 @@
     function setupSongRangeSliders() {
       const container = document.getElementById('songRangesList');
       
-      if (selectedSongs.length === 0) {
+      if (currentSongs.length === 0) {
         container.innerHTML = '<div style="color: #999; font-style: italic;">No songs available. Add songs first.</div>';
         return;
       }
       
       let html = '';
-      selectedSongs.forEach((song, index) => {
+      currentSongs.forEach((song, index) => {
         const audioId = `audio-range-${song.id}`;
         const playButton = song.url ? `<button class="btn-small btn-play" onclick="togglePlay('${audioId}', this)" style="margin-left: 8px;">▶️</button>` : '';
         
@@ -1570,17 +1655,25 @@
       
       container.innerHTML = html;
       
-      // Add event listeners to all range inputs
       document.querySelectorAll('.song-range-input').forEach(input => {
         input.addEventListener('input', handleSongRangeChange);
       });
     }
     
+    // Update song range sliders (wrapper for setup)
+    function updateSongRangeSliders() {
+      const musicDist = document.getElementById('musicDistribution').value;
+      
+      if (musicDist === 'specifyPlacement') {
+        setupSongRangeSliders();
+      }
+    }
+    
     // Handle song range input changes
     function handleSongRangeChange() {
-      songRanges = [];
-
-      selectedSongs.forEach((song, index) => {
+      const songRanges = [];
+  
+      currentSongs.forEach((song, index) => {
         const startInput = document.getElementById(`songRange${index}Start`);
         const endInput = document.getElementById(`songRange${index}End`);
     
@@ -1588,265 +1681,168 @@
           const startVal = parseInt(startInput.value);
           const endVal = parseInt(endInput.value);
       
-          if (!isNaN(startVal) && !isNaN(endVal)) {
-            let songIdentifier;
+        if (!isNaN(startVal) && !isNaN(endVal)) {
+          // FIX: For uploaded songs, extract filename from S3 URL
+          // For library songs, use the original name
+          let songIdentifier = song.name;  // ✅ DECLARE THE VARIABLE!
         
-            if (song.isLibrary) {
-              // Library: use actual filename
-              songIdentifier = song.name;
-            } else {
-              // Custom: use position-based name (matches backend upload order)
-              songIdentifier = `song${index + 1}.mp3`;
-            }
+          if (!song.isLibrary && song.url && song.url.startsWith('blob:')) {
+            // New upload with blob URL - use the original filename
+            songIdentifier = song.name;
+          } else if (!song.isLibrary && song.url && song.url.includes('/temp-uploads/')) {
+            // Previously uploaded song - extract filename from S3 URL
+            songIdentifier = song.url.split('/').pop();
+            console.log(`[SONG RANGE] Mapped uploaded song: ${song.name} -> ${songIdentifier}`);
+          }
         
-            songRanges.push({
-              song: songIdentifier,
-              startSlide: startVal,
-              endSlide: endVal
-            });
-         }
+          songRanges.push({
+            song: songIdentifier,  // ✅ NOW IT'S DEFINED!
+            startSlide: startVal,
+            endSlide: endVal
+          });
+        }
       }
     });
-
+  
+    if (songRanges.length > 0) {
+      trackChange('songRanges', songRanges);
+    } else {
+      delete pendingChanges.songRanges;
+      updateResubmitButton();
+    }
+  
     console.log('[SONG RANGES]', songRanges);
   }
-
-    // Update song range sliders when song count changes
-    function updateSongRangeSliders() {
-      const musicDist = document.getElementById('musicDistribution').value;
-      if (musicDist === 'specifyPlacement') {
+    
+    // Handle music distribution change
+    function handleMusicDistributionChange(value) {
+      const container = document.getElementById('songRangesContainer');
+      
+      if (value === 'specifyPlacement') {
+        container.style.display = 'block';
         setupSongRangeSliders();
+      } else {
+        container.style.display = 'none';
+        delete pendingChanges.songRanges;
+        updateResubmitButton();
       }
     }
     
-    async function handleSubmit() {
-      try {
-        showLoading(true);
-        
-        // STEP 1: Determine presentation type and source
-        const slideshowVersion = document.querySelector('input[name="slideshowVersion"]:checked').value;
-        let presentationType = null;
-        let presentationSource = null;
-        
-        if (slideshowVersion === 'original') {
-          if (slideshowUrl.includes('docs.google.com/presentation')) {
-            presentationType = 'google_slides';
-            presentationSource = slideshowUrl;
-          } else if (slideshowUrl.includes('sharepoint.com') || slideshowUrl.includes('onedrive.live.com') || slideshowUrl.includes('1drv.ms')) {
-            presentationType = 'powerpoint_url';
-            presentationSource = slideshowUrl;
-          } else {
-            throw new Error('Could not determine presentation type from original URL');
-          }
-        } else if (slideshowVersion === 'copy') {
-          const newUrl = document.getElementById('newGoogleSlidesUrl').value;
-          presentationType = 'google_slides';
-          presentationSource = newUrl;
-        } else if (slideshowVersion === 'download') {
-          const pptxFile = document.getElementById('pptxFile').files[0];
-          const pptxUrl = document.getElementById('pptxUrl').value;
-          
-          if (pptxFile) {
-            // Upload file to S3
-            showToast('Uploading presentation...', 'success');
-            const uploadedUrl = await uploadFileToS3(pptxFile, 'presentation');
-            presentationType = 'powerpoint_file';
-            presentationSource = uploadedUrl;
-          } else if (pptxUrl) {
-            presentationType = 'powerpoint_url';
-            presentationSource = pptxUrl;
-          }
-        }
-        
-        if (!presentationType || !presentationSource) {
-          throw new Error('Could not determine presentation type');
-        }
-        
-        // STEP 2: Upload custom songs to S3 and collect all song URLs
-        showToast('Uploading songs...', 'success');
-        const songs = [];
-        
-        for (let i = 0; i < selectedSongs.length; i++) {
-          const song = selectedSongs[i];
-          
-          if (song.isLibrary) {
-            // Library song - use direct URL
-            songs.push(song.url);
-          } else if (song.file) {
-            // Custom song - upload to S3
-            try {
-              const uploadedUrl = await uploadFileToS3(song.file, 'song', i + 1);
-              if (uploadedUrl) {
-                songs.push(uploadedUrl);
-              } else {
-                throw new Error(`Failed to upload ${song.name} - no URL returned`);
-              }
-            } catch (error) {
-              console.error(`[UPLOAD ERROR] Failed to upload song ${song.name}:`, error);
-              showToast(`Failed to upload ${song.name}: ${error.message}`, 'error');
-              throw new Error(`Song upload failed: ${song.name}`);
-            }
-          }
-        }
-        
-        if (songs.length === 0) {
-          throw new Error('No songs to process');
-        }
-        
-        console.log(`[SONGS] Successfully prepared ${songs.length} songs`);
-        console.log('[SONGS] URLs:', songs);
-        
-        // STEP 3: Build settings
-        const timingMode = document.querySelector('input[name="timingMode"]:checked').value;
-        const settings = {
-          jobId: uid,
-          customerEmail: email,
-          timingMode: timingMode,
-          visualPackage: document.getElementById('visualPackage').value,
-          audioCount: songs.length,
-          minPerSlideSec: 2,
-          maxPerSlideSec: 12,
-          targetLufs: -16,
-          fadeInSec: 2,
-          fadeOutSec: 2,
-          musicDistribution: document.getElementById('musicDistribution').value,
-          audioMatchPolicy: 'fitTo'
-        };
-        
-        if (timingMode === 'fixedRuntime') {
-          settings.fixedRuntimeSec = parseInt(document.getElementById('fixedRuntimeSec').value) || 350;
-        } else if (timingMode === 'perSlide') {
-          settings.perSlideSec = parseInt(document.getElementById('perSlideSec').value) || 5;
-        }
-
-        // ADD SONG RANGES IF SPECIFY PLACEMENT IS SELECTED
-        if (settings.musicDistribution === 'specifyPlacement' && songRanges.length > 0) {
-          settings.songRanges = songRanges;
-          console.log('[SUBMIT] Including songRanges:', songRanges);
-        }
-        
-        // STEP 4: Build final payload
-        const payload = {
-          jobId: uid,
-          presentationType: presentationType,
-          presentationSource: presentationSource,
-          songs: songs,
-          settings: settings
-        };
-        
-        console.log('[SUBMIT] Payload:', JSON.stringify(payload, null, 2));
-        
-        // STEP 5: Submit to API
-        showToast('Creating video...', 'success');
-        const response = await fetch(API_ENDPOINT, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload)
-        });
-        
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error || errorData.message || `HTTP ${response.status}`);
-        }
-        
-        const result = await response.json();
-        console.log('[SUBMIT] Success:', result);
-        
-        showLoading(false);
-        
-        // Show success message
-        alert('✅ Your memorial video is being created!\n\nYou will receive an email in 5-15 minutes with your video and a link to make any edits.');
-        
-        // Disable submit button
-        document.getElementById('submitBtn').disabled = true;
-        document.getElementById('submitBtn').textContent = '✅ Submitted Successfully';
-        
-      } catch (error) {
-        console.error('[SUBMIT ERROR]', error);
-        showLoading(false);
-        showToast('Failed to submit: ' + error.message, 'error');
+    // Setup manual edit buttons based on presentation type
+    function setupManualEditButtons(data) {
+      const container = document.getElementById('manualEditButtons');
+      const infoBox = document.getElementById('manualEditInfoBox');
+      const pptxUploadSection = document.getElementById('pptxUploadSection');
+      
+      if (data.provider === 'google_slides') {
+        infoBox.innerHTML = 'Select to edit your <strong>Google Slides</strong> to make manual changes, and once you are done you may select "Resubmit Changes" at the bottom along with any other changes you made. This version will be published in the next Video.';
+        pptxUploadSection.style.display = 'none';
+      } else if (data.provider === 'powerpoint') {
+        infoBox.innerHTML = 'Select to edit your <strong>PowerPoint</strong> to make manual changes, or upload a new PowerPoint file below. Once you are done, select "Resubmit Changes" at the bottom along with any other changes you made. This version will be published in the next Video.';
+        pptxUploadSection.style.display = 'block';
+      }
+      
+      if (data.provider === 'google_slides' && data.original_url) {
+        container.innerHTML = `
+          <button class="btn btn-primary" onclick="handleManualEditClick('${data.original_url}')">
+            📊 Edit Google Slides
+          </button>
+        `;
+      } else if (data.provider === 'powerpoint' && data.original_url) {
+        container.innerHTML = `
+          <button class="btn btn-primary" onclick="handleManualEditClick('${data.original_url}')">
+            📄 Edit PowerPoint
+          </button>
+        `;
+      } else {
+        container.innerHTML = `
+          <div style="color: #999; font-style: italic;">
+            Presentation link not available for this job.
+          </div>
+        `;
       }
     }
     
-    async function uploadFileToS3(file, fileType, fileNumber = null) {
-      try {
-        console.log(`[UPLOAD] Starting upload for ${file.name} (${fileType})`);
+    // Handle manual edit button click
+    function handleManualEditClick(url) {
+      window.open(url, '_blank');
+      trackChange('manualEditsRequested', true);
+      showToast('Presentation opened! Make your changes, then click "Resubmit Changes" when done.', 'success');
+    }
+    
+    // Display video and controls
+    function displayVideo(data) {
+      const container = document.getElementById('videoContainer');
+      const jobInfo = document.getElementById('jobInfo');
+      
+      jobInfo.textContent = `Order #${data.jobId}`;
+      
+      if (isFinalized) {
+        container.innerHTML = `
+          <div class="video-wrapper">
+            <video controls preload="auto">
+              <source src="${data.videoUrl}" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        `;
         
-        // Get presigned URL from API
-        const payload = {
-          jobId: uid,
-          fileType: fileType,
-          fileExtension: file.name.split('.').pop()
-        };
-        
-        if (fileNumber !== null) {
-          payload.fileNumber = fileNumber;
-        }
-        
-        console.log(`[UPLOAD] Requesting presigned URL with payload:`, payload);
-        
-        const urlResponse = await fetch(S3_UPLOAD_API, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        
-        if (!urlResponse.ok) {
-          const errorText = await urlResponse.text();
-          console.error(`[UPLOAD ERROR] Failed to get presigned URL: ${urlResponse.status} - ${errorText}`);
-          throw new Error(`Failed to get upload URL: ${urlResponse.status} - ${errorText}`);
-        }
-        
-        const responseData = await urlResponse.json();
-        console.log(`[UPLOAD] Presigned URL response:`, responseData);
-        
-        const uploadUrl = responseData.uploadUrl;
-        let s3Url = responseData.s3Url || responseData.s3Key;
-        
-        if (!uploadUrl) {
-          throw new Error('No uploadUrl in API response');
-        }
-        
-        console.log(`[UPLOAD] Got presigned URL, uploading to S3...`);
-        
-        // ✅ FIXED CODE
-        const uploadResponse = await fetch(uploadUrl, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': file.type
-            // ACL header removed - files inherit bucket permissions
-          },
-          body: file
-        });
-        
-        if (!uploadResponse.ok) {
-          console.error(`[UPLOAD ERROR] S3 upload failed: ${uploadResponse.status}`);
-          throw new Error(`S3 upload failed: ${uploadResponse.status}`);
-        }
-        
-        // Convert S3 key to full URL if needed
-        if (s3Url && !s3Url.startsWith('http')) {
-          s3Url = `https://order-by-age-uploads.s3.us-east-2.amazonaws.com/${s3Url}`;
-          console.log(`[UPLOAD] Converted S3 key to full URL: ${s3Url}`);
-        }
-        
-        console.log(`[UPLOAD] Successfully uploaded ${file.name} to S3`);
-        console.log(`[UPLOAD] S3 URL: ${s3Url}`);
-        
-        return s3Url;
-      } catch (error) {
-        console.error(`[UPLOAD ERROR] Failed to upload ${file.name}:`, error);
-        throw error;
+        document.getElementById('actionButtons').style.display = 'none';
+        document.getElementById('finalizedMessage').style.display = 'block';
+        document.getElementById('finalDownloadBtn').href = data.downloadUrl || data.videoUrl;
+        return;
       }
+      
+      if (isSharedView) {
+        container.innerHTML = `
+          <div class="video-wrapper">
+            <video controls preload="auto" crossorigin="anonymous">
+              <source src="${data.videoUrl}" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        `;
+        
+        document.getElementById('actionButtons').style.display = 'none';
+        return;
+      }
+      
+      container.innerHTML = `
+        <div class="video-wrapper">
+          <video controls preload="auto" crossorigin="anonymous">
+            <source src="${data.videoUrl}" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      `;
+      
+      const video = container.querySelector('video');
+      video.addEventListener('loadstart', () => console.log('[VIDEO] Loading started'));
+      video.addEventListener('loadedmetadata', () => console.log('[VIDEO] Metadata loaded'));
+      video.addEventListener('canplay', () => console.log('[VIDEO] Can play'));
+      video.addEventListener('error', (e) => {
+        console.error('[VIDEO ERROR]', e);
+        console.error('[VIDEO ERROR] Details:', video.error);
+        showError('Video failed to load. The file may be corrupted or the URL expired.');
+      });
+      
+      document.getElementById('editBtn').style.display = 'inline-flex';
+      document.getElementById('finalizeBtn').style.display = 'inline-flex';
+      document.getElementById('shareBtn').style.display = 'inline-flex';
+      
+      window.videoData = data;
+      
+      setupFinalizeButton();
+      setupEditButton();
     }
     
-    function showLoading(show) {
-      const overlay = document.getElementById('loadingOverlay');
-      overlay.classList.toggle('show', show);
+    // Show error message
+    function showError(message) {
+      const container = document.getElementById('videoContainer');
+      container.innerHTML = `<div class="error">${message}</div>`;
     }
     
+    // Toast notification
     function showToast(message, type = 'success') {
       const toast = document.getElementById('toast');
       toast.textContent = message;
@@ -1856,6 +1852,346 @@
         toast.classList.remove('show');
       }, 4000);
     }
+    
+    // Edit button handler
+    function setupEditButton() {
+      document.getElementById('editBtn').addEventListener('click', () => {
+        const editSections = document.getElementById('editSections');
+        const isVisible = editSections.style.display !== 'none';
+        
+        if (isVisible) {
+          editSections.style.display = 'none';
+          document.getElementById('editBtn').innerHTML = '✏️ Edit & Resubmit';
+        } else {
+          editSections.style.display = 'block';
+          document.getElementById('editBtn').innerHTML = '❌ Hide Edit Options';
+          editSections.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    }
+    
+    // Finalize button handler
+    function setupFinalizeButton() {
+      document.getElementById('finalizeBtn').addEventListener('click', async () => {
+        const confirmed = confirm(
+          "Are you sure? You won't be able to make anymore edits to the final video. " +
+          "You will also be emailed a final copy as a backup."
+        );
+        
+        if (!confirmed) return;
+        
+        try {
+          const downloadUrl = window.videoData.downloadUrl || window.videoData.videoUrl;
+          const link = document.createElement('a');
+          link.href = downloadUrl;
+          link.download = `memorial_video_${jobId}.mp4`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          showToast('Finalizing your order...', 'success');
+          const response = await fetch(`${API_BASE}/jobs/${jobId}/finalize`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (!response.ok) {
+            throw new Error('Failed to finalize order');
+          }
+          
+          const finalizedUrl = `${window.location.origin}${window.location.pathname}?job=${jobId}&finalized=true`;
+          history.replaceState(null, '', finalizedUrl);
+          location.reload();
+          
+        } catch (error) {
+          console.error('[FINALIZE ERROR]', error);
+          showToast('Download started, but email failed. Please contact support.', 'error');
+        }
+      });
+    }
+    
+    // Share button handler
+    document.getElementById('shareBtn').addEventListener('click', async () => {
+      try {
+        const shareUrl = `${window.location.origin}${window.location.pathname}?job=${jobId}&share=true`;
+        await navigator.clipboard.writeText(shareUrl);
+        showToast('Share link copied to clipboard! Recipients will only see the video.', 'success');
+      } catch (error) {
+        showToast('Failed to copy link: ' + error.message, 'error');
+      }
+    });
+    
+    // Edit section expansion
+    document.querySelectorAll('.edit-option-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const option = header.closest('.edit-option');
+        option.classList.toggle('expanded');
+      });
+    });
+    
+    // Track form changes
+    function trackChange(fieldName, value) {
+      if (value === '' || value === null || value === undefined) {
+        delete pendingChanges[fieldName];
+      } else {
+        pendingChanges[fieldName] = value;
+      }
+      updateResubmitButton();
+      console.log('[CHANGES]', pendingChanges);
+    }
+    
+    // Update resubmit button state
+    function updateResubmitButton() {
+      const btn = document.getElementById('resubmitBtn');
+      const hasChanges = Object.keys(pendingChanges).length > 0;
+      btn.disabled = !hasChanges;
+      
+      if (hasChanges) {
+        btn.textContent = `🚀 Resubmit Changes (${Object.keys(pendingChanges).length})`;
+      } else {
+        btn.textContent = '🚀 Resubmit Changes';
+      }
+    }
+    
+    // Setup change tracking for all form elements
+    document.getElementById('visualPackage').addEventListener('change', (e) => {
+      trackChange('visualPackage', e.target.value);
+    });
+    
+    document.querySelectorAll('input[name="timingMode"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        const mode = e.target.value;
+        handleTimingModeChange(mode);
+        trackChange('timingMode', mode);
+        
+        if (mode === 'perSlide') {
+          trackChange('perSlideSec', document.getElementById('perSlideSec').value);
+        } else if (mode === 'fixedRuntime') {
+          trackChange('fixedRuntimeSec', document.getElementById('fixedRuntimeSec').value);
+        }
+      });
+    });
+    
+    function handleTimingModeChange(mode) {
+      document.getElementById('perSlideInput').style.display = 'none';
+      document.getElementById('fixedRuntimeInput').style.display = 'none';
+      
+      document.querySelectorAll('.radio-option').forEach(opt => {
+        opt.classList.remove('selected');
+      });
+      
+      const selectedRadio = document.querySelector(`input[name="timingMode"][value="${mode}"]`);
+      if (selectedRadio) {
+        selectedRadio.closest('.radio-option').classList.add('selected');
+        
+        if (mode === 'perSlide') {
+          document.getElementById('perSlideInput').style.display = 'block';
+        } else if (mode === 'fixedRuntime') {
+          document.getElementById('fixedRuntimeInput').style.display = 'block';
+        }
+      }
+    }
+    
+    document.getElementById('perSlideSec').addEventListener('input', (e) => {
+      trackChange('perSlideSec', parseFloat(e.target.value));
+    });
+    
+    document.getElementById('fixedRuntimeSec').addEventListener('input', (e) => {
+      trackChange('fixedRuntimeSec', parseFloat(e.target.value));
+    });
+    
+    document.getElementById('musicDistribution').addEventListener('change', (e) => {
+      const value = e.target.value;
+      trackChange('musicDistribution', value);
+      handleMusicDistributionChange(value);
+    });
+    
+    // Resubmit button handler
+    document.getElementById('resubmitBtn').addEventListener('click', async () => {
+      if (Object.keys(pendingChanges).length === 0) {
+        showToast('No changes to submit', 'error');
+        return;
+      }
+      
+      const confirmed = confirm(
+        `Create a new video with ${Object.keys(pendingChanges).length} change(s)?\n\n` +
+        'You will receive an email in 5-15 minutes with your new video.'
+      );
+      
+      if (!confirmed) return;
+      
+      try {
+        showToast('Uploading files...', 'success');
+        console.log('[RESUBMIT] Preparing submission...');
+        
+        // Build COMPLETE settings (not just deltas)
+        const completeSettings = {
+          ...currentSettings,
+          timingMode: document.querySelector('input[name="timingMode"]:checked')?.value || currentSettings.timingMode || 'perSlide',
+          perSlideSec: parseFloat(document.getElementById('perSlideSec').value) || currentSettings.perSlideSec || 5,
+          fixedRuntimeSec: parseFloat(document.getElementById('fixedRuntimeSec').value) || currentSettings.fixedRuntimeSec || 350,
+          visualPackage: document.getElementById('visualPackage').value || currentSettings.visualPackage || 'simple-fade-wipe',
+          musicDistribution: document.getElementById('musicDistribution').value || currentSettings.musicDistribution || 'evenlyDistributed',
+          jobId: undefined,
+          originalJobId: undefined,
+          songOrder: currentSongs.map(s => s.name),
+          audioCount: currentSongs.length
+        };
+        
+        // Remove undefined fields
+        Object.keys(completeSettings).forEach(key => {
+          if (completeSettings[key] === undefined) {
+            delete completeSettings[key];
+          }
+        });
+
+        // ✅ ONLY ADD SONG RANGES IF musicDistribution is specifyPlacement AND they exist in pendingChanges
+        if (completeSettings.musicDistribution === 'specifyPlacement' && pendingChanges.songRanges && pendingChanges.songRanges.length > 0) {
+          completeSettings.songRanges = pendingChanges.songRanges;
+          console.log('[RESUBMIT] Including songRanges:', pendingChanges.songRanges);
+        } else {
+          // ✅ EXPLICITLY REMOVE songRanges if not using specifyPlacement
+          delete completeSettings.songRanges;
+          console.log('[RESUBMIT] Removed songRanges (not using specifyPlacement)');
+        }
+
+        console.log('[RESUBMIT] Complete settings:', completeSettings);
+        
+        const submitData = {
+          originalJobId: jobId,
+          changes: completeSettings
+        };
+        
+        // STEP 1: Upload PowerPoint file to S3 if present
+        if (newPptxFile) {
+          console.log('[UPLOAD] Getting presigned URL for PowerPoint...');
+          
+          const urlResponse = await fetch(`${API_BASE}/generate-upload-url`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              jobId: jobId,
+              fileType: 'presentation',
+              fileExtension: 'pptx'
+            })
+          });
+          
+          if (!urlResponse.ok) throw new Error('Failed to get PowerPoint upload URL');
+          
+          const {uploadUrl, s3Key} = await urlResponse.json();
+          
+          console.log('[UPLOAD] Uploading PowerPoint to S3...');
+          
+          const uploadResponse = await fetch(uploadUrl, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/vnd.openxmlformats-officedocument.presentationml.presentation'},
+            body: newPptxFile
+          });
+          
+          if (!uploadResponse.ok) throw new Error('Failed to upload PowerPoint');
+          
+          submitData.changes.newPresentationS3Key = s3Key;
+          console.log('[UPLOAD] PowerPoint uploaded successfully');
+        }
+        
+        // STEP 2: Upload new songs to S3 if present
+        const newSongFiles = currentSongs.filter(s => s.isNew && s.file);
+        
+        if (newSongFiles.length > 0) {
+          const uploadedSongs = [];
+          
+          for (let i = 0; i < newSongFiles.length; i++) {
+            const song = newSongFiles[i];
+            
+            console.log(`[UPLOAD] Getting presigned URL for song ${i + 1}...`);
+            
+            const urlResponse = await fetch(`${API_BASE}/generate-upload-url`, {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({
+                jobId: jobId,
+                fileType: 'song',
+                fileNumber: i + 1,
+                fileExtension: 'mp3'
+              })
+            });
+            
+            if (!urlResponse.ok) throw new Error(`Failed to get upload URL for song ${i + 1}`);
+            
+            const {uploadUrl, s3Key} = await urlResponse.json();
+            
+            console.log(`[UPLOAD] Uploading song ${i + 1} to S3...`);
+            
+            const uploadResponse = await fetch(uploadUrl, {
+              method: 'PUT',
+              headers: {'Content-Type': 'audio/mpeg'},
+              body: song.file
+            });
+            
+            if (!uploadResponse.ok) throw new Error(`Failed to upload song ${i + 1}`);
+            
+            uploadedSongs.push({
+              originalName: song.name,
+              s3Key: s3Key
+            });
+            
+            console.log(`[UPLOAD] Song ${i + 1} uploaded successfully`);
+          }
+          
+          submitData.changes.newSongs = uploadedSongs;
+          console.log('[UPLOAD] All songs uploaded');
+        }
+        
+        // Add manualEditsRequested flag if it was set
+        if (pendingChanges.manualEditsRequested) {
+          submitData.changes.manualEditsRequested = true;
+        }
+        
+        // STEP 3: Submit metadata to resubmit API
+        console.log('[RESUBMIT] Submitting to API...');
+        console.log('[RESUBMIT] Payload:', JSON.stringify(submitData, null, 2));
+        showToast('Processing changes...', 'success');
+        
+        const response = await fetch(`${API_BASE}/jobs/${jobId}/resubmit`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(submitData)
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || errorData.details || `HTTP ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('[RESUBMIT] Success:', result);
+        
+        showToast(
+          `✅ Video resubmitted successfully! New job: ${result.newJobId}. ` +
+          'You\'ll receive an email in 5-15 minutes.',
+          'success'
+        );
+        
+        // Clear changes and disable button
+        pendingChanges = {};
+        newPptxFile = null;
+        updateResubmitButton();
+        
+        // Hide edit sections after 2 seconds
+        setTimeout(() => {
+          document.getElementById('editSections').style.display = 'none';
+          document.getElementById('editBtn').innerHTML = '✏️ Edit & Resubmit';
+        }, 2000);
+        
+      } catch (error) {
+        console.error('[RESUBMIT ERROR]', error);
+        showToast('Failed to resubmit: ' + error.message, 'error');
+      }
+    });
   </script>
 </body>
 </html>
