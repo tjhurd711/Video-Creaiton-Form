@@ -843,16 +843,26 @@
         </div>
       </div>
       
-      <!-- Primary Actions -->
-      <div class="actions" id="actionButtons">
+      <!-- Primary Actions - Top Row -->
+      <div class="actions" id="actionButtons" style="margin-bottom: 15px;">
         <button id="editBtn" class="btn btn-edit" style="display:none;">
-          ✏️ Edit & Resubmit
-        </button>
-        <button id="finalizeBtn" class="btn btn-primary" style="display:none;">
-          ✅ I'm Finished (Download Video)
+          ✏️ Edit & Republish My Video (unlimited submissions)
         </button>
         <button id="shareBtn" class="btn btn-secondary" style="display:none;">
-          🔗 Share Video
+          📩 Share Draft Video with Others
+        </button>
+        <button id="deliverBtn" class="btn btn-primary" style="display:none;">
+          ⛪️ Deliver Final Downloadable Video to My Event Coordinator
+        </button>
+        <button id="helpBtn" class="btn btn-danger" style="display:none;">
+          🙋‍♀️ Help Needed
+        </button>
+      </div>
+      
+      <!-- Secondary Action - Bottom Row -->
+      <div class="actions" id="finalizeButtonContainer" style="justify-content: center;">
+        <button id="finalizeBtn" class="btn-resubmit" style="display:none; padding: 18px 40px; font-size: 16px;">
+          ✅ I am finished (Send me a Video Download Link)
         </button>
       </div>
       
@@ -2174,8 +2184,10 @@
       });
       
       document.getElementById('editBtn').style.display = 'inline-flex';
-      document.getElementById('finalizeBtn').style.display = 'inline-flex';
       document.getElementById('shareBtn').style.display = 'inline-flex';
+      document.getElementById('deliverBtn').style.display = 'inline-flex';
+      document.getElementById('helpBtn').style.display = 'inline-flex';
+      document.getElementById('finalizeBtn').style.display = 'inline-flex';
       
       window.videoData = data;
       
@@ -2208,7 +2220,7 @@
         
         if (isVisible) {
           editSections.style.display = 'none';
-          document.getElementById('editBtn').innerHTML = '✏️ Edit & Resubmit';
+          document.getElementById('editBtn').innerHTML = '✏️ Edit & Republish My Video (unlimited submissions)';
         } else {
           editSections.style.display = 'block';
           document.getElementById('editBtn').innerHTML = '❌ Hide Edit Options';
@@ -2537,7 +2549,7 @@
         // Hide edit sections after 2 seconds
         setTimeout(() => {
           document.getElementById('editSections').style.display = 'none';
-          document.getElementById('editBtn').innerHTML = '✏️ Edit & Resubmit';
+          document.getElementById('editBtn').innerHTML = '✏️ Edit & Republish My Video (unlimited submissions)';
         }, 2000);
         
       } catch (error) {
