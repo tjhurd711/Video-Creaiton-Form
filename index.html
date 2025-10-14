@@ -1446,6 +1446,23 @@
               duration: libSong ? libSong.duration : (song.duration || null)  // ✅ ADD THIS LINE
             };
           });
+
+          currentSongs.forEach(song => {
+            if (!song.isLibrary && song.url) {
+              const audio = new Audio(song.url);
+              audio.addEventListener('loadedmetadata', () => {
+                const duration = Math.round(audio.duration);
+                song.duration = duration;
+                console.log(`[DURATION LOADED] ${song.name}: ${duration}s`);
+                calculateVideoDuration(); // Recalculate when duration loads
+              });
+              audio.addEventListener('error', (e) => {
+                console.error(`[DURATION ERROR] Failed to load ${song.name}:`, e);
+              });
+            }
+          });
+        }
+          
         } else if (data.settings && data.settings.audioCount > 0) {
           const audioCount = data.settings.audioCount;
           for (let i = 1; i <= audioCount; i++) {
