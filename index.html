@@ -1886,22 +1886,35 @@
     
     // Track song changes for resubmit
     function updateSongTracking() {
-      const songOrder = currentSongs.map(song => song.name);
+      // ✅ USE DISPLAYNAME WHICH HAS THE ORIGINAL FILENAME
+      const songOrder = currentSongs.map(song => {
+        // For existing songs from previous submission, use the displayName (which is the original filename)
+        // For new songs, use the actual filename
+        if (song.isNew && song.file) {
+          return song.file.name;
+        } else if (song.isLibrary) {
+          return song.name; // Library songs use their actual filename
+        } else {
+          // Existing custom song - use displayName which has the original filename
+          return song.displayName;
+        }
+      });
+  
       const newSongs = currentSongs.filter(s => s.isNew).map(s => ({
-        originalName: s.name,
+        originalName: s.file ? s.file.name : s.name,
         file: s.file
       }));
-      
+  
       const hasChanges = currentSongs.some(s => s.isNew) || 
                         JSON.stringify(songOrder) !== JSON.stringify(currentSongs.map(s => s.name));
-      
+  
       if (hasChanges || newSongs.length > 0) {
         trackChange('songOrder', songOrder);
         if (newSongs.length > 0) {
           trackChange('newSongs', newSongs);
         }
-      }
-    }
+     }
+  }
     
     // Setup song range sliders
     function setupSongRangeSliders() {
