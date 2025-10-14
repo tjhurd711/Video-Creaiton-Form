@@ -949,6 +949,13 @@
           </div>
           <div class="edit-option-content">
             <div class="form-group">
+              <label for="slideCount">
+                Number of Slides in Your Presentation
+                <div class="help-text">Total number of slides (first and last slides display 2x longer)</div>
+              </label>
+              <input type="number" id="slideCount" name="slideCount" min="2" max="250" value="" placeholder="e.g., 50">
+            </div>
+            <div class="form-group">
               <label>Timing Mode</label>
               <div class="radio-group">
                 <label class="radio-option">
@@ -983,6 +990,21 @@
                   </div>
                 </label>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ✅ NEW: Duration Display -->
+        <div id="durationDisplay" class="preview-section" style="display:none; background: #e8f5e9; border-color: #4CAF50; margin-top: 20px; margin-bottom: 20px;">
+          <div class="preview-header" style="color: #2e7d32;">
+            ⏱️ Estimated Video Duration
+          </div>
+          <div style="padding: 15px; background: white; border-radius: 8px;">
+            <div style="font-size: 32px; font-weight: 700; color: #4CAF50; text-align: center;" id="durationValue">
+              --:--
+            </div>
+            <div style="font-size: 14px; color: #666; text-align: center; margin-top: 8px;" id="durationDetails">
+              Enter slide count to calculate
             </div>
           </div>
         </div>
@@ -1375,13 +1397,15 @@
         url: libSong.url,
         isNew: false,
         isLibrary: true,
-        file: null
+        file: null,
+        duration: libSong.duration
       });
       
       renderLibrary();
       renderSongList();
       updateSongCount();
       updateSongRangeSliders();
+      calculateVideoDuration();
       showToast(`Added "${libSong.displayName}"`, 'success');
     }
     
@@ -1645,8 +1669,9 @@
       renderSongList();
       updateSongCount();
       updateSongRangeSliders();
+      calculateVideoDuration();
     }
-    
+      
     // Update song count display
     function updateSongCount() {
       const display = document.getElementById('songCountDisplay');
@@ -1666,42 +1691,121 @@
       // Update library add buttons
       renderLibrary();
     }
+
+    // ✅ ADD THIS ENTIRE FUNCTION HERE
+    // Calculate and display video duration
+    function calculateVideoDuration() {
+      const slideCountInput = document.getElementById('slideCount');
+      const slideCount = parseInt(slideCountInput.value);
+      const timingMode = document.querySelector('input[name="timingMode"]:checked')?.value;
+
+      const displayDiv = document.getElementById('durationDisplay');
+      const valueDiv = document.getElementById('durationValue');
+      const detailsDiv = document.getElementById('durationDetails');
+
+      // Hide if no slide count
+      if (!slideCount || slideCount < 2) {
+        displayDiv.style.display = 'none';
+        return;
+      }
+
+      let totalSeconds = 0;
+      let detailsText = '';
+
+      if (timingMode === 'perSlide') {
+        const perSlideSec = parseInt(document.getElementById('perSlideSec').value) || 5;
+        totalSeconds = (slideCount - 2) * perSlideSec + (2 * perSlideSec * 2);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        const timeDisplay = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        detailsText = `Video will be ${timeDisplay} long with ${slideCount} slides at ${perSlideSec} seconds per slide (beginning and end slide at ${perSlideSec * 2}s)`;
+
+      } else if (timingMode === 'fixedRuntime') {
+        totalSeconds = parseInt(document.getElementById('fixedRuntimeSec').value) || 320;
+        const avgPerSlide = Math.round(totalSeconds / slideCount);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        const timeDisplay = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        detailsText = `Video will be ${timeDisplay} long across ${slideCount} slides at approximately ${avgPerSlide} seconds per slide`;
+
+      } else if (timingMode === 'fitToSongs') {
+        totalSeconds = currentSongs.reduce((sum, song) => {
+          return sum + (song.duration || 0);
+        }, 0);
+
+        if (totalSeconds === 0) {
+          detailsText = 'Add songs to calculate duration';
+          displayDiv.style.display = 'none';
+          return;
+        }
+
+        const avgPerSlide = Math.round(totalSeconds / slideCount);
+        const songWord = currentSongs.length === 1 ? 'song' : 'songs';
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        const timeDisplay = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        detailsText = `Video will be ${timeDisplay} long based on ${currentSongs.length} selected ${songWord} at ${avgPerSlide} seconds per slide (beginning and end slide at ${avgPerSlide * 2}s)`;
+      }
+
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+      valueDiv.textContent = formattedTime;
+      detailsDiv.textContent = detailsText;
+      displayDiv.style.display = 'block';
+    }
     
     // Handle new song uploads
     document.getElementById('newSongUpload').addEventListener('change', (e) => {
       const files = Array.from(e.target.files);
-      
+  
       files.forEach(file => {
         if (currentSongs.length >= MAX_SONGS) {
           showToast(`Maximum ${MAX_SONGS} songs reached`, 'error');
           return;
         }
-        
+    
         if (!file.type.includes('audio/mpeg') && !file.name.endsWith('.mp3')) {
           showToast(`${file.name} is not an MP3 file`, 'error');
           return;
         }
-        
+    
         const localUrl = URL.createObjectURL(file);
-        
-        currentSongs.push({
-          id: `new-${Date.now()}-${Math.random()}`,
-          name: file.name,
-          displayName: file.name,
-          url: localUrl,
-          isNew: true,
-          isLibrary: false,
-          file: file
-        });
+    
+        // ✅ CREATE AUDIO ELEMENT TO DETECT DURATION
+        const audio = new Audio(localUrl);
+        audio.addEventListener('loadedmetadata', () => {
+          const duration = Math.round(audio.duration);
+      
+        // Find the song and update its duration
+        const song = currentSongs.find(s => s.url === localUrl);
+        if (song) {
+          song.duration = duration;
+          console.log(`[DURATION] ${file.name}: ${duration}s`);
+          calculateVideoDuration(); // Recalculate after getting duration
+        }
       });
-      
-      renderSongList();
-      updateSongCount();
-      updateSongRangeSliders();
-      
-      e.target.value = '';
+    
+      currentSongs.push({
+        id: `new-${Date.now()}-${Math.random()}`,
+        name: file.name,
+        displayName: file.name,
+        url: localUrl,
+        isNew: true,
+        isLibrary: false,
+        file: file,
+        duration: null  // ✅ ADD THIS - Will be set when metadata loads
+      });
     });
-
+  
+    renderSongList();
+    updateSongCount();
+    updateSongRangeSliders();
+    calculateVideoDuration();  // ✅ ADD THIS
+  
+    e.target.value = '';
+  });
     document.getElementById('genreSelect').addEventListener('change', () => {
       renderLibrary();
     });
@@ -2156,6 +2260,8 @@
         } else if (mode === 'fixedRuntime') {
           trackChange('fixedRuntimeSec', document.getElementById('fixedRuntimeSec').value);
         }
+
+        calculateVideoDuration();
       });
     });
     
@@ -2181,11 +2287,15 @@
     
     document.getElementById('perSlideSec').addEventListener('input', (e) => {
       trackChange('perSlideSec', parseFloat(e.target.value));
+      calculateVideoDuration();
     });
     
     document.getElementById('fixedRuntimeSec').addEventListener('input', (e) => {
       trackChange('fixedRuntimeSec', parseFloat(e.target.value));
+      calculateVideoDuration();
     });
+
+    document.getElementById('slideCount').addEventListener('input', calculateVideoDuration);
     
     document.getElementById('musicDistribution').addEventListener('change', (e) => {
       const value = e.target.value;
