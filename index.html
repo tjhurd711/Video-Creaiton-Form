@@ -1321,6 +1321,54 @@
   
   <!-- Toast Notification -->
   <div id="toast" class="toast"></div>
+
+  <!-- Deliver to Coordinator Modal -->
+  <div id="deliverModal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <button class="modal-close" onclick="closeDeliverModal()">×</button>
+        <h2>⛪️ Deliver to Event Coordinator</h2>
+        <p>Ready to deliver your final memorial video? Send downloadable link to your funeral home or end of life event coordinator.</p>
+      </div>
+      <div class="modal-body">
+        <form id="deliverForm">
+          <div class="modal-form-row">
+            <div class="modal-form-group">
+              <label>First Name<span class="required">*</span></label>
+              <input type="text" id="coordFirstName" required placeholder="Jane">
+            </div>
+            <div class="modal-form-group">
+              <label>Last Name<span class="required">*</span></label>
+              <input type="text" id="coordLastName" required placeholder="Smith">
+            </div>
+          </div>
+        
+          <div class="modal-form-group">
+            <label>Event Host Organization Name<span class="required">*</span></label>
+            <input type="text" id="coordOrgName" required placeholder="e.g., Family Funeral Homes">
+          </div>
+        
+          <div class="modal-form-group">
+            <label>Email Address<span class="required">*</span></label>
+            <input type="email" id="coordEmail" required placeholder="jane@familyfuneralhomes.com">
+          </div>
+        
+          <div class="modal-info-box">
+            📧 <strong>What happens next?</strong><br>
+            The send button will deliver a video view link and MP4 file download link to your end of life event coordinator. It will include a video acceptance confirmation request. We will also copy you on this email to facilitate direct communication.
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="modal-btn modal-btn-secondary" onclick="closeDeliverModal()">
+          Cancel
+        </button>
+        <button type="button" class="modal-btn modal-btn-primary" onclick="submitDelivery()" id="deliverSubmitBtn">
+          📤 Send to Coordinator
+        </button>
+      </div>
+    </div>
+  </div>
   
   <script>
     // Configuration
@@ -2491,6 +2539,107 @@
         showToast('Failed to copy link: ' + error.message, 'error');
       }
     });
+
+    // Deliver to Coordinator button handler
+    document.getElementById('deliverBtn').addEventListener('click', () => {
+      openDeliverModal();
+    });
+
+    // Open deliver modal
+    function openDeliverModal() {
+      document.getElementById('deliverModal').classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    // Close deliver modal
+    function closeDeliverModal() {
+      document.getElementById('deliverModal').classList.remove('show');
+      document.body.style.overflow = 'auto';
+      document.getElementById('deliverForm').reset();
+      document.querySelectorAll('.modal-form-group input').forEach(input => {
+        input.classList.remove('error');
+      });
+    }
+
+    // Submit delivery
+    async function submitDelivery() {
+      const firstName = document.getElementById('coordFirstName').value.trim();
+      const lastName = document.getElementById('coordLastName').value.trim();
+      const orgName = document.getElementById('coordOrgName').value.trim();
+      const email = document.getElementById('coordEmail').value.trim();
+  
+     // Validation
+     let hasError = false;
+  
+     if (!firstName) {
+       document.getElementById('coordFirstName').classList.add('error');
+       hasError = true;
+     } else {
+       document.getElementById('coordFirstName').classList.remove('error');
+     }
+  
+     if (!lastName) {
+       document.getElementById('coordLastName').classList.add('error');
+       hasError = true;
+     } else {
+       document.getElementById('coordLastName').classList.remove('error');
+     }
+  
+     if (!orgName) {
+       document.getElementById('coordOrgName').classList.add('error');
+       hasError = true;
+     } else {
+       document.getElementById('coordOrgName').classList.remove('error');
+     }
+  
+     if (!email || !email.includes('@')) {
+       document.getElementById('coordEmail').classList.add('error');
+       hasError = true;
+     } else {
+       document.getElementById('coordEmail').classList.remove('error');
+     }
+  
+     if (hasError) {
+       showToast('Please fill in all required fields correctly', 'error');
+       return;
+     }
+  
+     const submitBtn = document.getElementById('deliverSubmitBtn');
+     submitBtn.disabled = true;
+     submitBtn.textContent = '📤 Sending...';
+  
+     try {
+       console.log('[DELIVER] Sending to coordinator:', {
+         jobId,
+         firstName,
+         lastName,
+         orgName,
+         email
+      });
+    
+      // Simulated API call (replace with real one later)
+      await new Promise(resolve => setTimeout(resolve, 1500));
+    
+      showToast('✅ Video successfully delivered to ' + email, 'success');
+      closeDeliverModal();
+    
+      // TODO: Real API call will go here when backend is ready
+    
+    } catch (error) {
+      console.error('[DELIVER ERROR]', error);
+      showToast('Failed to deliver video: ' + error.message, 'error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '📤 Send to Coordinator';
+    }
+  }
+
+  // Close modal when clicking outside
+  document.getElementById('deliverModal').addEventListener('click', (e) => {
+    if (e.target.id === 'deliverModal') {
+      closeDeliverModal();
+    }
+  });
     
     // Edit section expansion
     document.querySelectorAll('.edit-option-header').forEach(header => {
