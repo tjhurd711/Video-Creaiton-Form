@@ -825,7 +825,7 @@
   <div class="container">
     <div class="header">
       <img src="https://www.dropbox.com/scl/fi/i5ye9vg5wzfvxwyrwczq6/Untitled-940-x-600-px-1400-x-600-px.png?rlkey=rk5t9ot5gchvjcqx71lwiln1o&st=8orea38d&dl=1" alt="Company Logo" class="header-logo">
-      <h1>✨ Your Memorial Video</h1>
+      <h1 id="headerTitle">✨ Your Memorial Video</h1>
       <p id="jobInfo">Loading...</p>
     </div>
     
@@ -1435,7 +1435,13 @@
         // Store current settings
         if (data.settings) {
           currentSettings = data.settings;
-          // ❌ REMOVED: populateFormDefaults(data.settings);  
+          
+          const deceasedName = data.settings.fullName;
+          if (deceasedName && deceasedName !== 'your loved one' && deceasedName !== '') {
+            document.getElementById('headerTitle').textContent = `✨ ${deceasedName}'s Memorial Video`;
+            document.title = `${deceasedName}'s Memorial Video`;
+          }
+
           displaySummary(data.settings);
         }
     
