@@ -1703,6 +1703,10 @@
       const valueDiv = document.getElementById('durationValue');
       const detailsDiv = document.getElementById('durationDetails');
 
+      console.log('[DURATION CALC] Slide count:', slideCount);
+      console.log('[DURATION CALC] Timing mode:', timingMode);
+      console.log('[DURATION CALC] Current songs:', currentSongs);
+      
       // Hide if no slide count
       if (!slideCount || slideCount < 2) {
         displayDiv.style.display = 'none';
@@ -1729,9 +1733,14 @@
         detailsText = `Video will be ${timeDisplay} long across ${slideCount} slides at approximately ${avgPerSlide} seconds per slide`;
 
       } else if (timingMode === 'fitToSongs') {
+        console.log('[FIT TO SONGS] Calculating total duration...'); // ✅ ADD THIS LINE
+  
         totalSeconds = currentSongs.reduce((sum, song) => {
+          console.log(`[FIT TO SONGS] Song: ${song.displayName}, Duration: ${song.duration}`); // ✅ ADD THIS LINE TOO
           return sum + (song.duration || 0);
         }, 0);
+  
+        console.log('[FIT TO SONGS] Total seconds:', totalSeconds); // ✅ AND THIS LINE
 
         if (totalSeconds === 0) {
           detailsText = 'Add songs to calculate duration';
