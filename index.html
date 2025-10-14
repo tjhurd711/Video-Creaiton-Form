@@ -1442,7 +1442,8 @@
               url: song.url,
               isNew: false,
               isLibrary: !!libSong,
-              file: null
+              file: null,
+              duration: libSong ? libSong.duration : (song.duration || null)  // ✅ ADD THIS LINE
             };
           });
         } else if (data.settings && data.settings.audioCount > 0) {
