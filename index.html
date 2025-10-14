@@ -851,6 +851,10 @@
       position: relative;
     }
 
+    .modal-header.help-header {
+      background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+    }
+    
     .modal-header h2 {
       margin: 0 0 8px 0;
       font-size: 24px;
@@ -980,6 +984,23 @@
       transform: none;
     }
 
+    .modal-btn-danger {
+      background: #f44336;
+      color: white;
+    }
+
+    .modal-btn-danger:hover:not(:disabled) {
+      background: #d32f2f;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+    }
+
+    .modal-btn-danger:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
     .modal-btn-secondary {
       background: #f5f5f5;
       color: #666;
@@ -1365,6 +1386,49 @@
         </button>
         <button type="button" class="modal-btn modal-btn-primary" onclick="submitDelivery()" id="deliverSubmitBtn">
           📤 Send to Coordinator
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Help Needed Modal -->
+  <div id="helpModal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header help-header">
+        <button class="modal-close" onclick="closeHelpModal()">×</button>
+        <h2>🙋‍♀️ Help Needed</h2>
+        <p>I have tried editing and re-publishing my video, but it's not quite right. I would like some human help with final video revisions. Please send me a revision request form for your team to help me finalize my video.</p>
+      </div>
+      <div class="modal-body">
+        <form id="helpForm">
+          <div class="modal-form-row">
+            <div class="modal-form-group">
+              <label>First Name<span class="required">*</span></label>
+              <input type="text" id="helpFirstName" required placeholder="John">
+            </div>
+            <div class="modal-form-group">
+              <label>Last Name<span class="required">*</span></label>
+              <input type="text" id="helpLastName" required placeholder="Doe">
+            </div>
+          </div>
+        
+          <div class="modal-form-group">
+            <label>Email Address<span class="required">*</span></label>
+            <input type="email" id="helpEmail" required placeholder="john@example.com">
+          </div>
+        
+          <div class="modal-info-box">
+            📝 <strong>What happens next?</strong><br>
+            The send button will deliver you a revision request form to help you describe the assistance needed so that we can get your request to the right team member for review.
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="modal-btn modal-btn-secondary" onclick="closeHelpModal()">
+          Cancel
+        </button>
+        <button type="button" class="modal-btn modal-btn-danger" onclick="submitHelp()" id="helpSubmitBtn">
+          ✉️ Send me a help request form
         </button>
       </div>
     </div>
@@ -2638,6 +2702,98 @@
   document.getElementById('deliverModal').addEventListener('click', (e) => {
     if (e.target.id === 'deliverModal') {
       closeDeliverModal();
+    }
+  });
+
+  // Help Needed button handler
+  document.getElementById('helpBtn').addEventListener('click', () => {
+    openHelpModal();
+  });
+
+  // Open help modal
+  function openHelpModal() {
+    document.getElementById('helpModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  // Close help modal
+  function closeHelpModal() {
+    document.getElementById('helpModal').classList.remove('show');
+    document.body.style.overflow = 'auto';
+    document.getElementById('helpForm').reset();
+    document.querySelectorAll('#helpForm .modal-form-group input').forEach(input => {
+      input.classList.remove('error');
+    });
+  }
+
+  // Submit help request
+  async function submitHelp() {
+    const firstName = document.getElementById('helpFirstName').value.trim();
+    const lastName = document.getElementById('helpLastName').value.trim();
+    const email = document.getElementById('helpEmail').value.trim();
+
+    // Validation
+    let hasError = false;
+
+    if (!firstName) {
+      document.getElementById('helpFirstName').classList.add('error');
+      hasError = true;
+    } else {
+      document.getElementById('helpFirstName').classList.remove('error');
+    }
+
+    if (!lastName) {
+      document.getElementById('helpLastName').classList.add('error');
+      hasError = true;
+    } else {
+      document.getElementById('helpLastName').classList.remove('error');
+    } 
+
+    if (!email || !email.includes('@')) {
+      document.getElementById('helpEmail').classList.add('error');
+      hasError = true;
+    } else {
+      document.getElementById('helpEmail').classList.remove('error');
+    }
+
+    if (hasError) {
+      showToast('Please fill in all required fields correctly', 'error');
+      return;
+    }
+
+    const submitBtn = document.getElementById('helpSubmitBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = '✉️ Sending...';
+
+    try {
+      console.log('[HELP] Sending help request:', {
+        jobId,
+        firstName,
+        lastName,
+        email
+      });
+
+      // Simulated API call (replace with real one later)
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      showToast('✅ Help request form sent to ' + email, 'success');
+      closeHelpModal();
+
+      // TODO: Real API call will go here when backend is ready
+
+    } catch (error) {
+      console.error('[HELP ERROR]', error);
+      showToast('Failed to send help request: ' + error.message, 'error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '✉️ Send me a help request form';
+    }
+  }
+
+  // Close modal when clicking outside
+  document.getElementById('helpModal').addEventListener('click', (e) => {
+    if (e.target.id === 'helpModal') {
+      closeHelpModal();
     }
   });
     
