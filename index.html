@@ -1434,11 +1434,15 @@
           currentSongs = data.songs.map(song => {
             // Check if this is a library song
             const libSong = SONG_LIBRARY.find(lib => lib.name === song.name);
+
+            // ✅ GET ORIGINAL FILENAME FROM SETTINGS
+            const originalName = data.settings?.originalFilenames?.[song.name] || song.name;
+            console.log(`[SONG MAP] ${song.name} -> originalName: ${originalName}`);
         
             return {
               id: libSong ? libSong.id : song.name,
               name: song.name,
-              displayName: song.displayName || song.name,
+              displayName: libSong ? libSong.displayName : originalName,
               url: song.url,
               isNew: false,
               isLibrary: !!libSong,
