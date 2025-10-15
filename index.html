@@ -2802,13 +2802,28 @@
          email
       });
     
-      // Simulated API call (replace with real one later)
-      await new Promise(resolve => setTimeout(resolve, 1500));
-    
-      showToast('✅ Video successfully delivered to ' + email, 'success');
-      closeDeliverModal();
-    
-      // TODO: Real API call will go here when backend is ready
+      // Real API call
+      const response = await fetch(`${API_BASE}/jobs/${jobId}/deliver-to-coordinator`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+        firstName: firstName,
+        lastName: lastName,
+        orgName: orgName,
+        email: email
+      })
+    });
+
+if (!response.ok) {
+  const errorData = await response.json();
+  throw new Error(errorData.error || 'Failed to deliver video');
+}
+
+const result = await response.json();
+console.log('[DELIVER] Success:', result);
+
+showToast('✅ Video successfully delivered to ' + email, 'success');
+closeDeliverModal();
     
     } catch (error) {
       console.error('[DELIVER ERROR]', error);
@@ -2894,13 +2909,27 @@
         email
       });
 
-      // Simulated API call (replace with real one later)
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Real API call
+      const response = await fetch(`${API_BASE}/jobs/${jobId}/request-help`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+        firstName: firstName,
+        lastName: lastName,
+        email: email
+      })
+    });
 
-      showToast('✅ Help request form sent to ' + email, 'success');
-      closeHelpModal();
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to send help request');
+    }
 
-      // TODO: Real API call will go here when backend is ready
+    const result = await response.json();
+    console.log('[HELP] Success:', result);
+
+    showToast('✅ Help request form sent to ' + email, 'success');
+    closeHelpModal();
 
     } catch (error) {
       console.error('[HELP ERROR]', error);
@@ -3070,15 +3099,27 @@
         recipients: recipientData
       });
     
-      // Simulated API call (replace with real one later)
-      await new Promise(resolve => setTimeout(resolve, 1500));
-    
+      // Real API call
+      const response = await fetch(`${API_BASE}/jobs/${jobId}/share-with-recipients`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          recipients: recipientData
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to send invitations');
+      }
+
+      const result = await response.json();
+      console.log('[SHARE] Success:', result);
+
       const recipientCount = recipientData.length;
       const recipientWord = recipientCount === 1 ? 'recipient' : 'recipients';
       showToast(`✅ Invitations sent to ${recipientCount} ${recipientWord}`, 'success');
       closeShareModal();
-    
-      // TODO: Real API call will go here when backend is ready
     
     } catch (error) {
       console.error('[SHARE ERROR]', error);
