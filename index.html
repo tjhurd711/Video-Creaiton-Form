@@ -1165,13 +1165,16 @@
       <img src="https://www.dropbox.com/scl/fi/i5ye9vg5wzfvxwyrwczq6/Untitled-940-x-600-px-1400-x-600-px.png?rlkey=rk5t9ot5gchvjcqx71lwiln1o&st=8orea38d&dl=1" alt="Company Logo" class="header-logo">
       <h1 id="headerTitle">✨ Your Memorial Video</h1>
       <p id="jobInfo">Loading...</p>
-    </div>
-    
-    <div class="content">
-      <!-- Summary Sentence -->
-      <div id="summaryBox" class="summary-box" style="display:none;">
-        <!-- Will be populated dynamically -->
+      <div id="versionSelector" style="display:none; margin-top: 15px;">
+        <label for="versionDropdown" style="color: white; font-size: 14px; margin-right: 8px;">Video Version:</label>
+        <select id="versionDropdown" style="padding: 8px 12px; border-radius: 6px; border: 2px solid white; font-weight: 600; font-size: 14px; cursor: pointer;">
+          <!-- Will be populated dynamically -->
+        </select>
+        <button id="revertBtn" class="btn btn-outline" style="display:none; margin-left: 12px; padding: 8px 16px; font-size: 13px;">
+          🔄 Revert to This Version
+        </button>
       </div>
+    </div>
       
       <!-- Video Player Section -->
       <div class="video-section">
@@ -1580,6 +1583,10 @@
     // Configuration
     const API_BASE = 'https://4hyy6kr2id.execute-api.us-east-2.amazonaws.com/prod';
     const MAX_SONGS = 6;
+
+    // Global state
+    let allVersions = [];
+    let currentVersionIndex = 0;
     
     // Song Library with S3 URLs
     const SONG_LIBRARY = [
@@ -1905,6 +1912,9 @@
     
         const data = await response.json();
         console.log('[API] Response:', data);
+
+        // Load version history
+        await loadVersionHistory(jobId);
     
         // Store current settings
         if (data.settings) {
@@ -1990,6 +2000,71 @@
       } catch (error) {
         console.error('[API ERROR]', error);
         showError('Failed to load video data: ' + error.message);
+      }
+    }
+
+    // Load version history for this job
+    async function loadVersionHistory(baseJobId) {
+      try {
+        console.log('[VERSIONS] Loading version history for:', baseJobId);
+        const response = await fetch(`${API_BASE}/jobs/${baseJobId}/versions`);
+    
+        if (!response.ok) {
+          console.warn('[VERSIONS] No version history available');
+          return;
+        }
+    
+        const versions = await response.json();
+        console.log('[VERSIONS] Loaded:', versions);
+    
+        allVersions = versions;
+        currentVersionIndex = versions.findIndex(v => v.jobId === baseJobId);
+    
+        if (versions.length > 1) {
+          populateVersionDropdown();
+        }
+      } catch (error) {
+        console.error('[VERSIONS ERROR]', error);
+      }
+    }
+
+    // Populate version dropdown
+    function populateVersionDropdown() {
+      const selector = document.getElementById('versionSelector');
+      const dropdown = document.getElementById('versionDropdown');
+  
+      if (allVersions.length <= 1) {
+        selector.style.display = 'none';
+        return;
+      }
+  
+      let html = '';
+      allVersions.forEach((version, index) => {
+        const versionNum = version.version;
+        const date = new Date(version.createdAt).toLocaleDateString();
+        const isCurrent = version.jobId === jobId;
+        html += `<option value="${index}" ${isCurrent ? 'selected' : ''}>
+          v${versionNum} - ${date}${isCurrent ? ' (Current)' : ''}
+        </option>`;
+      });
+  
+      dropdown.innerHTML = html;
+      selector.style.display = 'block';
+  
+      updateRevertButton();
+    }
+
+    // Update revert button visibility
+    function updateRevertButton() {
+      const revertBtn = document.getElementById('revertBtn');
+      const dropdown = document.getElementById('versionDropdown');
+      const selectedIndex = parseInt(dropdown.value);
+  
+      // Show revert button if viewing an older version
+      if (selectedIndex !== currentVersionIndex) {
+        revertBtn.style.display = 'inline-block';
+      } else {
+        revertBtn.style.display = 'none';
       }
     }
     
@@ -2327,6 +2402,77 @@
   });
     document.getElementById('genreSelect').addEventListener('change', () => {
       renderLibrary();
+    });
+
+    // Version dropdown change handler
+    document.getElementById('versionDropdown').addEventListener('change', async (e) => {
+      updateRevertButton();
+  
+      const selectedIndex = parseInt(e.target.value);
+      const selectedVersion = allVersions[selectedIndex];
+  
+      if (!selectedVersion) return;
+  
+      console.log('[VERSIONS] Switching to version:', selectedVersion.jobId);
+  
+      // Reload page with selected version's jobId
+      const newUrl = `${window.location.origin}${window.location.pathname}?job=${selectedVersion.jobId}`;
+      window.location.href = newUrl;
+    });
+
+    // Revert button handler
+    document.getElementById('revertBtn').addEventListener('click', async () => {
+      const dropdown = document.getElementById('versionDropdown');
+      const selectedIndex = parseInt(dropdown.value);
+      const selectedVersion = allVersions[selectedIndex];
+  
+      if (!selectedVersion) return;
+  
+      const versionNum = selectedVersion.version;
+      const confirmed = confirm(
+        `Revert to version ${versionNum}?\n\n` +
+        'This will create a new version based on the settings from this previous version. ' +
+        'You can always switch back to any version later.'
+      );
+  
+      if (!confirmed) return;
+  
+      try {
+        showToast('Creating new version from v' + versionNum + '...', 'success');
+    
+        // Submit as a resubmission using the old version's settings
+        const response = await fetch(`${API_BASE}/jobs/${jobId}/resubmit`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            originalJobId: jobId,
+            revertToJobId: selectedVersion.jobId,
+            changes: selectedVersion.settings
+          })
+        });
+    
+        if (!response.ok) {
+          throw new Error('Failed to revert version');
+        }
+    
+        const result = await response.json();
+        console.log('[REVERT] Success:', result);
+    
+        showToast(
+          `✅ Successfully created new version from v${versionNum}! ` +
+          'You\'ll receive an email in 5-15 minutes.',
+          'success'
+        );
+    
+        // Reload after 2 seconds
+        setTimeout(() => {
+          location.reload();
+        }, 2000);
+    
+      } catch (error) {
+        console.error('[REVERT ERROR]', error);
+        showToast('Failed to revert: ' + error.message, 'error');
+      }
     });
     
     // Handle PowerPoint file upload
