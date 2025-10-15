@@ -130,16 +130,18 @@
 
     /* Top Row Actions - 4 Equal Buttons */
     #actionButtons {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      display: flex;
+      justify-content: center;
       gap: 10px;
       margin-bottom: 20px;
+      flex-wrap: wrap;
     }
 
     #actionButtons .btn {
-      width: 100%;
+      max-width: 200px;
+      flex: 0 1 auto;
       justify-content: center;
-      padding: 20px 4px;
+      padding: 20px 12px;
       font-size: 14px;
       line-height: 1.3;
     }
