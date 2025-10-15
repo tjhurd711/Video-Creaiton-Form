@@ -2613,20 +2613,6 @@
         return;
       }
       
-      if (isSharedView) {
-        container.innerHTML = `
-          <div class="video-wrapper">
-            <video controls preload="auto" crossorigin="anonymous">
-              <source src="${data.videoUrl}" type="video/mp4">
-              Your browser does not support the video tag.
-            </video>
-          </div>
-        `;
-        
-        document.getElementById('actionButtons').style.display = 'none';
-        return;
-      }
-      
       container.innerHTML = `
         <div class="video-wrapper">
           <video controls preload="auto" crossorigin="anonymous">
@@ -3256,6 +3242,17 @@
           originalJobId: jobId,
           changes: completeSettings
         };
+
+        // ✅ ADD THIS BLOCK:
+        if (isSharedView) {
+          const sharedByEmail = urlParams.get('email');
+          const sharedByName = urlParams.get('name');
+  
+          submitData.sharedBy = {
+            email: sharedByEmail,
+            name: sharedByName
+        };
+      }
         
         // STEP 1: Upload PowerPoint file to S3 if present
         if (newPptxFile) {
