@@ -854,6 +854,10 @@
     .modal-header.help-header {
       background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
     }
+
+    .modal-header.share-header {
+      background: linear-gradient(135deg, #2196F3 0%, #0b7dda 100%);
+    }
     
     .modal-header h2 {
       margin: 0 0 8px 0;
@@ -1010,6 +1014,108 @@
     .modal-btn-secondary:hover {
       background: #e0e0e0;
     }
+
+    .modal-btn-info {
+      background: #2196F3;
+      color: white;
+    }
+
+    .modal-btn-info:hover:not(:disabled) {
+      background: #0b7dda;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+    }
+
+    .modal-btn-info:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Share Recipients List */
+    .recipients-list {
+      margin-bottom: 20px;
+    }
+
+    .recipient-item {
+      background: #f5f5f5;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .recipient-item.last {
+      border-color: #2196F3;
+      background: #e3f2fd;
+    }
+
+    .recipient-number {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #2196F3 0%, #0b7dda 100%);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .recipient-fields {
+      margin-left: 40px;
+    }
+
+   .recipient-remove {
+     position: absolute;
+     top: 15px;
+     right: 15px;
+     background: #f44336;
+     color: white;
+     border: none;
+     width: 28px;
+     height: 28px;
+     border-radius: 50%;
+     cursor: pointer;
+     font-size: 16px;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     transition: all 0.2s;
+   }
+
+   .recipient-remove:hover {
+     background: #d32f2f;
+     transform: scale(1.1);
+   }
+
+   .btn-add-recipient {
+     width: 100%;
+     padding: 12px;
+     background: #f5f5f5;
+     border: 2px dashed #2196F3;
+     border-radius: 8px;
+     color: #2196F3;
+     font-weight: 600;
+     font-size: 14px;
+     cursor: pointer;
+     transition: all 0.2s;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     gap: 8px;
+   }
+
+   .btn-add-recipient:hover {
+     background: #e3f2fd;
+     border-color: #0b7dda;
+     color: #0b7dda;
+   }
     
     /* Notification Toast */
     .toast {
@@ -1429,6 +1535,41 @@
         </button>
         <button type="button" class="modal-btn modal-btn-danger" onclick="submitHelp()" id="helpSubmitBtn">
           ✉️ Send me a help request form
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Share Draft Video Modal -->
+  <div id="shareModal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header share-header">
+        <button class="modal-close" onclick="closeShareModal()">×</button>
+        <h2>📩 Share Draft Video</h2>
+        <p>Invite family and friends to review & comment and/or edit your video</p>
+      </div>
+      <div class="modal-body">
+        <form id="shareForm">
+          <div class="recipients-list" id="recipientsList">
+            <!-- Recipients will be added here dynamically -->
+          </div>
+        
+          <button type="button" class="btn-add-recipient" onclick="addRecipient()">
+            ➕ Add Another Recipient
+          </button>
+        
+          <div class="modal-info-box" style="margin-top: 20px;">
+            🔗 <strong>What happens next?</strong><br>
+            Each recipient will receive an email with a link to view your draft video. They'll be able to leave comments and suggestions to help you finalize it.
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="modal-btn modal-btn-secondary" onclick="closeShareModal()">
+          Cancel
+        </button>
+        <button type="button" class="modal-btn modal-btn-info" onclick="submitShare()" id="shareSubmitBtn">
+          📤 Send Invitations
         </button>
       </div>
     </div>
@@ -2595,13 +2736,7 @@
     
     // Share button handler
     document.getElementById('shareBtn').addEventListener('click', async () => {
-      try {
-        const shareUrl = `${window.location.origin}${window.location.pathname}?job=${jobId}&share=true`;
-        await navigator.clipboard.writeText(shareUrl);
-        showToast('Share link copied to clipboard! Recipients will only see the video.', 'success');
-      } catch (error) {
-        showToast('Failed to copy link: ' + error.message, 'error');
-      }
+      openShareModal();
     });
 
     // Deliver to Coordinator button handler
@@ -2704,7 +2839,7 @@
       closeDeliverModal();
     }
   });
-
+    
   // Help Needed button handler
   document.getElementById('helpBtn').addEventListener('click', () => {
     openHelpModal();
@@ -2794,6 +2929,184 @@
   document.getElementById('helpModal').addEventListener('click', (e) => {
     if (e.target.id === 'helpModal') {
       closeHelpModal();
+    }
+  });
+
+  // Share Modal Functions
+  let recipientCount = 0;
+  let recipients = [];
+
+  // Open share modal
+  function openShareModal() {
+    document.getElementById('shareModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  
+    // Initialize with one recipient if empty
+    if (recipientCount === 0) {
+      addRecipient();
+    }
+  }
+
+  // Close share modal
+  function closeShareModal() {
+    document.getElementById('shareModal').classList.remove('show');
+    document.body.style.overflow = 'auto';
+  
+    // Reset recipients
+    recipientCount = 0;
+    recipients = [];
+    document.getElementById('recipientsList').innerHTML = '';
+  }
+
+  // Add recipient
+  function addRecipient() {
+    recipientCount++;
+    const recipientId = `recipient-${recipientCount}`;
+  
+    const recipientHtml = `
+      <div class="recipient-item ${recipientCount === 1 ? '' : 'last'}" id="${recipientId}">
+        <div class="recipient-number">${recipientCount}</div>
+        ${recipientCount > 1 ? `<button type="button" class="recipient-remove" onclick="removeRecipient('${recipientId}')">×</button>` : ''}
+        <div class="recipient-fields">
+          <div class="modal-form-row">
+            <div class="modal-form-group">
+              <label>First Name<span class="required">*</span></label>
+              <input type="text" id="${recipientId}-firstName" required placeholder="Jane" class="recipient-input">
+            </div>
+            <div class="modal-form-group">
+              <label>Last Name<span class="required">*</span></label>
+              <input type="text" id="${recipientId}-lastName" required placeholder="Smith" class="recipient-input">
+            </div>
+          </div>
+          <div class="modal-form-group">
+            <label>Email Address<span class="required">*</span></label>
+            <input type="email" id="${recipientId}-email" required placeholder="jane@example.com" class="recipient-input">
+          </div>
+        </div>
+      </div>
+    `;
+  
+    // Remove 'last' class from all items
+    document.querySelectorAll('.recipient-item').forEach(item => {
+      item.classList.remove('last');
+    });
+  
+    document.getElementById('recipientsList').insertAdjacentHTML('beforeend', recipientHtml);
+  
+    // Add 'last' class to the newly added item
+    document.getElementById(recipientId).classList.add('last');
+  }
+
+  // Remove recipient
+  function removeRecipient(recipientId) {
+    const item = document.getElementById(recipientId);
+    if (item) {
+      item.remove();
+      recipientCount--;
+    
+      // Renumber remaining recipients
+      const items = document.querySelectorAll('.recipient-item');
+      items.forEach((item, index) => {
+        const number = item.querySelector('.recipient-number');
+        if (number) {
+          number.textContent = index + 1;
+        }
+      
+        // Add 'last' class only to the last item
+        item.classList.remove('last');
+        if (index === items.length - 1) {
+          item.classList.add('last');
+        }
+      });
+    }
+  }
+
+  // Submit share
+  async function submitShare() {
+    const recipientItems = document.querySelectorAll('.recipient-item');
+    const recipientData = [];
+    let hasError = false;
+  
+    recipientItems.forEach(item => {
+      const id = item.id;
+      const firstName = document.getElementById(`${id}-firstName`);
+      const lastName = document.getElementById(`${id}-lastName`);
+      const email = document.getElementById(`${id}-email`);
+    
+      // Validation
+      if (!firstName.value.trim()) {
+        firstName.classList.add('error');
+        hasError = true;
+      } else {
+        firstName.classList.remove('error');
+      }
+    
+      if (!lastName.value.trim()) {
+        lastName.classList.add('error');
+        hasError = true;
+      } else {
+        lastName.classList.remove('error');
+      }
+    
+      if (!email.value.trim() || !email.value.includes('@')) {
+        email.classList.add('error');
+        hasError = true;
+      } else {
+        email.classList.remove('error');
+      }
+    
+      if (firstName.value.trim() && lastName.value.trim() && email.value.trim()) {
+        recipientData.push({
+          firstName: firstName.value.trim(),
+          lastName: lastName.value.trim(),
+          email: email.value.trim()
+        });
+      }
+    });
+  
+    if (hasError) {
+      showToast('Please fill in all required fields correctly', 'error');
+      return;
+    }
+  
+    if (recipientData.length === 0) {
+      showToast('Please add at least one recipient', 'error');
+      return;
+    }
+  
+    const submitBtn = document.getElementById('shareSubmitBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = '📤 Sending...';
+  
+    try {
+      console.log('[SHARE] Sending invitations to:', {
+        jobId,
+        recipients: recipientData
+      });
+    
+      // Simulated API call (replace with real one later)
+      await new Promise(resolve => setTimeout(resolve, 1500));
+    
+      const recipientCount = recipientData.length;
+      const recipientWord = recipientCount === 1 ? 'recipient' : 'recipients';
+      showToast(`✅ Invitations sent to ${recipientCount} ${recipientWord}`, 'success');
+      closeShareModal();
+    
+      // TODO: Real API call will go here when backend is ready
+    
+    } catch (error) {
+      console.error('[SHARE ERROR]', error);
+      showToast('Failed to send invitations: ' + error.message, 'error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '📤 Send Invitations';
+    }
+  }
+
+  // Close modal when clicking outside
+  document.getElementById('shareModal').addEventListener('click', (e) => {
+    if (e.target.id === 'shareModal') {
+      closeShareModal();
     }
   });
     
