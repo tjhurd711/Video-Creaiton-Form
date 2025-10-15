@@ -2068,9 +2068,13 @@
       }
     }
     
-    // Display summary sentence
     function displaySummary(settings) {
       const summaryBox = document.getElementById('summaryBox');
+  
+      if (!summaryBox) {
+        console.warn('[DISPLAY SUMMARY] summaryBox element not found');
+        return;
+      }
       
       // Format duration
       let durationText = '';
