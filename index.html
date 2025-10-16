@@ -3743,12 +3743,15 @@ closeDeliverModal();
     // Proceed from confirmation
     function proceedFromConfirm() {
       closeConfirmModal();
-    
-      if (confirmModalAction === 'deliver') {
-        openDeliverModal();
-      } else if (confirmModalAction === 'finalize') {
-        finalizeVideoDirectly();
-      }
+  
+      // Add a small delay to ensure modal closes before opening next one
+      setTimeout(() => {
+        if (confirmModalAction === 'deliver') {
+          openDeliverModal();
+        } else if (confirmModalAction === 'finalize') {
+          finalizeVideoDirectly();
+        }
+      }, 300); // 300ms delay
     }
 
     // Finalize video directly (extracted from original button handler)
