@@ -1159,6 +1159,65 @@
       .song-controls { flex-wrap: wrap; }
       .library-grid { grid-template-columns: 1fr; }
     }
+
+    /* Thank You Overlay */
+    .thank-you-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #f8f9fa;
+      z-index: 2000;
+      display: none;
+      overflow-y: auto;
+    }
+
+    .thank-you-content {
+      background: white;
+      max-width: 600px;
+      margin: 80px auto;
+      padding: 50px;
+      border-radius: 12px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .thank-you-icon {
+      width: 80px;
+      height: 80px;
+      background: #10b981;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 30px;
+      font-size: 40px;
+      color: white;
+    }
+
+    .thank-you-title {
+      font-size: 32px;
+      color: #2c3e50;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .thank-you-message {
+      font-size: 18px;
+      color: #6c757d;
+      line-height: 1.7;
+      margin-bottom: 30px;
+    }
+
+    .thank-you-footer {
+      font-size: 14px;
+      color: #adb5bd;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e9ecef;
+    }
+    
   </style>
 </head>
 <body>
@@ -1220,7 +1279,25 @@
           </a>
         </div>
       </div>
-      
+
+      <!-- Resubmit Thank You Overlay -->
+      <div id="resubmitThankYouOverlay" class="thank-you-overlay">
+        <div class="thank-you-content">
+          <div class="thank-you-icon">✓</div>
+          <h1 class="thank-you-title">Changes Submitted!</h1>
+          <p class="thank-you-message">
+            Your video is being processed with your requested changes.
+            <br><br>
+            <strong>You'll receive an email in 5-15 minutes</strong> with your new video.
+            <br><br>
+            In the next video, you'll be able to access all previous versions using the version picker at the top.
+          </p>
+          <div class="thank-you-footer">
+            Your changes have been successfully submitted. You may close this window.
+          </div>
+        </div>
+      </div>
+    
       <!-- Edit Sections -->
       <div class="edit-sections" id="editSections" style="display:none;">
         <div class="section-header">
@@ -3594,22 +3671,15 @@ closeDeliverModal();
         const result = await response.json();
         console.log('[RESUBMIT] Success:', result);
         
-        showToast(
-          `✅ Video resubmitted successfully! New job: ${result.newJobId}. ` +
-          'You\'ll receive an email in 5-15 minutes.',
-          'success'
-        );
-        
-        // Clear changes and disable button
+        // Show thank you overlay
+        document.getElementById('resubmitThankYouOverlay').style.display = 'block';
+
+        // Hide the main container
+        document.querySelector('.container').style.display = 'none';
+
+        // Clear changes
         pendingChanges = {};
         newPptxFile = null;
-        updateResubmitButton();
-        
-        // Hide edit sections after 2 seconds
-        setTimeout(() => {
-          document.getElementById('editSections').style.display = 'none';
-          document.getElementById('editBtn').innerHTML = '✏️ Edit & Republish My Video (unlimited submissions)';
-        }, 2000);
         
       } catch (error) {
         console.error('[RESUBMIT ERROR]', error);
