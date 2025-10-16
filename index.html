@@ -2123,10 +2123,10 @@
       let html = '';
       allVersions.forEach((version, index) => {
         const versionNum = version.version;
-        const date = new Date(version.createdAt).toLocaleDateString();
+        const createdBy = version.createdBy || 'Unknown';
         const isCurrent = version.jobId === jobId;
         html += `<option value="${index}" ${isCurrent ? 'selected' : ''}>
-          v${versionNum} - ${date}${isCurrent ? ' (Current)' : ''}
+          v${versionNum} - Made by ${createdBy}${isCurrent ? ' (Current)' : ''}
         </option>`;
       });
   
