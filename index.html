@@ -1382,6 +1382,9 @@
             <span class="chevron">▼</span>
           </div>
           <div class="edit-option-content">
+            <div id="fitToMusicNotice" class="info-box" style="display:none; background: #fff3cd; border-color: #ffc107; color: #856404;">
+              ⚠️ <strong>"Fit to Music Length" is selected</strong> - Song Logic is determined automatically when video duration matches your music length.
+            </div>
             <div class="form-group">
               <label for="musicDistribution">
                 Music Distribution
@@ -2148,12 +2151,11 @@
         document.getElementById('fixedRuntimeSec').value = settings.fixedRuntimeSec;
       }
       
-      // Song Logic
-      if (settings.musicDistribution) {
+      // Song Logic - only set if NOT using fitToSongs
+      if (settings.timingMode !== 'fitToSongs' && settings.musicDistribution) {
         document.getElementById('musicDistribution').value = settings.musicDistribution;
         handleMusicDistributionChange(settings.musicDistribution);
       }
-    }
     
     // Render song list
     function renderSongList() {
@@ -3332,7 +3334,30 @@ closeDeliverModal();
         const mode = e.target.value;
         handleTimingModeChange(mode);
         trackChange('timingMode', mode);
-        
+    
+        // Handle Song Logic section based on timing mode
+        const songLogicSection = document.querySelector('[data-section="songlogic"]');
+        const musicDistSelect = document.getElementById('musicDistribution');
+    
+        if (mode === 'fitToSongs') {
+          // Disable Song Logic section when Fit to Music is selected
+          if (songLogicSection) {
+            songLogicSection.style.opacity = '0.5';
+            songLogicSection.style.pointerEvents = 'none';
+          }
+          musicDistSelect.value = '';
+          delete pendingChanges.musicDistribution;
+          delete pendingChanges.songRanges;
+          document.getElementById('songRangesContainer').style.display = 'none';
+          updateResubmitButton();
+        } else {
+          // Re-enable Song Logic section
+          if (songLogicSection) {
+            songLogicSection.style.opacity = '1';
+            songLogicSection.style.pointerEvents = 'auto';
+          }
+        }
+    
         if (mode === 'perSlide') {
           trackChange('perSlideSec', document.getElementById('perSlideSec').value);
         } else if (mode === 'fixedRuntime') {
@@ -3346,22 +3371,34 @@ closeDeliverModal();
     function handleTimingModeChange(mode) {
       document.getElementById('perSlideInput').style.display = 'none';
       document.getElementById('fixedRuntimeInput').style.display = 'none';
-      
+  
+      // Handle the fit to music notice
+      const fitToMusicNotice = document.getElementById('fitToMusicNotice');
+      const musicDistSelect = document.getElementById('musicDistribution');
+  
+      if (mode === 'fitToSongs') {
+        if (fitToMusicNotice) fitToMusicNotice.style.display = 'block';
+        musicDistSelect.disabled = true;
+      } else {
+        if (fitToMusicNotice) fitToMusicNotice.style.display = 'none';
+        musicDistSelect.disabled = false;
+      }
+  
       document.querySelectorAll('.radio-option').forEach(opt => {
         opt.classList.remove('selected');
       });
-      
+  
       const selectedRadio = document.querySelector(`input[name="timingMode"][value="${mode}"]`);
       if (selectedRadio) {
         selectedRadio.closest('.radio-option').classList.add('selected');
-        
+    
         if (mode === 'perSlide') {
           document.getElementById('perSlideInput').style.display = 'block';
         } else if (mode === 'fixedRuntime') {
           document.getElementById('fixedRuntimeInput').style.display = 'block';
         }
-      }
-    }
+     }
+  }
     
     document.getElementById('perSlideSec').addEventListener('input', (e) => {
       trackChange('perSlideSec', parseFloat(e.target.value));
@@ -3377,6 +3414,15 @@ closeDeliverModal();
     
     document.getElementById('musicDistribution').addEventListener('change', (e) => {
       const value = e.target.value;
+  
+      // Check if Fit to Music is selected
+      const timingMode = document.querySelector('input[name="timingMode"]:checked')?.value;
+      if (timingMode === 'fitToSongs') {
+        showToast('"Fit to Music Length" determines your Song Logic automatically', 'error');
+        e.target.value = ''; // Reset selection
+        return;
+      }
+  
       trackChange('musicDistribution', value);
       handleMusicDistributionChange(value);
     });
