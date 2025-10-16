@@ -1660,6 +1660,38 @@
       </div>
     </div>
   </div>
+
+  <!-- Confirmation Preview Modal -->
+  <div id="confirmModal" class="modal-overlay">
+    <div class="modal" style="max-width: 800px;">
+      <div class="modal-header" id="confirmModalHeader">
+        <button class="modal-close" onclick="closeConfirmModal()">×</button>
+        <h2 id="confirmModalTitle">⛪️ Confirm Video</h2>
+        <p id="confirmModalSubtitle">Please review your video before proceeding</p>
+      </div>
+      <div class="modal-body">
+        <div class="modal-info-box" id="confirmModalMessage">
+          Can you confirm this is the video you wish to send to your event coordinator?
+        </div>
+        
+        <!-- Video Player Embed -->
+        <div class="video-wrapper" style="margin-bottom: 20px;">
+          <video id="confirmVideo" controls preload="auto">
+            <source id="confirmVideoSource" src="" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="modal-btn modal-btn-secondary" onclick="closeConfirmModal()">
+          ❌ No, Go Back
+        </button>
+        <button type="button" class="modal-btn modal-btn-primary" id="confirmProceedBtn" onclick="proceedFromConfirm()">
+          ✅ Yes, Continue
+        </button>
+      </div>
+    </div>
+  </div>
   
   <script>
     // Configuration
@@ -2912,43 +2944,8 @@
     
     // Finalize button handler
     function setupFinalizeButton() {
-      document.getElementById('finalizeBtn').addEventListener('click', async () => {
-        const confirmed = confirm(
-          "Are you sure? You won't be able to make anymore edits to the final video. " +
-          "You will also be emailed a final copy as a backup."
-        );
-        
-        if (!confirmed) return;
-        
-        try {
-          const downloadUrl = window.videoData.downloadUrl || window.videoData.videoUrl;
-          const link = document.createElement('a');
-          link.href = downloadUrl;
-          link.download = `memorial_video_${jobId}.mp4`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          
-          showToast('Finalizing your order...', 'success');
-          const response = await fetch(`${API_BASE}/jobs/${jobId}/finalize`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          });
-          
-          if (!response.ok) {
-            throw new Error('Failed to finalize order');
-          }
-          
-          const finalizedUrl = `${window.location.origin}${window.location.pathname}?job=${jobId}&finalized=true`;
-          history.replaceState(null, '', finalizedUrl);
-          location.reload();
-          
-        } catch (error) {
-          console.error('[FINALIZE ERROR]', error);
-          showToast('Download started, but email failed. Please contact support.', 'error');
-        }
+      document.getElementById('finalizeBtn').addEventListener('click', () => {
+        openConfirmModal('finalize');
       });
     }
     
@@ -2959,7 +2956,7 @@
 
     // Deliver to Coordinator button handler
     document.getElementById('deliverBtn').addEventListener('click', () => {
-      openDeliverModal();
+      openConfirmModal('deliver');
     });
 
     // Open deliver modal
@@ -3686,6 +3683,121 @@ closeDeliverModal();
         showToast('Failed to resubmit: ' + error.message, 'error');
       }
     });
+
+    // Confirmation Modal State
+    let confirmModalAction = null; // 'deliver' or 'finalize'
+
+    // Open confirmation modal
+    function openConfirmModal(action) {
+      confirmModalAction = action;
+      const modal = document.getElementById('confirmModal');
+      const title = document.getElementById('confirmModalTitle');
+      const subtitle = document.getElementById('confirmModalSubtitle');
+      const message = document.getElementById('confirmModalMessage');
+      const proceedBtn = document.getElementById('confirmProceedBtn');
+      const header = document.getElementById('confirmModalHeader');
+    
+      // Get video URL from current video
+      const currentVideo = document.querySelector('.video-wrapper video');
+      const videoUrl = currentVideo ? currentVideo.querySelector('source').src : '';
+    
+      // Set video source
+      document.getElementById('confirmVideoSource').src = videoUrl;
+      document.getElementById('confirmVideo').load();
+    
+      // Customize based on action
+      if (action === 'deliver') {
+        header.style.background = 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)';
+        title.innerHTML = '⛪️ Confirm Video for Coordinator';
+        subtitle.textContent = 'Please review your video before sending';
+        message.innerHTML = '📧 Can you confirm this is the video you wish to send to your event coordinator?';
+        proceedBtn.innerHTML = '✅ Yes, Continue to Delivery';
+        proceedBtn.className = 'modal-btn modal-btn-primary';
+      } else if (action === 'finalize') {
+        header.style.background = 'linear-gradient(135deg, #2196F3 0%, #0b7dda 100%)';
+        title.innerHTML = '✅ Confirm Final Video';
+        subtitle.textContent = 'Please review your video before finalizing';
+        message.innerHTML = '🎬 Can you confirm this is the final video you wish to submit? You won\'t be able to make anymore edits after this.';
+        proceedBtn.innerHTML = '✅ Yes, Continue to Finalize';
+        proceedBtn.className = 'modal-btn modal-btn-info';
+      }
+    
+      modal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    // Close confirmation modal
+    function closeConfirmModal() {
+      const modal = document.getElementById('confirmModal');
+      const video = document.getElementById('confirmVideo');
+    
+      // Pause video
+      video.pause();
+      video.currentTime = 0;
+    
+      modal.classList.remove('show');
+      document.body.style.overflow = 'auto';
+      confirmModalAction = null;
+    }
+
+    // Proceed from confirmation
+    function proceedFromConfirm() {
+      closeConfirmModal();
+    
+      if (confirmModalAction === 'deliver') {
+        openDeliverModal();
+      } else if (confirmModalAction === 'finalize') {
+        finalizeVideoDirectly();
+      }
+    }
+
+    // Finalize video directly (extracted from original button handler)
+    async function finalizeVideoDirectly() {
+      const confirmed = confirm(
+        "Final confirmation: You won't be able to make anymore edits to the final video. " +
+        "You will also be emailed a final copy as a backup."
+      );
+    
+      if (!confirmed) return;
+    
+      try {
+        const downloadUrl = window.videoData.downloadUrl || window.videoData.videoUrl;
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = `memorial_video_${jobId}.mp4`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      
+        showToast('Finalizing your order...', 'success');
+        const response = await fetch(`${API_BASE}/jobs/${jobId}/finalize`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+      
+        if (!response.ok) {
+          throw new Error('Failed to finalize order');
+        }
+      
+        const finalizedUrl = `${window.location.origin}${window.location.pathname}?job=${jobId}&finalized=true`;
+        history.replaceState(null, '', finalizedUrl);
+        location.reload();
+      
+      } catch (error) {
+        console.error('[FINALIZE ERROR]', error);
+        showToast('Download started, but email failed. Please contact support.', 'error');
+      }
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('confirmModal').addEventListener('click', (e) => {
+      if (e.target.id === 'confirmModal') {
+        closeConfirmModal();
+      }
+    });
+    
   </script>
 </body>
 </html>
