@@ -3395,12 +3395,9 @@ closeDeliverModal();
       const btn = document.getElementById('resubmitBtn');
       const hasChanges = Object.keys(pendingChanges).length > 0;
       btn.disabled = !hasChanges;
-      
-      if (hasChanges) {
-        btn.textContent = `🚀 Resubmit Changes (${Object.keys(pendingChanges).length})`;
-      } else {
-        btn.textContent = '🚀 Resubmit Changes';
-      }
+  
+      // Removed the counter - just show the base text
+      btn.textContent = '🚀 Resubmit Changes';
     }
     
     // Setup change tracking for all form elements
