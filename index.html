@@ -3742,16 +3742,24 @@ closeDeliverModal();
 
     // Proceed from confirmation
     function proceedFromConfirm() {
+      console.log('[CONFIRM] Action:', confirmModalAction);
+  
       closeConfirmModal();
   
       // Add a small delay to ensure modal closes before opening next one
       setTimeout(() => {
+        console.log('[CONFIRM] Proceeding with action:', confirmModalAction);
+    
         if (confirmModalAction === 'deliver') {
-          openDeliverModal();
+          console.log('[CONFIRM] Opening deliver modal...');
+          const deliverModal = document.getElementById('deliverModal');
+          deliverModal.classList.add('show');
+          document.body.style.overflow = 'hidden';
         } else if (confirmModalAction === 'finalize') {
+          console.log('[CONFIRM] Finalizing video...');
           finalizeVideoDirectly();
         }
-      }, 300); // 300ms delay
+      }, 300);
     }
 
     // Finalize video directly (extracted from original button handler)
