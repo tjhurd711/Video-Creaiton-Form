@@ -3799,7 +3799,7 @@ closeDeliverModal();
       document.getElementById('modalDuration').textContent = duration;
       document.getElementById('modalSummary').textContent = 
         `Your updated video will have ${slideCount} slides with an estimated duration of ${duration}.`;
-  
+
       document.getElementById('calculationModal').classList.add('show');
     }
 
@@ -3808,12 +3808,17 @@ closeDeliverModal();
       document.getElementById('calculationModal').classList.remove('show');
     }
 
-    // Close modal when clicking outside
-    document.getElementById('calculationModal').addEventListener('click', (e) => {
-      if (e.target.id === 'calculationModal') {
-        closeCalculationModal();
-    }
-  });
+    // Close modal when clicking outside - wrapped to run after DOM loads
+    window.addEventListener('DOMContentLoaded', function() {
+      const calcModal = document.getElementById('calculationModal');
+      if (calcModal) {
+        calcModal.addEventListener('click', (e) => {
+          if (e.target.id === 'calculationModal') {
+            closeCalculationModal();
+          }
+        });
+      }
+    });
     
     // ========== END CALCULATION FUNCTIONS ==========
 
