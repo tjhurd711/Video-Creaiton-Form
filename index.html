@@ -3630,7 +3630,7 @@ closeDeliverModal();
             presentationSource = await uploadPowerPointForCalculation(jobId, newPptxFile);
           } else {
             // Use existing presentation from S3
-            presentationSource = currentSettings.original_url || `https://order-by-age-uploads.s3.us-east-2.amazonaws.com/${jobId}/presentation.pptx`;
+            presentationSource = currentSettings.original_url || `https://order-by-age-uploads.s3.us-east-2.amazonaws.com/input/${jobId}/presentation.pptx`;
           }
         }
         
