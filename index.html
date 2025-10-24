@@ -3486,7 +3486,8 @@ closeDeliverModal();
     
     // Update resubmit button state
     function updateResubmitButton() {
-      document.getElementById('resubmitBtn').onclick = calculateVideo;
+      const btn = document.getElementById('resubmitBtn');
+      btn.onclick = calculateVideo;
       const hasChanges = Object.keys(pendingChanges).length > 0;
       btn.disabled = !hasChanges;
   
