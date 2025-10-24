@@ -1119,6 +1119,58 @@
      border-color: #0b7dda;
      color: #0b7dda;
    }
+
+   /* Calculation Modal Specific Styles */
+   .modal-header.calc-header {
+     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+   }
+
+   .calc-result-item {
+     display: flex;
+     justify-content: space-between;
+     align-items: center;
+     padding: 16px;
+     background: #f8f9ff;
+     border-radius: 8px;
+     margin-bottom: 16px;
+     border: 2px solid #e0e0e0;
+   }
+
+   .calc-label {
+     font-weight: 600;
+     color: #555;
+     font-size: 16px;
+   }
+
+   .calc-value {
+     font-weight: 700;
+     color: #2a5298;
+     font-size: 20px;
+   }
+
+   .calc-summary {
+     background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+     border-left: 4px solid #667eea;
+     border-radius: 8px;
+     padding: 20px;
+     margin-top: 20px;
+     font-size: 15px;
+     line-height: 1.6;
+     color: #333;
+   }
+
+   .modal-btn-calc-primary {
+     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+     color: white;
+     padding: 14px 24px;
+     font-size: 16px;
+     flex: 1;
+   }
+
+   .modal-btn-calc-primary:hover {
+     transform: translateY(-2px);
+     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+   }
     
     /* Notification Toast */
     .toast {
@@ -3743,30 +3795,25 @@ closeDeliverModal();
     
     // Show calculation modal
     function showCalculationModal(slideCount, duration) {
-      const resultsDiv = document.getElementById('calculationResults');
-      resultsDiv.innerHTML = `
-        <p><strong>Slide Count:</strong> ${slideCount} slides</p>
-        <p><strong>Estimated Duration:</strong> ${duration}</p>
-        <p style="margin-top: 15px; color: #666;">
-          Your updated video will have ${slideCount} slides with an estimated duration of ${duration}.
-        </p>
-      `;
-      
-      document.getElementById('calculationModal').style.display = 'block';
+      document.getElementById('modalSlideCount').textContent = `${slideCount} slides`;
+      document.getElementById('modalDuration').textContent = duration;
+      document.getElementById('modalSummary').textContent = 
+        `Your updated video will have ${slideCount} slides with an estimated duration of ${duration}.`;
+  
+      document.getElementById('calculationModal').classList.add('show');
     }
-    
+
     // Close calculation modal
     function closeCalculationModal() {
-      document.getElementById('calculationModal').style.display = 'none';
+      document.getElementById('calculationModal').classList.remove('show');
     }
-    
+
     // Close modal when clicking outside
-    window.onclick = function(event) {
-      const modal = document.getElementById('calculationModal');
-      if (event.target == modal) {
+    document.getElementById('calculationModal').addEventListener('click', (e) => {
+      if (e.target.id === 'calculationModal') {
         closeCalculationModal();
-      }
     }
+  });
     
     // ========== END CALCULATION FUNCTIONS ==========
 
@@ -4086,21 +4133,39 @@ closeDeliverModal();
     
   </script>
 
-  <!-- ✅ ADD THE CALCULATION MODAL HERE ✅ -->
-  <div id="calculationModal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeCalculationModal()">&times;</span>
-      <h2>Video Calculation Complete</h2>
-      <div id="calculationResults">
-        <!-- Results will be inserted here -->
+<!-- Calculation Modal -->
+  <div id="calculationModal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header calc-header">
+        <h2>📊 Your Video Calculation</h2>
       </div>
-      <div class="modal-actions">
-        <button onclick="closeCalculationModal()" class="secondary-btn">Make Another Update</button>
-        <button onclick="finalSubmit()" class="submit-btn">Create This Video</button>
+      
+      <div class="modal-body">
+        <div class="calc-result-item">
+          <span class="calc-label">Slide Count:</span>
+          <span class="calc-value" id="modalSlideCount">--</span>
+        </div>
+        
+        <div class="calc-result-item">
+          <span class="calc-label">Estimated Duration:</span>
+          <span class="calc-value" id="modalDuration">--</span>
+        </div>
+        
+        <div class="calc-summary" id="modalSummary">
+          Calculating...
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn-secondary" onclick="closeCalculationModal()">
+          ← Make Another Update
+        </button>
+        <button class="modal-btn modal-btn-calc-primary" onclick="finalSubmit()">
+          Create This Video →
+        </button>
       </div>
     </div>
   </div>
-  <!-- ✅ END OF CALCULATION MODAL ✅ -->
   
 </body>
 </html>
