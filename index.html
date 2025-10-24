@@ -1217,6 +1217,82 @@
       padding-top: 20px;
       border-top: 1px solid #e9ecef;
     }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+      background-color: white;
+      margin: 10% auto;
+      padding: 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      line-height: 20px;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: #000;
+    }
+
+    #calculationResults {
+      margin: 20px 0;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    #calculationResults p {
+      margin: 10px 0;
+      font-size: 16px;
+    }
+
+    #calculationResults strong {
+      color: #2c5aa0;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 15px;
+      margin-top: 25px;
+    }
+
+    .modal-actions button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .secondary-btn {
+      background: #6c757d;
+      color: white;
+    }
+
+    .secondary-btn:hover {
+      background: #5a6268;
+    }
     
   </style>
 </head>
@@ -1527,7 +1603,7 @@
         <!-- Resubmit Section -->
         <div class="resubmit-section">
           <button id="resubmitBtn" class="btn-resubmit" disabled>
-            🚀 Resubmit Changes
+              🚀 Calculate My Video
           </button>
           <p style="margin-top:12px; color:#ffffff; font-size:14px;">
             Make changes above, then click to create a new video
@@ -3410,12 +3486,12 @@ closeDeliverModal();
     
     // Update resubmit button state
     function updateResubmitButton() {
-      const btn = document.getElementById('resubmitBtn');
+      document.getElementById('resubmitBtn').onclick = calculateVideo;
       const hasChanges = Object.keys(pendingChanges).length > 0;
       btn.disabled = !hasChanges;
   
-      // Removed the counter - just show the base text
-      btn.textContent = '🚀 Resubmit Changes';
+      // Updated text to match calculation flow
+      btn.textContent = '🚀 Calculate My Video';
     }
     
     // Transition preview video mapping
@@ -3538,9 +3614,166 @@ closeDeliverModal();
       trackChange('musicDistribution', value);
       handleMusicDistributionChange(value);
     });
+
+    // ========== CALCULATION FUNCTIONS ==========
     
-    // Resubmit button handler
-    document.getElementById('resubmitBtn').addEventListener('click', async () => {
+    // Calculate video before submission
+    async function calculateVideo() {
+      console.log('[CALCULATE] Starting calculation...');
+      
+      // Show loading state on the button
+      const calculateBtn = document.getElementById('resubmitBtn');
+      const originalText = calculateBtn.textContent;
+      calculateBtn.textContent = 'Calculating...';
+      calculateBtn.disabled = true;
+      
+      try {
+        // Get presentation type from pending changes or form
+        const presentationType = pendingChanges.presentationType || 
+                                currentSettings.provider || 
+                                document.querySelector('input[name="presentationType"]:checked')?.value;
+        
+        if (!presentationType) {
+          alert('Please select a presentation type');
+          calculateBtn.textContent = originalText;
+          calculateBtn.disabled = false;
+          return;
+        }
+        
+        // Get presentation source based on type
+        let presentationSource;
+        if (presentationType === 'google_slides') {
+          presentationSource = pendingChanges.presentationUrl || currentSettings.original_url;
+        } else if (presentationType === 'powerpoint_url') {
+          presentationSource = pendingChanges.presentationUrl || currentSettings.original_url;
+        } else if (presentationType === 'powerpoint_file' || presentationType === 'pptx') {
+          // If there's a new file uploaded, we need to upload it first
+          if (newPptxFile) {
+            console.log('[CALCULATE] Uploading new PowerPoint file first...');
+            presentationSource = await uploadPowerPointForCalculation(jobId, newPptxFile);
+          } else {
+            // Use existing presentation from S3
+            presentationSource = currentSettings.original_url || `https://order-by-age-uploads.s3.us-east-2.amazonaws.com/${jobId}/presentation.pptx`;
+          }
+        }
+        
+        if (!presentationSource) {
+          alert('No presentation source found. Please upload or select a presentation.');
+          calculateBtn.textContent = originalText;
+          calculateBtn.disabled = false;
+          return;
+        }
+        
+        console.log('[CALCULATE] Calling Lambda...', {
+          jobId: jobId,
+          presentationType: presentationType,
+          presentationSource: presentationSource
+        });
+        
+        // Call the calculation Lambda (same one used by main form)
+        const response = await fetch(`${API_BASE}/jobs/${jobId}/calculate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            presentationType: presentationType,
+            presentationSource: presentationSource
+          })
+        });
+        
+        const result = await response.json();
+        console.log('[CALCULATE] Lambda response:', result);
+        
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to calculate video');
+        }
+        
+        // Calculate duration (15 seconds per slide)
+        const slideCount = result.slideCount;
+        const durationSeconds = slideCount * 15;
+        const minutes = Math.floor(durationSeconds / 60);
+        const seconds = durationSeconds % 60;
+        const durationString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        // Show modal with results
+        showCalculationModal(slideCount, durationString);
+        
+      } catch (error) {
+        console.error('[CALCULATE ERROR]', error);
+        alert(`Failed to calculate video: ${error.message}`);
+      } finally {
+        calculateBtn.textContent = originalText;
+        calculateBtn.disabled = false;
+      }
+    }
+    
+    // Upload PowerPoint file for calculation only
+    async function uploadPowerPointForCalculation(jobId, file) {
+      console.log('[CALCULATE UPLOAD] Uploading PowerPoint to temp location...');
+      
+      const urlResponse = await fetch(`${API_BASE}/generate-upload-url`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          jobId: jobId,
+          fileType: 'presentation',
+          fileExtension: 'pptx'
+        })
+      });
+      
+      if (!urlResponse.ok) throw new Error('Failed to get PowerPoint upload URL');
+      
+      const {uploadUrl, s3Key} = await urlResponse.json();
+      
+      const uploadResponse = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/vnd.openxmlformats-officedocument.presentationml.presentation'},
+        body: file
+      });
+      
+      if (!uploadResponse.ok) throw new Error('Failed to upload PowerPoint');
+      
+      // Return S3 URL
+      const s3Url = `https://order-by-age-uploads.s3.us-east-2.amazonaws.com/${s3Key}`;
+      console.log('[CALCULATE UPLOAD] PowerPoint uploaded:', s3Url);
+      return s3Url;
+    }
+    
+    // Show calculation modal
+    function showCalculationModal(slideCount, duration) {
+      const resultsDiv = document.getElementById('calculationResults');
+      resultsDiv.innerHTML = `
+        <p><strong>Slide Count:</strong> ${slideCount} slides</p>
+        <p><strong>Estimated Duration:</strong> ${duration}</p>
+        <p style="margin-top: 15px; color: #666;">
+          Your updated video will have ${slideCount} slides with an estimated duration of ${duration}.
+        </p>
+      `;
+      
+      document.getElementById('calculationModal').style.display = 'block';
+    }
+    
+    // Close calculation modal
+    function closeCalculationModal() {
+      document.getElementById('calculationModal').style.display = 'none';
+    }
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById('calculationModal');
+      if (event.target == modal) {
+        closeCalculationModal();
+      }
+    }
+    
+    // ========== END CALCULATION FUNCTIONS ==========
+
+    // Final submit function (called from calculation modal)
+    async function finalSubmit() {
+      // Close the calculation modal
+      closeCalculationModal();
+      
       if (Object.keys(pendingChanges).length === 0) {
         showToast('No changes to submit', 'error');
         return;
@@ -3720,7 +3953,7 @@ closeDeliverModal();
         console.error('[RESUBMIT ERROR]', error);
         showToast('Failed to resubmit: ' + error.message, 'error');
       }
-    });
+    }
 
     // Confirmation Modal State
     let confirmModalAction = null; // 'deliver' or 'finalize'
@@ -3851,6 +4084,23 @@ closeDeliverModal();
     });
     
   </script>
+
+  <!-- ✅ ADD THE CALCULATION MODAL HERE ✅ -->
+  <div id="calculationModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeCalculationModal()">&times;</span>
+      <h2>Video Calculation Complete</h2>
+      <div id="calculationResults">
+        <!-- Results will be inserted here -->
+      </div>
+      <div class="modal-actions">
+        <button onclick="closeCalculationModal()" class="secondary-btn">Make Another Update</button>
+        <button onclick="finalSubmit()" class="submit-btn">Create This Video</button>
+      </div>
+    </div>
+  </div>
+  <!-- ✅ END OF CALCULATION MODAL ✅ -->
+  
 </body>
 </html>
 
