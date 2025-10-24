@@ -3607,7 +3607,7 @@ closeDeliverModal();
       try {
         // Get presentation type from pending changes or form
         const presentationType = pendingChanges.presentationType || 
-                                currentSettings.provider || 
+                                (currentSettings.provider === 'powerpoint' ? 'powerpoint_url' : currentSettings.provider) || 
                                 document.querySelector('input[name="presentationType"]:checked')?.value;
         
         if (!presentationType) {
