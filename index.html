@@ -1377,7 +1377,7 @@
                 <input type="file" id="newSongUpload" accept=".mp3,audio/mpeg" multiple style="display: none;">
               </label>
               <div style="margin-top: 8px; font-size: 13px; color: #666;">
-                <span id="songCountDisplay">0 of 6 songs</span>
+                <span id="songCountDisplay">0 songs selected</span>
               </div>
             </div>
 
@@ -2449,7 +2449,8 @@
       const uploadSection = document.getElementById('uploadSection');
       const uploadLabel = document.getElementById('uploadLabel');
       
-      display.textContent = `${currentSongs.length} of ${MAX_SONGS} songs`;
+      const songWord = currentSongs.length === 1 ? 'song' : 'songs';
+      display.textContent = `${currentSongs.length} ${songWord} selected`;
       
       if (currentSongs.length >= MAX_SONGS) {
         uploadSection.classList.add('max-reached');
