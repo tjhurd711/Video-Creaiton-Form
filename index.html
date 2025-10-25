@@ -2296,7 +2296,7 @@
           <div class="${cardClass}" data-song-id="${song.id}">
             <div class="library-song-name">${song.displayName}</div>
             <div class="library-song-controls">
-              <button class="btn-small btn-play" onclick="togglePlay('${audioId}', this)">▶️</button>
+              <button class="btn-small btn-play" onclick="togglePlay('${audioId}', this)">▶️ Play Song</button>
               <button class="${btnClass}" onclick="addLibrarySong('${song.id}')" ${isAdded || currentSongs.length >= MAX_SONGS ? 'disabled' : ''}>
                 ${btnText}
               </button>
@@ -2626,9 +2626,9 @@
               ${libraryBadge}
             </div>
             <div class="song-controls">
-              ${song.url ? `<button class="btn-small btn-play" onclick="togglePlay('${audioId}', this)">▶️</button>` : ''}
-              <button class="btn-small btn-move" onclick="moveSongUp(${index})" ${index === 0 ? 'disabled' : ''}>⬆️</button>
-              <button class="btn-small btn-move" onclick="moveSongDown(${index})" ${index === currentSongs.length - 1 ? 'disabled' : ''}>⬇️</button>
+              ${song.url ? `<button class="btn-small btn-play" onclick="togglePlay('${audioId}', this)">▶️ Play Song</button>` : ''}
+              <button class="btn-small btn-move" onclick="moveSongUp(${index})" ${index === 0 ? 'disabled' : ''}>⬆️ Move Up</button>
+              <button class="btn-small btn-move" onclick="moveSongDown(${index})" ${index === currentSongs.length - 1 ? 'disabled' : ''}>⬇️ Move Down</button>
               <button class="btn-small btn-danger" onclick="removeSong(${index})">🗑️</button>
             </div>
             ${song.url ? `<audio id="${audioId}" src="${song.url}" preload="none"></audio>` : ''}
@@ -2643,35 +2643,35 @@
     // Toggle audio play/pause
     function togglePlay(audioId, button) {
       const audio = document.getElementById(audioId);
-      
+  
       if (currentlyPlayingAudio && currentlyPlayingAudio !== audio) {
         currentlyPlayingAudio.pause();
         currentlyPlayingAudio.currentTime = 0;
         document.querySelectorAll('.btn-play').forEach(btn => {
-          btn.textContent = '▶️';
+          btn.textContent = '▶️ Play Song';
           btn.classList.remove('playing');
         });
       }
-      
+  
       if (audio.paused) {
         audio.play().catch(err => {
           console.error('Play error:', err);
-          button.textContent = '▶️';
+          button.textContent = '▶️ Play Song';
           button.classList.remove('playing');
         });
-        button.textContent = '⏸️';
+        button.textContent = '⏸️ Pause Song';
         button.classList.add('playing');
         currentlyPlayingAudio = audio;
-        
+    
         audio.onended = () => {
-          button.textContent = '▶️';
+          button.textContent = '▶️ Play Song';
           button.classList.remove('playing');
           currentlyPlayingAudio = null;
         };
       } else {
         audio.pause();
         audio.currentTime = 0;
-        button.textContent = '▶️';
+        button.textContent = '▶️ Play Song';
         button.classList.remove('playing');
         currentlyPlayingAudio = null;
       }
