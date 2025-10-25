@@ -3936,15 +3936,50 @@ closeDeliverModal();
           throw new Error(result.error || 'Failed to calculate video');
         }
         
-        // Calculate duration (15 seconds per slide)
         const slideCount = result.slideCount;
-        const durationSeconds = slideCount * 15;
-        const minutes = Math.floor(durationSeconds / 60);
-        const seconds = durationSeconds % 60;
-        const durationString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        // STEP 3: Calculate duration based on timing mode and songs
+        const timingMode = document.querySelector('input[name="timingMode"]:checked').value;
+        let estimatedSeconds = 0;
+        let durationText = '';
+        let summaryText = '';
+        
+        // Calculate total music duration
+        let totalMusicSeconds = 0;
+        for (const song of currentSongs) {
+          totalMusicSeconds += song.duration || 180; // Default 3 min if no duration
+        }
+        
+        if (timingMode === 'fixedRuntime') {
+          estimatedSeconds = parseInt(document.getElementById('fixedRuntimeSec').value) || 350;
+          const minutes = Math.floor(estimatedSeconds / 60);
+          const seconds = estimatedSeconds % 60;
+          durationText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+          
+          const perSlide = (estimatedSeconds / slideCount).toFixed(1);
+          summaryText = `Your video will be exactly ${minutes} minutes and ${seconds} seconds long with ${slideCount} slides (approximately ${perSlide} seconds per slide).`;
+          
+        } else if (timingMode === 'perSlide') {
+          const perSlide = parseInt(document.getElementById('perSlideSec').value) || 5;
+          estimatedSeconds = slideCount * perSlide;
+          const minutes = Math.floor(estimatedSeconds / 60);
+          const seconds = estimatedSeconds % 60;
+          durationText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+          
+          summaryText = `Your video will be approximately ${minutes} minutes and ${seconds} seconds long with ${slideCount} slides at ${perSlide} seconds per slide.`;
+          
+        } else if (timingMode === 'matchMusic') {
+          estimatedSeconds = totalMusicSeconds;
+          const minutes = Math.floor(estimatedSeconds / 60);
+          const seconds = estimatedSeconds % 60;
+          durationText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+          
+          const perSlide = (estimatedSeconds / slideCount).toFixed(1);
+          summaryText = `Your video will match your music length of ${minutes} minutes and ${seconds} seconds with ${slideCount} slides (approximately ${perSlide} seconds per slide).`;
+        }
         
         // Show modal with results
-        showCalculationModal(slideCount, durationString);
+        showCalculationModal(slideCount, durationText, summaryText);
         
       } catch (error) {
         console.error('[CALCULATE ERROR]', error);
