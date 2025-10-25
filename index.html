@@ -351,7 +351,7 @@
     
     .radio-option {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 10px;
       padding: 12px;
       border: 2px solid #e0e0e0;
@@ -363,13 +363,6 @@
     .radio-option:hover {
       border-color: #2a5298;
       background: #f8f9ff;
-    }
-
-    .radio-option-label {
-      font-weight: 600;
-      display: inline;
-      vertical-align: middle;
-      line-height: 20px;
     }
     
     .radio-option.selected {
@@ -384,23 +377,25 @@
       margin-top: 2px;
       flex-shrink: 0;
     }
-
+    
     .radio-option-content {
       flex: 1;
     }
-
+    
     .radio-option-label {
       font-weight: 600;
-      display: inline;
+      display: inline-block;
+      line-height: 20px;
+      vertical-align: top;
     }
-
+    
     .radio-option-desc {
       font-size: 13px;
       color: #666;
       display: block;
       margin-top: 4px;
     }
-
+    
     .conditional-input {
       margin-top: 12px;
       padding: 12px;
