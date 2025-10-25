@@ -384,13 +384,17 @@
 
     .radio-option-label {
       font-weight: 600;
-      display: block;
+      display: inline-block;
       margin-bottom: 4px;
+      font-size: 15px;
     }
 
     .radio-option-desc {
       font-size: 13px;
       color: #666;
+      line-height: 1.4;
+      display: block;
+      margin-top: 4px;
     }
 
     .conditional-input {
@@ -1564,8 +1568,8 @@
               <div class="radio-group">
                 <label class="radio-option">
                   <input type="radio" name="timingMode" value="perSlide">
+                  <span class="radio-option-label">Per Slide Duration</span>
                   <div class="radio-option-content">
-                    <span class="radio-option-label">Per Slide Duration</span>
                     <span class="radio-option-desc">Set how many seconds each slide should display</span>
                     <div class="conditional-input" id="perSlideInput" style="display:none;">
                       <label for="perSlideSec" style="font-size: 13px; margin-bottom: 6px;">Seconds per slide:</label>
