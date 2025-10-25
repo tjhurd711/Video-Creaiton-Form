@@ -2747,12 +2747,19 @@
       }
   
       let html = '';
+      let exampleStart = 1;
+      let exampleEnd = 19;
+  
       currentSongs.forEach((song, index) => {
         const audioId = `audio-range-${song.id}`;
-        const playButton = song.url ? `<button class="btn-small btn-play" onclick="togglePlay('${audioId}', this)" style="margin-left: 8px;">▶️</button>` : '';
+        const playButton = song.url ? `<button class="btn-small btn-play" onclick="togglePlay('${audioId}', this)" style="margin-left: 8px;">▶️ Play Song</button>` : '';
     
         // Auto-populate start value: first song starts at 1, others start at previous end + 1
         const startValue = index === 0 ? '1' : '';
+        
+        // Calculate example placeholders
+        const startPlaceholder = `Example: ${exampleStart}`;
+        const endPlaceholder = `Example: ${exampleEnd}`;
     
         html += `
           <div class="song-range-item">
@@ -2772,7 +2779,7 @@
                        min="1" 
                        max="250"
                        value="${startValue}"
-                       placeholder="e.g., 1">
+                       placeholder="${startPlaceholder}">
               </div>
               <div class="slide-input-group">
                 <label>End Slide</label>
@@ -2783,11 +2790,15 @@
                        data-type="end"
                        min="1" 
                        max="250" 
-                       placeholder="e.g., 50">
+                       placeholder="${endPlaceholder}">
               </div>
            </div>
         </div>
       `;
+        
+       // Update examples for next song
+        exampleStart = exampleEnd + 1;
+        exampleEnd = exampleStart + 17; // Each song spans about 18 slides in examples
     });
   
     container.innerHTML = html;
