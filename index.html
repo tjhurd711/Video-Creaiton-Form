@@ -2466,8 +2466,7 @@
     // ✅ ADD THIS ENTIRE FUNCTION HERE
     // Calculate and display video duration
     function calculateVideoDuration() {
-      const slideCountInput = document.getElementById('slideCount');
-      const slideCount = parseInt(slideCountInput.value);
+      const slideCount = null; // Removed manual input - slideCount comes from API
       const timingMode = document.querySelector('input[name="timingMode"]:checked')?.value;
 
       const displayDiv = document.getElementById('durationDisplay');
@@ -2479,7 +2478,7 @@
       console.log('[DURATION CALC] Current songs:', currentSongs);
       
       // Hide if no slide count
-      if (!slideCount || slideCount < 2) {
+      if (!slideCount) {
         displayDiv.style.display = 'none';
         return;
       }
