@@ -3953,16 +3953,59 @@ closeDeliverModal();
           durationText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
           
           const perSlide = (estimatedSeconds / slideCount).toFixed(1);
-          summaryText = `Your video will be exactly ${minutes} minutes and ${seconds} seconds long with ${slideCount} slides (approximately ${perSlide} seconds per slide).`;
           
-        } else if (timingMode === 'perSlide') {
+          // Get visual package and music distribution
+          const visualPackage = document.getElementById('visualPackage').value;
+          const visualPackageNames = {
+            'simple-fade-wipe': 'Simple Fade & Wipe',
+            'pages-of-life': 'Pages of Life',
+            'floating-frames': 'Floating Frames',
+            'zoom-through': 'Zoom Through',
+            'blinds-combs-bars': 'Blinds, Combs & Bars'
+          };
+          const visualName = visualPackageNames[visualPackage] || visualPackage;
+          
+          const musicDistribution = document.getElementById('musicDistribution').value;
+          const distributionNames = {
+            'evenlyDistributed': 'Evenly Distributed',
+            'specifyPlacement': 'Specify Placement'
+          };
+          const distributionName = distributionNames[musicDistribution] || 'Evenly Distributed';
+          
+          const songCount = currentSongs.length;
+          const songText = songCount === 1 ? '1 song' : `${songCount} songs`;
+          
+          summaryText = `Your ${durationText} video uses Fixed Runtime mode with ${slideCount} slides (approximately ${perSlide} seconds per slide), ${visualName} transitions, and ${songText} (${distributionName}).`;
+          
+       } else if (timingMode === 'perSlide') {
           const perSlide = parseInt(document.getElementById('perSlideSec').value) || 5;
           estimatedSeconds = slideCount * perSlide;
           const minutes = Math.floor(estimatedSeconds / 60);
           const seconds = estimatedSeconds % 60;
           durationText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
           
-          summaryText = `Your video will be approximately ${minutes} minutes and ${seconds} seconds long with ${slideCount} slides at ${perSlide} seconds per slide.`;
+          // Get visual package and music distribution
+          const visualPackage = document.getElementById('visualPackage').value;
+          const visualPackageNames = {
+            'simple-fade-wipe': 'Simple Fade & Wipe',
+            'pages-of-life': 'Pages of Life',
+            'floating-frames': 'Floating Frames',
+            'zoom-through': 'Zoom Through',
+            'blinds-combs-bars': 'Blinds, Combs & Bars'
+          };
+          const visualName = visualPackageNames[visualPackage] || visualPackage;
+          
+          const musicDistribution = document.getElementById('musicDistribution').value;
+          const distributionNames = {
+            'evenlyDistributed': 'Evenly Distributed',
+            'specifyPlacement': 'Specify Placement'
+          };
+          const distributionName = distributionNames[musicDistribution] || 'Evenly Distributed';
+          
+          const songCount = currentSongs.length;
+          const songText = songCount === 1 ? '1 song' : `${songCount} songs`;
+          
+          summaryText = `Your ${durationText} video uses Per Slide Duration mode with ${slideCount} slides at ${perSlide} seconds per slide, ${visualName} transitions, and ${songText} (${distributionName}).`;
           
         } else if (timingMode === 'matchMusic') {
           estimatedSeconds = totalMusicSeconds;
@@ -3971,7 +4014,22 @@ closeDeliverModal();
           durationText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
           
           const perSlide = (estimatedSeconds / slideCount).toFixed(1);
-          summaryText = `Your video will match your music length of ${minutes} minutes and ${seconds} seconds with ${slideCount} slides (approximately ${perSlide} seconds per slide).`;
+          
+          // Get visual package
+          const visualPackage = document.getElementById('visualPackage').value;
+          const visualPackageNames = {
+            'simple-fade-wipe': 'Simple Fade & Wipe',
+            'pages-of-life': 'Pages of Life',
+            'floating-frames': 'Floating Frames',
+            'zoom-through': 'Zoom Through',
+            'blinds-combs-bars': 'Blinds, Combs & Bars'
+          };
+          const visualName = visualPackageNames[visualPackage] || visualPackage;
+          
+          const songCount = currentSongs.length;
+          const songText = songCount === 1 ? '1 song' : `${songCount} songs`;
+          
+          summaryText = `Your ${durationText} video uses Fit to Music Length mode with ${slideCount} slides (approximately ${perSlide} seconds per slide), ${visualName} transitions, and ${songText} (automatically distributed to match music length).`;
         }
         
         // Show modal with results
