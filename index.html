@@ -4077,11 +4077,10 @@ closeDeliverModal();
     }
     
     // Show calculation modal
-    function showCalculationModal(slideCount, duration) {
+    function showCalculationModal(slideCount, duration, summaryText) {
       document.getElementById('modalSlideCount').textContent = `${slideCount} slides`;
       document.getElementById('modalDuration').textContent = duration;
-      document.getElementById('modalSummary').textContent = 
-        `Your updated video will have ${slideCount} slides with an estimated duration of ${duration}.`;
+      document.getElementById('modalSummary').textContent = summaryText;
 
       document.getElementById('calculationModal').classList.add('show');
     }
