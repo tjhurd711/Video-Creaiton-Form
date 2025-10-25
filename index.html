@@ -1269,7 +1269,100 @@
       padding-top: 20px;
       border-top: 1px solid #e9ecef;
     }
+
+    .thank-you-footer {
+      font-size: 14px;
+      color: #adb5bd;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e9ecef;
+    }
     
+    /* Music Terms Modal */
+    .terms-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 3000;
+    }
+
+    .terms-modal-overlay.show {
+      display: flex;
+    }
+
+    .terms-modal-content {
+      background: white;
+      border-radius: 16px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    .terms-modal-header {
+      background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+      color: white;
+      padding: 24px;
+      border-radius: 16px 16px 0 0;
+      text-align: center;
+    }
+
+    .terms-modal-header h2 {
+      font-size: 24px;
+      margin: 0;
+    }
+
+    .terms-modal-body {
+      padding: 30px;
+      line-height: 1.8;
+      color: #333;
+      font-size: 15px;
+    }
+
+    .terms-modal-footer {
+      padding: 20px 30px;
+      display: flex;
+      gap: 12px;
+      border-top: 2px solid #f0f0f0;
+    }
+
+    .terms-btn {
+      flex: 1;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .terms-btn-cancel {
+      background: #f44336;
+      color: white;
+    }
+
+    .terms-btn-cancel:hover {
+      background: #d32f2f;
+    }
+
+    .terms-btn-accept {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .terms-btn-accept:hover {
+      background: #45a049;
+    }
+
   </style>
 </head>
 <body>
@@ -2537,6 +2630,7 @@
     }
     
     // Handle new song uploads
+    document.getElementById('uploadLabel').addEventListener('click', showMusicTermsModal);
     document.getElementById('newSongUpload').addEventListener('change', (e) => {
       const files = Array.from(e.target.files);
   
@@ -4063,6 +4157,22 @@ closeDeliverModal();
         closeConfirmModal();
       }
     });
+    // Music terms modal functions
+    function showMusicTermsModal(e) {
+      e.preventDefault();
+      document.getElementById('musicTermsModal').classList.add('show');
+    }
+
+    function cancelMusicUpload() {
+      document.getElementById('musicTermsModal').classList.remove('show');
+      document.getElementById('newSongUpload').value = ''; // Clear file input
+    }
+
+    function acceptMusicTerms() {
+      document.getElementById('musicTermsModal').classList.remove('show');
+      // Trigger the file input
+      document.getElementById('newSongUpload').click();
+    }
     
   </script>
 
@@ -4100,6 +4210,29 @@ closeDeliverModal();
     </div>
   </div>
   
+  <!-- Music Terms Modal -->
+  <div id="musicTermsModal" class="terms-modal-overlay">
+    <div class="terms-modal-content">
+      <div class="terms-modal-header">
+        <h2>⚠️ User Uploaded Music</h2>
+      </div>
+    
+      <div class="terms-modal-body">
+        <p>By clicking "Agree and Accept," you confirm that you have the legal right to upload and publicly display all content (including photos, videos, and music) in your memorial video.</p>
+      
+        <p>You agree that Memorial Video AI is not responsible for any copyright or other legal issues arising from content you upload, and you will protect and reimburse Memorial Video AI for any claims, costs, or damages (including legal fees) that result from your uploaded content violating someone else's rights.</p>
+      </div>
+    
+      <div class="terms-modal-footer">
+        <button class="terms-btn terms-btn-cancel" onclick="cancelMusicUpload()">
+          Cancel Upload
+        </button>
+        <button class="terms-btn terms-btn-accept" onclick="acceptMusicTerms()">
+          Agree and Accept
+        </button>
+      </div>
+    </div>
+  </div>
+  
 </body>
 </html>
-
