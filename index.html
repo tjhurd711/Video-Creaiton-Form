@@ -1385,6 +1385,55 @@
       background: #45a049;
     }
 
+    /* Loading Overlay Styles */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loading-overlay.show {
+      display: flex;
+    }
+
+    .loading-content {
+      text-align: center;
+      color: white;
+    }
+
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .loading-subtext {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+    
   </style>
 </head>
 <body>
@@ -3735,7 +3784,7 @@ closeDeliverModal();
       btn.disabled = !hasChanges;
   
       // Updated text to match calculation flow
-      btn.textContent = '🚀 Calculate My Video';
+      btn.textContent = '📊 Review My Video Plan (Submit)';
     }
     
     // Transition preview video mapping
@@ -3864,11 +3913,8 @@ closeDeliverModal();
     async function calculateVideo() {
       console.log('[CALCULATE] Starting calculation...');
       
-      // Show loading state on the button
-      const calculateBtn = document.getElementById('resubmitBtn');
-      const originalText = calculateBtn.textContent;
-      calculateBtn.textContent = 'Calculating...';
-      calculateBtn.disabled = true;
+      // Show loading overlay
+      showLoading(true);
       
       try {
         // Get presentation type from pending changes or form
@@ -3877,9 +3923,8 @@ closeDeliverModal();
                                 document.querySelector('input[name="presentationType"]:checked')?.value;
         
         if (!presentationType) {
+          showLoading(false);
           alert('Please select a presentation type');
-          calculateBtn.textContent = originalText;
-          calculateBtn.disabled = false;
           return;
         }
         
@@ -3901,9 +3946,8 @@ closeDeliverModal();
         }
         
         if (!presentationSource) {
+          showLoading(false);
           alert('No presentation source found. Please upload or select a presentation.');
-          calculateBtn.textContent = originalText;
-          calculateBtn.disabled = false;
           return;
         }
         
@@ -4051,10 +4095,8 @@ closeDeliverModal();
         
       } catch (error) {
         console.error('[CALCULATE ERROR]', error);
+        showLoading(false);
         alert(`Failed to calculate video: ${error.message}`);
-      } finally {
-        calculateBtn.textContent = originalText;
-        calculateBtn.disabled = false;
       }
     }
     
@@ -4092,13 +4134,13 @@ closeDeliverModal();
     
     // Show calculation modal
     function showCalculationModal(slideCount, duration, summaryText) {
+      showLoading(false); // Hide loading overlay
       document.getElementById('modalSlideCount').textContent = `${slideCount} slides`;
       document.getElementById('modalDuration').textContent = duration;
       document.getElementById('modalSummary').textContent = summaryText;
 
       document.getElementById('calculationModal').classList.add('show');
     }
-
     // Close calculation modal
     function closeCalculationModal() {
       document.getElementById('calculationModal').classList.remove('show');
@@ -4117,7 +4159,15 @@ closeDeliverModal();
     });
     
     // ========== END CALCULATION FUNCTIONS ==========
-
+    // Show/hide loading overlay
+    function showLoading(show) {
+      const overlay = document.getElementById('loadingOverlay');
+      if (show) {
+        overlay.classList.add('show');
+      } else {
+        overlay.classList.remove('show');
+      }
+    }
     // Final submit function (called from calculation modal)
     async function finalSubmit() {
       // Close the calculation modal
@@ -4505,6 +4555,15 @@ closeDeliverModal();
           Agree and Accept
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <div class="loading-text">Reviewing Video Information...</div>
+      <div class="loading-subtext">Counting slides and estimating duration</div>
     </div>
   </div>
   
