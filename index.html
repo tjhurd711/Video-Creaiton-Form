@@ -4319,9 +4319,13 @@ closeDeliverModal();
         console.log('[RESUBMIT] Preparing submission...');
         
         // Build settings from form values (form is pre-populated for user convenience)
+        // ✅ FIX: If this is a shared view, use the shared user's email/name from URL
+        const customerEmail = isSharedView ? urlParams.get('email') : currentSettings.customerEmail;
+        const customerName = isSharedView ? urlParams.get('name') : currentSettings.fullName;
+
         const completeSettings = {
-          customerEmail: currentSettings.customerEmail,
-          fullName: currentSettings.fullName,
+          customerEmail: customerEmail,
+          fullName: customerName,
           provider: currentSettings.provider,
           original_url: currentSettings.original_url,
           timingMode: document.querySelector('input[name="timingMode"]:checked')?.value || 'perSlide',
