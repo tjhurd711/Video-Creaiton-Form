@@ -2612,6 +2612,69 @@
       
       summaryBox.style.display = 'block';
     }
+
+        // Update summary box with actual video duration from loaded video
+    function updateSummaryWithActualDuration(actualSeconds, settings) {
+      const summaryBox = document.getElementById('summaryBox');
+      
+      if (!summaryBox) {
+        console.warn('[UPDATE SUMMARY] summaryBox element not found');
+        return;
+      }
+      
+      console.log('[UPDATE SUMMARY] Updating with actual duration:', actualSeconds, 'seconds');
+      
+      // Format actual duration based on timing mode
+      let durationText = '';
+      if (settings.timingMode === 'fixedRuntime') {
+        // Convert seconds to MM:SS format
+        const minutes = Math.floor(actualSeconds / 60);
+        const seconds = actualSeconds % 60;
+        durationText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        console.log('[UPDATE SUMMARY] Formatted duration:', durationText);
+      } else if (settings.timingMode === 'perSlide' && settings.perSlideSec) {
+        // Keep per-slide format (doesn't change)
+        durationText = `${settings.perSlideSec}s per slide`;
+      } else if (settings.timingMode === 'fitToSongs') {
+        // Keep fit-to-music format (doesn't change)
+        durationText = 'matched to music length';
+      } else {
+        durationText = 'custom timing';
+      }
+      
+      // Timing mode display name
+      const timingModeNames = {
+        'fixedRuntime': 'Fixed Runtime',
+        'perSlide': 'Per Slide Duration',
+        'fitToSongs': 'Fit to Music'
+      };
+      const timingModeName = timingModeNames[settings.timingMode] || settings.timingMode;
+      
+      // Visual package display name
+      const visualPackageNames = {
+        'simple-fade-wipe': 'Simple Fade & Wipe',
+        'pages-of-life': 'Pages of Life',
+        'floating-frames': 'Floating Frames',
+        'zoom-through': 'Zoom Through',
+        'blinds-combs-bars': 'Blinds, Combs & Bars'
+      };
+      const visualPackageName = visualPackageNames[settings.visualPackage] || settings.visualPackage;
+      
+      // Music distribution display name
+      const musicDistNames = {
+        'evenlyDistributed': 'Evenly Distributed',
+        'specifyPlacement': 'Specify Placement'
+      };
+      const musicDistName = musicDistNames[settings.musicDistribution] || settings.musicDistribution;
+      
+      // Build updated summary
+      const audioCount = settings.audioCount || 3;
+      summaryBox.innerHTML = `
+        Your <strong>${durationText}</strong> video uses <strong>${timingModeName}</strong> mode with <strong>${visualPackageName}</strong> transitions and <strong>${audioCount} song${audioCount !== 1 ? 's' : ''}</strong> (${musicDistName}).
+      `;
+      
+      console.log('[UPDATE SUMMARY] ✅ Summary updated successfully');
+    }
     
     // Populate form defaults from settings
     function populateFormDefaults(settings) {
@@ -3279,7 +3342,21 @@
       
       const video = container.querySelector('video');
       video.addEventListener('loadstart', () => console.log('[VIDEO] Loading started'));
-      video.addEventListener('loadedmetadata', () => console.log('[VIDEO] Metadata loaded'));
+      
+      // 👇 THIS IS THE CHANGED PART 👇
+      video.addEventListener('loadedmetadata', () => {
+        console.log('[VIDEO] Metadata loaded');
+        console.log('[VIDEO] Actual duration:', video.duration, 'seconds');
+        
+        // Update summary with actual video duration
+        if (video.duration && data.settings) {
+          const actualDurationSeconds = Math.round(video.duration);
+          console.log('[VIDEO] Updating summary with actual duration:', actualDurationSeconds);
+          updateSummaryWithActualDuration(actualDurationSeconds, data.settings);
+        }
+      });
+      // 👆 END OF CHANGED PART 👆
+      
       video.addEventListener('canplay', () => console.log('[VIDEO] Can play'));
       video.addEventListener('error', (e) => {
         console.error('[VIDEO ERROR]', e);
