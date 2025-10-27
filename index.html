@@ -4010,6 +4010,16 @@ closeDeliverModal();
           const seconds = estimatedSeconds % 60;
           durationText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
           
+          // Calculate time range (± 9 seconds)
+          const minSeconds = Math.max(0, estimatedSeconds - 9);
+          const maxSeconds = estimatedSeconds + 9;
+          const minMinutes = Math.floor(minSeconds / 60);
+          const minSecs = minSeconds % 60;
+          const maxMinutes = Math.floor(maxSeconds / 60);
+          const maxSecs = maxSeconds % 60;
+          const minTime = `${minMinutes}:${minSecs.toString().padStart(2, '0')}`;
+          const maxTime = `${maxMinutes}:${maxSecs.toString().padStart(2, '0')}`;
+          
           const perSlide = (estimatedSeconds / slideCount).toFixed(1);
           
           // Get visual package and music distribution
@@ -4033,7 +4043,7 @@ closeDeliverModal();
           const songCount = currentSongs.length;
           const songText = songCount === 1 ? '1 song' : `${songCount} songs`;
           
-          summaryText = `Your ${durationText} video uses Fixed Runtime mode with ${slideCount} slides (approximately ${perSlide} seconds per slide), ${visualName} transitions, and ${songText} (${distributionName}).`;
+          summaryText = `The video between ${minTime} and ${maxTime} that uses Fixed Runtime mode with ${slideCount} slides (approximately ${perSlide} seconds per slide), ${visualName} transitions, and ${songText} (${distributionName}).`;
           
        } else if (timingMode === 'perSlide') {
           const perSlide = parseInt(document.getElementById('perSlideSec').value) || 5;
@@ -4041,6 +4051,16 @@ closeDeliverModal();
           const minutes = Math.floor(estimatedSeconds / 60);
           const seconds = estimatedSeconds % 60;
           durationText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+          
+          // Calculate time range (± 9 seconds)
+          const minSeconds = Math.max(0, estimatedSeconds - 9);
+          const maxSeconds = estimatedSeconds + 9;
+          const minMinutes = Math.floor(minSeconds / 60);
+          const minSecs = minSeconds % 60;
+          const maxMinutes = Math.floor(maxSeconds / 60);
+          const maxSecs = maxSeconds % 60;
+          const minTime = `${minMinutes}:${minSecs.toString().padStart(2, '0')}`;
+          const maxTime = `${maxMinutes}:${maxSecs.toString().padStart(2, '0')}`;
           
           // Get visual package and music distribution
           const visualPackage = document.getElementById('visualPackage').value;
@@ -4063,13 +4083,23 @@ closeDeliverModal();
           const songCount = currentSongs.length;
           const songText = songCount === 1 ? '1 song' : `${songCount} songs`;
           
-          summaryText = `Your ${durationText} video uses Per Slide Duration mode with ${slideCount} slides at ${perSlide} seconds per slide, ${visualName} transitions, and ${songText} (${distributionName}).`;
+          summaryText = `The video between ${minTime} and ${maxTime} that uses Per Slide Duration mode with ${slideCount} slides at ${perSlide} seconds per slide, ${visualName} transitions, and ${songText} (${distributionName}).`;
           
         } else if (timingMode === 'fitToSongs') {
           estimatedSeconds = totalMusicSeconds;
           const minutes = Math.floor(estimatedSeconds / 60);
           const seconds = estimatedSeconds % 60;
           durationText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+          
+          // Calculate time range (± 9 seconds)
+          const minSeconds = Math.max(0, estimatedSeconds - 9);
+          const maxSeconds = estimatedSeconds + 9;
+          const minMinutes = Math.floor(minSeconds / 60);
+          const minSecs = minSeconds % 60;
+          const maxMinutes = Math.floor(maxSeconds / 60);
+          const maxSecs = maxSeconds % 60;
+          const minTime = `${minMinutes}:${minSecs.toString().padStart(2, '0')}`;
+          const maxTime = `${maxMinutes}:${maxSecs.toString().padStart(2, '0')}`;
           
           const perSlide = (estimatedSeconds / slideCount).toFixed(1);
           
@@ -4087,7 +4117,7 @@ closeDeliverModal();
           const songCount = currentSongs.length;
           const songText = songCount === 1 ? '1 song' : `${songCount} songs`;
           
-          summaryText = `Your ${durationText} video uses Fit to Music Length mode with ${slideCount} slides (approximately ${perSlide} seconds per slide), ${visualName} transitions, and ${songText} (automatically distributed to match music length).`;
+          summaryText = `The video between ${minTime} and ${maxTime} that uses Fit to Music Length mode with ${slideCount} slides (approximately ${perSlide} seconds per slide), ${visualName} transitions, and ${songText} (automatically distributed to match music length).`;
         }
         
         // Show modal with results
@@ -4135,8 +4165,30 @@ closeDeliverModal();
     // Show calculation modal
     function showCalculationModal(slideCount, duration, summaryText) {
       showLoading(false); // Hide loading overlay
+      
+      // Parse the duration (format: "M:SS")
+      const parts = duration.split(':');
+      const minutes = parseInt(parts[0]);
+      const seconds = parseInt(parts[1]);
+      const totalSeconds = (minutes * 60) + seconds;
+      
+      // Calculate range (± 9 seconds)
+      const minSeconds = Math.max(0, totalSeconds - 9);
+      const maxSeconds = totalSeconds + 9;
+      
+      // Convert back to M:SS format
+      const minMinutes = Math.floor(minSeconds / 60);
+      const minSecs = minSeconds % 60;
+      const maxMinutes = Math.floor(maxSeconds / 60);
+      const maxSecs = maxSeconds % 60;
+      
+      const minTime = `${minMinutes}:${minSecs.toString().padStart(2, '0')}`;
+      const maxTime = `${maxMinutes}:${maxSecs.toString().padStart(2, '0')}`;
+      
+      const durationRange = `${minTime} - ${maxTime}`;
+      
       document.getElementById('modalSlideCount').textContent = `${slideCount} slides`;
-      document.getElementById('modalDuration').textContent = duration;
+      document.getElementById('modalDuration').textContent = durationRange;
       document.getElementById('modalSummary').textContent = summaryText;
 
       document.getElementById('calculationModal').classList.add('show');
