@@ -4043,7 +4043,7 @@ closeDeliverModal();
           const songCount = currentSongs.length;
           const songText = songCount === 1 ? '1 song' : `${songCount} songs`;
           
-          summaryText = `The video between ${minTime} and ${maxTime} that uses Fixed Runtime mode with ${slideCount} slides (approximately ${perSlide} seconds per slide), ${visualName} transitions, and ${songText} (${distributionName}).`;
+          summaryText = `The video between ${minTime} and ${maxTime} uses Fixed Runtime mode with ${slideCount} slides (approximately ${perSlide} seconds per slide), ${visualName} transitions, and ${songText} (${distributionName}).`;
           
        } else if (timingMode === 'perSlide') {
           const perSlide = parseInt(document.getElementById('perSlideSec').value) || 5;
@@ -4083,7 +4083,7 @@ closeDeliverModal();
           const songCount = currentSongs.length;
           const songText = songCount === 1 ? '1 song' : `${songCount} songs`;
           
-          summaryText = `The video between ${minTime} and ${maxTime} that uses Per Slide Duration mode with ${slideCount} slides at ${perSlide} seconds per slide, ${visualName} transitions, and ${songText} (${distributionName}).`;
+          summaryText = `The video between ${minTime} and ${maxTime} uses Per Slide Duration mode with ${slideCount} slides at ${perSlide} seconds per slide, ${visualName} transitions, and ${songText} (${distributionName}).`;
           
         } else if (timingMode === 'fitToSongs') {
           estimatedSeconds = totalMusicSeconds;
@@ -4117,7 +4117,7 @@ closeDeliverModal();
           const songCount = currentSongs.length;
           const songText = songCount === 1 ? '1 song' : `${songCount} songs`;
           
-          summaryText = `The video between ${minTime} and ${maxTime} that uses Fit to Music Length mode with ${slideCount} slides (approximately ${perSlide} seconds per slide), ${visualName} transitions, and ${songText} (automatically distributed to match music length).`;
+          summaryText = `The video between ${minTime} and ${maxTime} uses Fit to Music Length mode with ${slideCount} slides (approximately ${perSlide} seconds per slide), ${visualName} transitions, and ${songText} (automatically distributed to match music length).`;
         }
         
         // Show modal with results
