@@ -3994,37 +3994,42 @@ closeDeliverModal();
       showLoading(true);
       
       try {
-        // Get presentation type from pending changes or form
-        const presentationType = pendingChanges.presentationType || 
-                                (currentSettings.provider === 'powerpoint' ? 'powerpoint_url' : currentSettings.provider) || 
-                                document.querySelector('input[name="presentationType"]:checked')?.value;
-        
-        if (!presentationType) {
-          showLoading(false);
-          alert('Please select a presentation type');
-          return;
-        }
-        
-        // Get presentation source based on type
+        // ✅ FIX: Determine presentation type correctly
+        let presentationType;
         let presentationSource;
-        if (presentationType === 'google_slides') {
-          presentationSource = pendingChanges.presentationUrl || currentSettings.original_url;
-        } else if (presentationType === 'powerpoint_url') {
-          presentationSource = pendingChanges.presentationUrl || currentSettings.original_url;
-        } else if (presentationType === 'powerpoint_file' || presentationType === 'pptx') {
-          // If there's a new file uploaded, we need to upload it first
-          if (newPptxFile) {
-            console.log('[CALCULATE] Uploading new PowerPoint file first...');
-            presentationSource = await uploadPowerPointForCalculation(jobId, newPptxFile);
+        
+        // If new PowerPoint file is uploaded, always use powerpoint_file
+        if (newPptxFile) {
+          console.log('[CALCULATE] New PowerPoint file detected, uploading...');
+          presentationSource = await uploadPowerPointForCalculation(jobId, newPptxFile);
+          presentationType = 'powerpoint_file';  // ✅ THIS IS THE KEY FIX
+        } 
+        // Otherwise, determine from current settings
+        else if (currentSettings.provider === 'google_slides') {
+          presentationType = 'google_slides';
+          presentationSource = currentSettings.original_url;
+        } 
+        else if (currentSettings.provider === 'powerpoint') {
+          // ✅ Check if original was a file upload or URL
+          // File uploads have paths like /input/ or /temp-uploads/
+          if (currentSettings.original_url && 
+              (currentSettings.original_url.includes('/input/') || 
+               currentSettings.original_url.includes('/temp-uploads/'))) {
+            presentationType = 'powerpoint_file';
           } else {
-            // Use existing presentation from S3
-            presentationSource = currentSettings.original_url || `https://order-by-age-uploads.s3.us-east-2.amazonaws.com/input/${jobId}/presentation.pptx`;
+            presentationType = 'powerpoint_url';
           }
+          presentationSource = currentSettings.original_url;
+        } 
+        else {
+          // Fallback to checking pending changes
+          presentationType = pendingChanges.presentationType || currentSettings.provider;
+          presentationSource = pendingChanges.presentationUrl || currentSettings.original_url;
         }
         
-        if (!presentationSource) {
+        if (!presentationType || !presentationSource) {
           showLoading(false);
-          alert('No presentation source found. Please upload or select a presentation.');
+          alert('Could not determine presentation type. Please try again.');
           return;
         }
         
