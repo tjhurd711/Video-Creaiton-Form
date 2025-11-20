@@ -55,11 +55,13 @@
     .header h1 {
       font-size: 28px;
       margin-bottom: 8px;
+      color: #1e3c72;
     }
     
     .header p {
       opacity: 0.9;
       font-size: 14px;
+      color: #2a5298;
     }
 
     .header-logo {
@@ -1524,7 +1526,7 @@
                🎼 Song Library - Choose from our curated memorial music
               </div>
               <div style="margin-bottom: 15px;">
-                <label for="genreSelect" style="font-weight: 600; color: #e65100; margin-bottom: 6px; display: block;">Select Genre:</label>
+                <label for="genreSelect" style="font-weight: 600; color: #2196F3; margin-bottom: 6px; display: block;">Select Genre:</label>
                 <select id="genreSelect" style="padding: 10px; border: 2px solid #FF9800; border-radius: 8px; font-size: 14px; font-weight: 600; background: white; cursor: pointer; width: 200px;">
                   <option value="Classical">Classical</option>
                   <option value="Country">Country</option>
@@ -3404,13 +3406,13 @@
       
       if (data.provider === 'google_slides' && data.original_url) {
         container.innerHTML = `
-          <button class="btn btn-primary" onclick="handleManualEditClick('${data.original_url}')">
+          <button class="btn btn-primary" onclick="handleManualEditClick('${data.original_url}')" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); border: none;">
             📊 Edit Google Slides
           </button>
         `;
       } else if (data.provider === 'powerpoint' && data.original_url) {
         container.innerHTML = `
-          <button class="btn btn-primary" onclick="handleManualEditClick('${data.original_url}')">
+          <button class="btn btn-primary" onclick="handleManualEditClick('${data.original_url}')" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); border: none;">
             📄 Edit PowerPoint
           </button>
         `;
