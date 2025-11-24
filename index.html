@@ -1620,9 +1620,9 @@
               <div class="radio-group">
                 <label class="radio-option">
                   <input type="radio" name="timingMode" value="perSlide">
-                  <span class="radio-option-label">Set video length by choosing time per slide (Recommended)</span>
+                  <span class="radio-option-label">Set seconds per slide (Recommended)</span>
                   <div class="radio-option-content">
-                    <span class="radio-option-desc">Ensures that each slide is shown for a specific amount of time, and the music is adjusted to fit your video length</span>
+                    <span class="radio-option-desc">Great for scene timing (normal range 5-7 seconds per slide)</span>
                     <div class="conditional-input" id="perSlideInput" style="display:none;">
                       <label for="perSlideSec" style="font-size: 13px; margin-bottom: 6px;">Seconds per slide:</label>
                       <input type="number" id="perSlideSec" name="perSlideSec" min="2" max="30" step="0.1" value="5" style="padding: 8px;">
@@ -1632,9 +1632,9 @@
                 
                 <label class="radio-option">
                   <input type="radio" name="timingMode" value="fixedRuntime">
-                  <span class="radio-option-label">Set video length to a fixed time (i.e. 8 minutes or 480 secs)</span>
+                  <span class="radio-option-label">Set a total video runtime (i.e. 10 minutes)</span>
                   <div class="radio-option-content">
-                    <span class="radio-option-desc">Ensures that your video fits in a time window, and adjusts slide pacing and music to fit the total length</span>
+                    <span class="radio-option-desc">Great for meeting event agenda time requirements</span>
                     <div class="conditional-input" id="fixedRuntimeInput" style="display:none;">
                       <label for="fixedRuntimeSec" style="font-size: 13px; margin-bottom: 6px;">Total runtime (seconds):</label>
                       <input type="number" id="fixedRuntimeSec" name="fixedRuntimeSec" min="30" step="0.1" max="1800" value="320" style="padding: 8px;">
@@ -1644,9 +1644,9 @@
                 
                 <label class="radio-option">
                   <input type="radio" name="timingMode" value="fitToSongs">
-                  <span class="radio-option-label">Determines video length from all songs selected</span>
+                  <span class="radio-option-label">Set video length to the full runtime of my songs</span>
                   <div class="radio-option-content">
-                    <span class="radio-option-desc">Ensures every song plays from start to finish, and lets the slide timing adjust automatically</span>
+                    <span class="radio-option-desc">Perfect for those who do not want partial songs</span>
                   </div>
                 </label>
               </div>
