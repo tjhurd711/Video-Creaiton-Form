@@ -1941,6 +1941,28 @@
     const API_BASE = 'https://4hyy6kr2id.execute-api.us-east-2.amazonaws.com/prod';
     const MAX_SONGS = 6;
 
+    // Fresh download URL helper
+    async function downloadVideo(jobId) {
+        try {
+            showToast('Preparing download...', 'success');
+            const response = await fetch(`${API_BASE}/jobs/${jobId}/download`);
+
+            if (!response.ok) throw new Error('Failed to get download link');
+
+            const data = await response.json();
+
+            const link = document.createElement('a');
+            link.href = data.downloadUrl;
+            link.download = `memorial_video_${jobId}.mp4`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error('[DOWNLOAD ERROR]', error);
+            showToast('Download failed. Please try again.', 'error');
+        }
+    }
+
     // Global state
     let allVersions = [];
     let currentVersionIndex = 0;
@@ -3456,7 +3478,11 @@
         
         document.getElementById('actionButtons').style.display = 'none';
         document.getElementById('finalizedMessage').style.display = 'block';
-        document.getElementById('finalDownloadBtn').href = data.downloadUrl || data.videoUrl;
+        document.getElementById('finalDownloadBtn').href = '#';
+        document.getElementById('finalDownloadBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            await downloadVideo(jobId);
+        });
         return;
       }
       
@@ -4721,13 +4747,7 @@ closeDeliverModal();
       if (!confirmed) return;
     
       try {
-        const downloadUrl = window.videoData.downloadUrl || window.videoData.videoUrl;
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.download = `memorial_video_${jobId}.mp4`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        await downloadVideo(jobId);
       
         showToast('Finalizing your order...', 'success');
         const response = await fetch(`${API_BASE}/jobs/${jobId}/finalize`, {
