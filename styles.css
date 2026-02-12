@@ -1221,6 +1221,10 @@
         max-width: 100%;
         box-sizing: border-box;
       }
+      .edit-option.expanded .edit-option-content {
+        max-height: none !important;
+        overflow: visible !important;
+      }
       .library-section > div {
         width: 100%;
         max-width: 100%;
