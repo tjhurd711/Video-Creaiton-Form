@@ -1234,7 +1234,24 @@
       }
       .toast { right: 20px; left: 20px; max-width: none; }
       .slide-inputs { grid-template-columns: 1fr; }
-      .song-controls { flex-wrap: wrap; }
+      .song-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+      .song-info {
+        width: 100%;
+        flex: none;
+      }
+      .song-controls {
+        flex-direction: column;
+        width: 100%;
+        gap: 8px;
+      }
+      .song-controls .btn-small {
+        width: 100%;
+        justify-content: center;
+      }
       .library-grid { grid-template-columns: 1fr; }
     }
 
