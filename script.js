@@ -2854,5 +2854,4 @@ closeDeliverModal();
       // Trigger the file input
       document.getElementById('newSongUpload').click();
     }
-    
-  </script>
+
