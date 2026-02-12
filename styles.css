@@ -1226,28 +1226,18 @@
         max-width: 100%;
         box-sizing: border-box;
       }
-      .edit-option .edit-option-content {
-        max-height: none !important;
-        height: auto !important;
-        overflow: visible !important;
-        transition: none !important;
-        padding: 0 20px 20px !important;
-        display: block !important;
-      }
       .edit-option-content {
         width: 100% !important;
         max-width: 100% !important;
         box-sizing: border-box !important;
-        overflow: visible !important;
-        max-height: none !important;
-        height: auto !important;
-        transition: none !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        transition: max-height 0.3s ease !important;
+        padding: 0 20px !important;
       }
       .edit-option.expanded .edit-option-content {
-        max-height: none !important;
-        height: auto !important;
+        max-height: 10000px !important;
         overflow: visible !important;
-        transition: none !important;
         padding: 0 20px 20px !important;
       }
       .library-section > div {
