@@ -1234,31 +1234,46 @@
       }
       .toast { right: 20px; left: 20px; max-width: none; }
       .slide-inputs { grid-template-columns: 1fr; }
+      .song-list {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
       .song-item {
+        display: flex !important;
         flex-direction: column !important;
         align-items: stretch !important;
+        justify-content: flex-start !important;
         gap: 12px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
       }
       .song-info {
         width: 100% !important;
+        max-width: 100% !important;
         flex: none !important;
         min-width: 0 !important;
+        display: flex !important;
+        box-sizing: border-box !important;
       }
       .song-controls {
+        display: flex !important;
         flex-direction: column !important;
         width: 100% !important;
         max-width: 100% !important;
         gap: 8px !important;
         flex-wrap: nowrap !important;
+        box-sizing: border-box !important;
       }
       .song-controls .btn-small {
+        display: block !important;
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
         flex: none !important;
-        display: flex !important;
-        justify-content: center !important;
         box-sizing: border-box !important;
+        text-align: center !important;
       }
       .library-grid { grid-template-columns: 1fr; }
     }
