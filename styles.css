@@ -1201,8 +1201,13 @@
     }
     
     @media (max-width: 768px) {
+      body {
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
       .container {
         overflow: visible !important;
+        max-height: none !important;
       }
       .header h1 { font-size: 24px; }
       .actions { flex-direction: column; }
@@ -1219,16 +1224,29 @@
         max-width: 100%;
         box-sizing: border-box;
       }
-      .edit-option-content {
-        width: 100%;
-        max-width: 100%;
-        box-sizing: border-box;
-        overflow: visible !important;
-      }
-      .edit-option.expanded .edit-option-content {
-        max-height: 10000px !important;
+      .edit-option .edit-option-content {
+        max-height: none !important;
+        height: auto !important;
         overflow: visible !important;
         transition: none !important;
+        padding: 0 20px 20px !important;
+        display: block !important;
+      }
+      .edit-option-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        overflow: visible !important;
+        max-height: none !important;
+        height: auto !important;
+        transition: none !important;
+      }
+      .edit-option.expanded .edit-option-content {
+        max-height: none !important;
+        height: auto !important;
+        overflow: visible !important;
+        transition: none !important;
+        padding: 0 20px 20px !important;
       }
       .library-section > div {
         width: 100%;
