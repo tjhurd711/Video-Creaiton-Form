@@ -1201,6 +1201,9 @@
     }
     
     @media (max-width: 768px) {
+      .container {
+        overflow: visible !important;
+      }
       .header h1 { font-size: 24px; }
       .actions { flex-direction: column; }
       .btn { width: 100%; justify-content: center; }
@@ -1220,10 +1223,12 @@
         width: 100%;
         max-width: 100%;
         box-sizing: border-box;
+        overflow: visible !important;
       }
       .edit-option.expanded .edit-option-content {
-        max-height: none !important;
+        max-height: 10000px !important;
         overflow: visible !important;
+        transition: none !important;
       }
       .library-section > div {
         width: 100%;
