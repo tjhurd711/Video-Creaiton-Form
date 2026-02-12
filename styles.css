@@ -1265,15 +1265,38 @@
         min-width: 0 !important;
         box-sizing: border-box !important;
       }
-      .edit-option-content > div[style*="flex: 0 0 280px"] {
-        flex: 1 1 100% !important;
-        min-width: 0 !important;
+      .edit-option-content > div {
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      .edit-option-content > div > div {
         max-width: 100% !important;
         width: 100% !important;
+        flex: 1 1 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
       }
-      .edit-option-content > div[style*="display: flex"] {
+      .edit-option-content .form-group {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      .edit-option-content .form-group select {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+      }
+      .edit-option-content div[style] {
+        max-width: 100% !important;
+        width: 100% !important;
+        flex: 1 1 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+      }
+      .edit-option[data-section="transitions"] .edit-option-content > div {
         flex-direction: column !important;
-        gap: 20px !important;
+        flex-wrap: wrap !important;
       }
       .toast { right: 20px; left: 20px; max-width: none; }
       .slide-inputs { grid-template-columns: 1fr; }
