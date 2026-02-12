@@ -1211,6 +1211,11 @@
         font-size: 12px !important;
         line-height: 1.3;
       }
+      #genreSelect {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
+      }
       .toast { right: 20px; left: 20px; max-width: none; }
       .slide-inputs { grid-template-columns: 1fr; }
       .song-controls { flex-wrap: wrap; }
