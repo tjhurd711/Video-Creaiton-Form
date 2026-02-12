@@ -1259,6 +1259,22 @@
         min-width: 0 !important;
         box-sizing: border-box !important;
       }
+      #visualPackage {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+      }
+      .edit-option-content > div[style*="flex: 0 0 280px"] {
+        flex: 1 1 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+      .edit-option-content > div[style*="display: flex"] {
+        flex-direction: column !important;
+        gap: 20px !important;
+      }
       .toast { right: 20px; left: 20px; max-width: none; }
       .slide-inputs { grid-template-columns: 1fr; }
       .song-list {
